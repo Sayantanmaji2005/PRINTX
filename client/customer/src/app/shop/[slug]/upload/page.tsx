@@ -743,7 +743,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     Printing Your Document!
                   </h2>
                   <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
-                    Your order <span className="font-mono font-bold text-slate-800">{order.orderNumber}</span> has been dispatched to {shop?.name}'s printer tray.
+                    Your order <span className="font-mono font-bold text-slate-800">{order.orderNumber}</span> has been dispatched to {shop?.name}&apos;s printer tray.
                   </p>
 
                   <div className="my-5 p-4 rounded-2xl bg-blue-50/80 border border-blue-100 text-left text-xs text-slate-700 space-y-1.5">

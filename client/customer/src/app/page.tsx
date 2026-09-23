@@ -122,7 +122,7 @@ export default function HomePage() {
               <div className="text-xs font-bold text-amber-600 mb-1">STEP 4</div>
               <h3 className="font-semibold text-slate-900 text-base">Auto Print & Collect</h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                Server verifies payment and triggers shop's desktop Print Agent immediately.
+                Server verifies payment and triggers shop&apos;s desktop Print Agent immediately.
               </p>
             </div>
           </div>
