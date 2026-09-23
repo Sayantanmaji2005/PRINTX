@@ -1,14 +1,19 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export async function fetchShopBySlug(slug: string) {
-  const res = await fetch(`${API_BASE_URL}/shops/public/${slug}`, {
-    cache: 'no-store',
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json.message || 'Failed to fetch shop details');
+  try {
+    const res = await fetch(`${API_BASE_URL}/shops/public/${slug}`, {
+      cache: 'no-store',
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.message || 'Failed to fetch shop details');
+    }
+    return json.data;
+  } catch (err: any) {
+    console.warn('fetchShopBySlug warn:', err.message);
+    throw err;
   }
-  return json.data;
 }
 
 export async function startCustomerSession(shopSlug: string, customerPhone?: string) {
@@ -25,14 +30,17 @@ export async function startCustomerSession(shopSlug: string, customerPhone?: str
 }
 
 export async function fetchAllShops() {
-  const res = await fetch(`${API_BASE_URL}/shops/all`, {
-    cache: 'no-store',
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json.message || 'Failed to fetch shops');
+  try {
+    const res = await fetch(`${API_BASE_URL}/shops/all`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.warn('fetchAllShops network error, returning fallback:', err);
+    return [];
   }
-  return json.data;
 }
 
 export async function calculateOrderPrice(data: {
