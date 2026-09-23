@@ -46,7 +46,7 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="http://localhost:3001"
+              href={process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin-printx.netlify.app"}
               target="_blank"
               className="text-xs font-semibold px-4 py-2 rounded-xl bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-600 transition-colors border border-slate-200 shadow-xs"
             >
