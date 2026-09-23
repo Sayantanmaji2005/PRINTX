@@ -1,7 +1,18 @@
 import { PrismaClient, UserRole, ShopStatus, PaperSize, ColorMode, PrintSide, PrinterStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-const prisma = new PrismaClient();
+dotenv.config({ path: path.join(__dirname, '../.env') });
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
 
 async function main() {
   console.log('🌱 Starting PrintX Database Seeding...');
