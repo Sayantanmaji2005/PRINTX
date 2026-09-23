@@ -1,0 +1,26 @@
+{
+  "name": "printx",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PrintX — Smart Xerox & Instant Digital Print Platform",
+  "workspaces": [
+    "server",
+    "client/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run start:dev --workspace=server",
+    "dev:customer": "npm run dev --workspace=client/customer",
+    "dev:admin": "npm run dev --workspace=client/admin",
+    "build": "npm run build --workspaces --if-present",
+    "db:push": "npm run db:push --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "test": "npm run test:e2e --workspace=server"
+  },
+  "keywords": [
+    "printx",
+    "xerox",
+    "saas"
+  ],
+  "author": "PrintX Team",
+  "license": "UNLICENSED"
+}

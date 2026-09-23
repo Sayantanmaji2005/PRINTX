@@ -1,0 +1,520 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SHOP_OWNER
+  SHOP_STAFF
+  CUSTOMER
+}
+
+enum ShopStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum PaperSize {
+  A4
+  A3
+  LETTER
+  LEGAL
+}
+
+enum ColorMode {
+  BW
+  COLOR
+  AUTO
+}
+
+enum PrintSide {
+  SINGLE
+  DOUBLE
+}
+
+enum PageOrientation {
+  AUTO
+  PORTRAIT
+  LANDSCAPE
+}
+
+enum PaymentProvider {
+  DEMO
+  RAZORPAY
+  CASHFREE
+  PHONEPE
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+  EXPIRED
+}
+
+enum OrderStatus {
+  CREATED
+  DOCUMENT_PROCESSING
+  READY_FOR_PAYMENT
+  PAYMENT_PENDING
+  PAID
+  QUEUED
+  PRINTING
+  PRINTED
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUND_PENDING
+  REFUNDED
+}
+
+enum PrintJobStatus {
+  WAITING
+  QUEUED
+  ASSIGNED
+  PRINTING
+  PRINTED
+  FAILED
+  CANCELLED
+}
+
+enum PrinterStatus {
+  READY
+  PRINTING
+  BUSY
+  OFFLINE
+  ERROR
+  PAPER_JAM
+  OUT_OF_PAPER
+  OUT_OF_INK
+}
+
+enum ScannerStatus {
+  CONNECTED
+  READY
+  SCANNING
+  ERROR
+  DISCONNECTED
+}
+
+enum AgentStatus {
+  ONLINE
+  OFFLINE
+  BUSY
+  ERROR
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  PAYMENT_SUCCESS
+  PRINT_QUEUED
+  PRINT_STARTED
+  PRINT_COMPLETED
+  PRINT_FAILED
+  PRINTER_OFFLINE
+  AGENT_OFFLINE
+}
+
+// 1. User
+model User {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  email           String       @unique
+  passwordHash    String
+  name            String
+  phone           String?
+  role            UserRole     @default(CUSTOMER)
+  refreshToken    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  ownedShops      Shop[]       @relation("ShopOwner")
+  shopMemberships ShopMember[]
+  auditLogs       AuditLog[]
+  orders          Order[]      @relation("CustomerUserOrders")
+}
+
+// 2. Shop
+model Shop {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  slug            String            @unique
+  ownerId         String            @db.ObjectId
+  owner           User              @relation("ShopOwner", fields: [ownerId], references: [id])
+  address         String?
+  phone           String?
+  email           String?
+  status          ShopStatus        @default(ACTIVE)
+  upiId           String?
+  logoUrl         String?
+  retentionHours  Int               @default(24)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  members         ShopMember[]
+  qrCodes         ShopQrCode[]
+  pricingRules    PricingRule[]
+  printers        Printer[]
+  scanners        Scanner[]
+  agents          PrintAgent[]
+  orders          Order[]
+  customerSessions CustomerSession[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+}
+
+// 3. Shop Member (Staff / Operators)
+model ShopMember {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  shopId    String    @db.ObjectId
+  shop      Shop      @relation(fields: [shopId], references: [id])
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  role      UserRole  @default(SHOP_STAFF)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([shopId, userId])
+}
+
+// 4. Shop QR Code
+model ShopQrCode {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  shopId      String    @db.ObjectId
+  shop        Shop      @relation(fields: [shopId], references: [id])
+  code        String    @unique
+  qrImageUrl  String?
+  isActive    Boolean   @default(true)
+  scansCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// 5. Customer Session (Ephemeral guest session initiated via QR / Web)
+model CustomerSession {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  shopId        String      @db.ObjectId
+  shop          Shop        @relation(fields: [shopId], references: [id])
+  customerPhone String?
+  userAgent     String?
+  ipAddress     String?
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  documents     Document[]
+  orders        Order[]
+}
+
+// 6. Document
+model Document {
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  customerSessionId String            @db.ObjectId
+  customerSession   CustomerSession   @relation(fields: [customerSessionId], references: [id])
+  fileName          String
+  originalName      String
+  fileSize          Int
+  mimeType          String
+  fileKey           String            // Storage object key
+  storageUrl        String?
+  pageCount         Int               @default(0)
+  detectedColorPages Int              @default(0)
+  detectedBwPages   Int               @default(0)
+  detectedPaperSize PaperSize         @default(A4)
+  detectedOrientation PageOrientation @default(PORTRAIT)
+  isProcessed       Boolean           @default(false)
+  expiresAt         DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  pages             DocumentPage[]
+  orders            Order[]
+}
+
+// 7. Document Page (Individual page metadata & color detection breakdown)
+model DocumentPage {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  documentId    String    @db.ObjectId
+  document      Document  @relation(fields: [documentId], references: [id])
+  pageNumber    Int
+  hasColor      Boolean   @default(false)
+  width         Float?
+  height        Float?
+  thumbnailKey  String?
+  createdAt     DateTime  @default(now())
+
+  @@unique([documentId, pageNumber])
+}
+
+// 8. Pricing Rule (Configured per shop)
+model PricingRule {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  shopId      String      @db.ObjectId
+  shop        Shop        @relation(fields: [shopId], references: [id])
+  paperSize   PaperSize   @default(A4)
+  colorMode   ColorMode   @default(BW)
+  printSide   PrintSide   @default(SINGLE)
+  pricePerUnit Float      // Price per page or sheet
+  minOrderFee Float       @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([shopId, paperSize, colorMode, printSide])
+}
+
+// 9. Order
+model Order {
+  id                  String            @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber         String            @unique // e.g. PX-20260922-000102
+  shopId              String            @db.ObjectId
+  shop                Shop              @relation(fields: [shopId], references: [id])
+  customerSessionId   String            @db.ObjectId
+  customerSession     CustomerSession   @relation(fields: [customerSessionId], references: [id])
+  customerId          String?           @db.ObjectId
+  customer            User?             @relation("CustomerUserOrders", fields: [customerId], references: [id])
+  documentId          String            @db.ObjectId
+  document            Document          @relation(fields: [documentId], references: [id])
+  
+  status              OrderStatus       @default(CREATED)
+  paymentStatus       PaymentStatus     @default(PENDING)
+  printStatus         PrintJobStatus    @default(WAITING)
+
+  subtotal            Float
+  serviceFee          Float             @default(0)
+  tax                 Float             @default(0)
+  total               Float
+  currency            String            @default("INR")
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  configuration       PrintConfiguration?
+  items               OrderItem[]
+  payments            Payment[]
+  printJobs           PrintJob[]
+  invoices            Invoice[]
+  refunds             Refund[]
+}
+
+// 10. Print Configuration (Configuration details linked to order)
+model PrintConfiguration {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String          @unique @db.ObjectId
+  order           Order           @relation(fields: [orderId], references: [id])
+  paperSize       PaperSize       @default(A4)
+  colorMode       ColorMode       @default(BW)
+  printSide       PrintSide       @default(SINGLE)
+  copies          Int             @default(1)
+  pageRange       String?         // "all" or "1-5, 8, 10-12"
+  totalPages      Int             @default(1)
+  totalSheets     Int             @default(1)
+  orientation     PageOrientation @default(AUTO)
+  customNotes     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+// 11. Order Item
+model OrderItem {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderId     String    @db.ObjectId
+  order       Order     @relation(fields: [orderId], references: [id])
+  description String
+  quantity    Int
+  unitPrice   Float
+  totalPrice  Float
+  createdAt   DateTime  @default(now())
+}
+
+// 12. Payment
+model Payment {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  orderId           String          @db.ObjectId
+  order             Order           @relation(fields: [orderId], references: [id])
+  provider          PaymentProvider @default(DEMO)
+  providerOrderId   String?
+  providerPaymentId String?         @unique
+  idempotencyKey    String?         @unique
+  amount            Float
+  currency          String          @default("INR")
+  status            PaymentStatus   @default(PENDING)
+  verifiedAt        DateTime?
+  rawWebhookData    String?
+  errorMessage      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  events            PaymentEvent[]
+  refunds           Refund[]
+}
+
+// 13. Payment Event (Webhook audit & history)
+model PaymentEvent {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  paymentId     String        @db.ObjectId
+  payment       Payment       @relation(fields: [paymentId], references: [id])
+  eventType     String
+  eventStatus   PaymentStatus
+  eventPayload  String?
+  receivedAt    DateTime      @default(now())
+}
+
+// 14. Printer
+model Printer {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  shopId          String        @db.ObjectId
+  shop            Shop          @relation(fields: [shopId], references: [id])
+  name            String
+  driverName      String?
+  connectionType  String        @default("USB") // USB, NETWORK, SHARED
+  status          PrinterStatus @default(READY)
+  capabilities    String?       // Supported sizes, color capability, duplex support
+  isDefault       Boolean       @default(true)
+  lastSeenAt      DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  printJobs       PrintJob[]
+}
+
+// 15. Scanner
+model Scanner {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  shopId          String        @db.ObjectId
+  shop            Shop          @relation(fields: [shopId], references: [id])
+  name            String
+  driverName      String?
+  status          ScannerStatus @default(READY)
+  capabilities    String?
+  lastSeenAt      DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// 16. Print Agent (Desktop Client)
+model PrintAgent {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  shopId          String        @db.ObjectId
+  shop            Shop          @relation(fields: [shopId], references: [id])
+  name            String
+  tokenHash       String        @unique
+  version         String?
+  ipAddress       String?
+  hostname        String?
+  status          AgentStatus   @default(ONLINE)
+  lastHeartbeatAt DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  heartbeats      PrintAgentHeartbeat[]
+  printJobs       PrintJob[]
+}
+
+// 17. Print Agent Heartbeat
+model PrintAgentHeartbeat {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  agentId     String      @db.ObjectId
+  agent       PrintAgent  @relation(fields: [agentId], references: [id])
+  metrics     String?     // CPU, RAM, connected devices
+  status      AgentStatus
+  timestamp   DateTime    @default(now())
+}
+
+// 18. Print Job
+model PrintJob {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  jobId         String          @unique // e.g. PJ-PX-20260922-000102-1
+  orderId       String          @db.ObjectId
+  order         Order           @relation(fields: [orderId], references: [id])
+  printerId     String?         @db.ObjectId
+  printer       Printer?        @relation(fields: [printerId], references: [id])
+  agentId       String?         @db.ObjectId
+  agent         PrintAgent?     @relation(fields: [agentId], references: [id])
+  status        PrintJobStatus  @default(WAITING)
+  attempts      Int             @default(0)
+  maxAttempts   Int             @default(3)
+  lockedAt      DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+  idempotencyKey String?        @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// 19. Invoice
+model Invoice {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNumber String    @unique
+  orderId       String    @db.ObjectId
+  order         Order     @relation(fields: [orderId], references: [id])
+  amount        Float
+  taxAmount     Float     @default(0)
+  pdfUrl        String?
+  issuedAt      DateTime  @default(now())
+}
+
+// 20. Refund
+model Refund {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String        @db.ObjectId
+  order           Order         @relation(fields: [orderId], references: [id])
+  paymentId       String        @db.ObjectId
+  payment         Payment       @relation(fields: [paymentId], references: [id])
+  amount          Float
+  reason          String
+  status          PaymentStatus @default(PENDING)
+  providerRefundId String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// 21. Audit Log
+model AuditLog {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  shopId      String?   @db.ObjectId
+  shop        Shop?     @relation(fields: [shopId], references: [id])
+  userId      String?   @db.ObjectId
+  user        User?     @relation(fields: [userId], references: [id])
+  action      String
+  entityType  String
+  entityId    String?
+  details     String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+}
+
+// 22. Notification
+model Notification {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  shopId      String            @db.ObjectId
+  shop        Shop              @relation(fields: [shopId], references: [id])
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean           @default(false)
+  data        String?
+  createdAt   DateTime          @default(now())
+}
+
+// 23. System Setting
+model SystemSetting {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  key         String    @unique
+  value       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
