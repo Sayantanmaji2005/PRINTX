@@ -1,7 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Printer, Smartphone, Zap, ShieldCheck, ArrowLeft } from 'lucide-react';

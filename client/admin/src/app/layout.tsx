@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'PrintX Station — Super Admin Master Portal',
   description: 'Manage shop pricing, live printers, print queues and revenue metrics',
