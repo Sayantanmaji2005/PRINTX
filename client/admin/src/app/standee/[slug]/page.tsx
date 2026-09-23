@@ -12,13 +12,15 @@ export default function ShopStandeePage() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`http://localhost:4000/api/shops/public/${slug}`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://printx-cib8.onrender.com/api';
+    fetch(`${apiUrl}/shops/public/${slug}`)
       .then((res) => res.json())
       .then((json) => setShop(json.data))
       .catch((err) => console.error(err));
   }, [slug]);
 
-  const customerUrl = `http://localhost:3000/shop/${slug}`;
+  const customerBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://no1printx.netlify.app';
+  const customerUrl = `${customerBaseUrl}/shop/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(customerUrl)}`;
 
   return (
