@@ -37,6 +37,8 @@ export class AdminService {
       revenueAggregation,
       activePrinters,
       recentShops,
+      recentOrders,
+      paidOrdersWithConfig,
     ] = await Promise.all([
       this.prisma.shop.count(),
       this.prisma.shop.count({ where: { status: ShopStatus.ACTIVE } }),
@@ -67,10 +69,49 @@ export class AdminService {
           _count: { select: { orders: true, customerSessions: true } },
         },
       }),
+      this.prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+        include: {
+          configuration: true,
+          document: {
+            select: {
+              originalName: true,
+              pageCount: true,
+              fileSize: true,
+            },
+          },
+          shop: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      }),
+      this.prisma.order.findMany({
+        where: { paymentStatus: PaymentStatus.SUCCESS },
+        select: {
+          configuration: {
+            select: {
+              totalPages: true,
+              copies: true,
+            },
+          },
+        },
+      }),
     ]);
 
     const totalRevenue = revenueAggregation._sum.total || 0;
     const paidOrders = revenueAggregation._count.id || 0;
+
+    // Calculate actual total printed pages from paid configurations
+    const totalPagesPrinted = paidOrdersWithConfig.reduce((sum, order) => {
+      const pages = order.configuration?.totalPages || 1;
+      const copies = order.configuration?.copies || 1;
+      return sum + pages * copies;
+    }, 0);
 
     const result = {
       metrics: {
@@ -80,7 +121,7 @@ export class AdminService {
         totalOrders,
         paidOrders,
         totalRevenue: Math.round(totalRevenue * 100) / 100,
-        totalPagesPrinted: paidOrders,
+        totalPagesPrinted,
         activePrinters,
       },
       recentShops: recentShops.map((s) => ({
@@ -102,6 +143,25 @@ export class AdminService {
         totalOrders: s._count.orders,
         totalCustomers: s._count.customerSessions,
         createdAt: s.createdAt,
+      })),
+      recentOrders: recentOrders.map((o) => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        shopId: o.shopId,
+        shopName: o.shop?.name || 'Xerox Station',
+        shopSlug: o.shop?.slug || '',
+        fileName: o.document?.originalName || 'Document.pdf',
+        fileSize: o.document?.fileSize || 0,
+        pageCount: o.configuration?.totalPages || o.document?.pageCount || 1,
+        copies: o.configuration?.copies || 1,
+        colorMode: o.configuration?.colorMode || 'BW',
+        paperSize: o.configuration?.paperSize || 'A4',
+        printSide: o.configuration?.printSide || 'SINGLE',
+        total: o.total,
+        paymentStatus: o.paymentStatus,
+        printStatus: o.printStatus,
+        status: o.status,
+        createdAt: o.createdAt,
       })),
     };
 

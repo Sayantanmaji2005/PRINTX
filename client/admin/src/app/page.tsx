@@ -29,6 +29,8 @@ import {
   Terminal,
   Copy,
   Check,
+  FileText,
+  Clock,
 } from 'lucide-react';
 import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
 import { downloadAgentZip } from '@/lib/agentBundle';
@@ -39,6 +41,10 @@ export default function SuperAdminDashboard() {
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem('printx_admin_cached_overview');
+        if (cached && (cached.includes('maji-xerox-station') || cached.includes('Maji Xerox'))) {
+          localStorage.removeItem('printx_admin_cached_overview');
+          return null;
+        }
         return cached ? JSON.parse(cached) : null;
       } catch {
         return null;
@@ -49,6 +55,11 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
+
+  // Live Orders Filter & Search State
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderFilterStatus, setOrderFilterStatus] = useState('ALL');
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
 
   // Modal State for Adding New Shop
   const [showAddModal, setShowAddModal] = useState(false);
@@ -169,6 +180,62 @@ export default function SuperAdminDashboard() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const filteredOrders = data?.recentOrders?.filter((order: any) => {
+    const matchesSearch =
+      (order.orderNumber && order.orderNumber.toLowerCase().includes(orderSearchQuery.toLowerCase())) ||
+      (order.fileName && order.fileName.toLowerCase().includes(orderSearchQuery.toLowerCase())) ||
+      (order.shopName && order.shopName.toLowerCase().includes(orderSearchQuery.toLowerCase()));
+
+    const matchesStatus =
+      orderFilterStatus === 'ALL' ||
+      order.paymentStatus === orderFilterStatus ||
+      order.printStatus === orderFilterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const formatOrderTime = (isoString?: string) => {
+    if (!isoString) return '';
+    try {
+      const d = new Date(isoString);
+      return d.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return '';
+    }
+  };
+
+  const formatOrderDate = (isoString?: string) => {
+    if (!isoString) return '';
+    try {
+      const d = new Date(isoString);
+      return d.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+      });
+    } catch {
+      return '';
+    }
+  };
+
+  const handleCopyOrderId = (id: string, text: string) => {
+    if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(text);
+      setCopiedOrderId(id);
+      setTimeout(() => setCopiedOrderId(null), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/60 via-slate-50 to-white text-slate-900">
@@ -458,6 +525,200 @@ export default function SuperAdminDashboard() {
               >
                 + Add First Xerox Shop
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Live Customer Orders & Real-time Print Stream */}
+        <div className="mt-8 p-6 rounded-3xl bg-white border border-blue-100 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-slate-900 font-['Outfit']">
+                    Live Customer Orders & Print Stream
+                  </h2>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    LIVE DB SYNC
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Actual document prints uploaded and paid by customers at counter standees.
+                </p>
+              </div>
+            </div>
+
+            {/* Orders Search and Filters */}
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search order #, file, shop..."
+                  value={orderSearchQuery}
+                  onChange={(e) => setOrderSearchQuery(e.target.value)}
+                  className="pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-52 sm:w-64"
+                />
+              </div>
+
+              <select
+                value={orderFilterStatus}
+                onChange={(e) => setOrderFilterStatus(e.target.value)}
+                className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all"
+              >
+                <option value="ALL">All Status</option>
+                <option value="SUCCESS">Payment Success</option>
+                <option value="PENDING">Payment Pending</option>
+                <option value="PRINTED">Printed Out</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Orders Table */}
+          {loading && (!data?.recentOrders || data.recentOrders.length === 0) ? (
+            <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-brand-600" />
+              <span>Fetching live customer orders...</span>
+            </div>
+          ) : filteredOrders && filteredOrders.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
+                    <th className="pb-3 px-3">Order ID</th>
+                    <th className="pb-3 px-3">Document & Specs</th>
+                    <th className="pb-3 px-3">Xerox Station</th>
+                    <th className="pb-3 px-3">Amount</th>
+                    <th className="pb-3 px-3 text-center">Payment</th>
+                    <th className="pb-3 px-3 text-center">Print Status</th>
+                    <th className="pb-3 px-3 text-right">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredOrders.map((order: any) => (
+                    <tr key={order.id} className="hover:bg-blue-50/40 transition-colors group">
+                      <td className="py-4 px-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-slate-900 text-xs">
+                            {order.orderNumber}
+                          </span>
+                          <button
+                            onClick={() => handleCopyOrderId(order.id, order.orderNumber)}
+                            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                            title="Copy Order ID"
+                          >
+                            {copiedOrderId === order.id ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+
+                      <td className="py-4 px-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <FileText className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900 text-xs truncate max-w-xs" title={order.fileName}>
+                              {order.fileName}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="text-[10px] text-slate-500 font-medium">
+                                {order.pageCount} {order.pageCount === 1 ? 'page' : 'pages'} × {order.copies} {order.copies === 1 ? 'copy' : 'copies'}
+                              </span>
+                              <span className="text-slate-300">•</span>
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${order.colorMode === 'COLOR' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}`}>
+                                {order.colorMode}
+                              </span>
+                              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                                {order.paperSize}
+                              </span>
+                              {order.fileSize ? (
+                                <>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="text-[10px] text-slate-400">{formatFileSize(order.fileSize)}</span>
+                                </>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-4 px-3">
+                        <div className="font-semibold text-slate-800 text-xs">
+                          {order.shopName}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          /{order.shopSlug}
+                        </div>
+                      </td>
+
+                      <td className="py-4 px-3">
+                        <div className="font-bold text-slate-900 text-sm">
+                          ₹{(order.total || 0).toFixed(2)}
+                        </div>
+                        <span className="text-[10px] text-slate-400">UPI Instant</span>
+                      </td>
+
+                      <td className="py-4 px-3 text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            order.paymentStatus === 'SUCCESS'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}
+                        >
+                          {order.paymentStatus === 'SUCCESS' ? (
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          ) : (
+                            <Clock className="w-3 h-3 text-amber-500" />
+                          )}
+                          {order.paymentStatus}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-3 text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            order.printStatus === 'PRINTED'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : order.printStatus === 'PRINTING'
+                              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 animate-pulse'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                          }`}
+                        >
+                          <Printer className="w-3 h-3" />
+                          {order.printStatus === 'PRINTED' ? 'Printed Out' : order.printStatus}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-3 text-right">
+                        <div className="text-slate-800 font-medium text-xs">
+                          {formatOrderTime(order.createdAt)}
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {formatOrderDate(order.createdAt)}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-12 text-center text-slate-400">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-semibold text-slate-600">No print orders recorded yet.</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Orders will automatically stream in when customers scan the counter standee QR and upload documents.
+              </p>
             </div>
           )}
         </div>
