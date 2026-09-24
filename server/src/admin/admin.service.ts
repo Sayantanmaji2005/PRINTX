@@ -131,12 +131,12 @@ export class AdminService {
     upiId?: string;
     retentionHours?: number;
   }) {
+    const shopName = (dto?.name || 'New Xerox Shop').trim();
+    const ownerName = (dto?.ownerName || 'Shop Owner').trim();
+
     // 1. Generate or sanitize slug
-    const baseSlug = (dto.slug || dto.name)
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    const rawSlug = (dto?.slug || shopName).toLowerCase().trim();
+    const baseSlug = rawSlug.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `shop-${Date.now()}`;
 
     let slug = baseSlug;
     const existing = await this.prisma.shop.findUnique({ where: { slug } });
@@ -146,7 +146,7 @@ export class AdminService {
 
     // 2. Find or create Shop Owner User
     const ownerEmail =
-      dto.ownerEmail?.toLowerCase().trim() ||
+      dto?.ownerEmail?.toLowerCase().trim() ||
       `${slug}@printx-station.local`;
 
     let owner = await this.prisma.user.findUnique({
@@ -158,9 +158,9 @@ export class AdminService {
       const defaultHash = await bcrypt.hash('Shop@123', salt);
       owner = await this.prisma.user.create({
         data: {
-          name: dto.ownerName.trim(),
+          name: ownerName,
           email: ownerEmail,
-          phone: dto.ownerPhone?.trim(),
+          phone: dto?.ownerPhone?.trim(),
           passwordHash: defaultHash,
           role: UserRole.SHOP_OWNER,
         },

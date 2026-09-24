@@ -7,18 +7,42 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { AdminService } from './admin.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole, ShopStatus } from '@/types';
 
 export class AdminCreateShopDto {
+  @IsString()
+  @IsNotEmpty()
   name: string;
+
+  @IsString()
+  @IsOptional()
   slug?: string;
+
+  @IsString()
+  @IsNotEmpty()
   ownerName: string;
+
+  @IsString()
+  @IsOptional()
   ownerEmail?: string;
+
+  @IsString()
+  @IsOptional()
   ownerPhone?: string;
+
+  @IsString()
+  @IsOptional()
   address?: string;
+
+  @IsString()
+  @IsOptional()
   upiId?: string;
+
+  @IsNumber()
+  @IsOptional()
   retentionHours?: number;
 }
 
