@@ -51,6 +51,7 @@ import {
   Send,
   Building,
   CheckSquare,
+  Menu,
 } from 'lucide-react';
 import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
 import { downloadAgentZip } from '@/lib/agentBundle';
@@ -69,6 +70,7 @@ type AdminTab =
 export default function SuperAdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('OVERVIEW');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Overview / Telemetry State
   const [data, setData] = useState<any>(() => {
@@ -710,45 +712,123 @@ export default function SuperAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/60 via-slate-50 to-white text-slate-900 font-sans">
-      {/* Top Master Header matching reference branding */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-blue-100 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Visual PRINTX Logo concept matching reference */}
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white">
-              <Printer className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-slate-900 font-['Outfit']">
-                  PRINT<span className="text-brand-600">X</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-brand-50 text-brand-700 font-bold border border-brand-200 uppercase tracking-wider">
-                  SHOP OPERATING SYSTEM
-                </span>
+    <div className="min-h-screen flex bg-slate-50/70 text-slate-900 font-sans">
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Left Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200/80 shadow-2xl lg:shadow-none flex flex-col justify-between transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:h-screen lg:shrink-0 ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Top Branding */}
+        <div className="flex flex-col flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
+                <Printer className="w-5 h-5" />
               </div>
-              <p className="text-[10px] text-slate-500 font-medium hidden sm:block">
-                Print anything. Pay digitally. Collect instantly.
-              </p>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl font-black tracking-tight text-slate-900 font-['Outfit']">
+                    PRINT<span className="text-brand-600">X</span>
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] bg-brand-50 text-brand-700 font-bold border border-brand-200 uppercase">
+                    OS v2.0
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Online • Shop Hub</span>
+                </div>
+              </div>
             </div>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Live Printer Connection Indicator */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Live Printer: Canon G3010</span>
+          {/* Navigation Items */}
+          <div className="px-3 py-4 space-y-1">
+            <div className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Workstation Navigation
             </div>
+            {[
+              { id: 'OVERVIEW', label: 'Overview & Telemetry', icon: Activity },
+              { id: 'PRINT_QUEUE', label: 'Live Print Queue', icon: Printer, badge: printQueue.filter(q => q.status === 'PRINTING' || q.status === 'QUEUED').length },
+              { id: 'ORDERS', label: 'Orders & Receipts', icon: FileText, badge: data?.recentOrders?.length },
+              { id: 'PRINTERS', label: 'Printer Fleet', icon: Zap },
+              { id: 'PRICING', label: 'Rates & Price Engine', icon: Tag },
+              { id: 'INVENTORY', label: 'Inventory & Supplies', icon: Package, badge: inventory.filter(i => i.status !== 'NORMAL').length },
+              { id: 'CUSTOMERS', label: 'Customer CRM', icon: Users },
+              { id: 'REPORTS', label: 'Business Reports', icon: BarChart3 },
+              { id: 'SETTINGS', label: 'Shop Settings', icon: Settings },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as AdminTab);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 font-bold'
+                      : 'text-slate-600 hover:bg-slate-100/90 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                    <span>{tab.label}</span>
+                  </div>
+                  {tab.badge !== undefined && tab.badge > 0 ? (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        isActive ? 'bg-white text-blue-700' : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {tab.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
+        {/* Sidebar Bottom Footer */}
+        <div className="p-3 border-t border-slate-100 bg-slate-50/70 space-y-2.5 shrink-0">
+          <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 mb-1">
+              <span>Hardware Link</span>
+              <span className="text-emerald-600 font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Ready
+              </span>
+            </div>
+            <div className="text-xs font-bold text-slate-800 truncate">Canon PIXMA G3010</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">USB Local Spooler Active</div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+              className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs shadow-blue-500/20 transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Add Shop</span>
+              <span>Add Shop</span>
             </button>
-
             <button
               onClick={() => loadData(false)}
               className="p-2 rounded-xl bg-white hover:bg-blue-50 text-slate-600 hover:text-brand-600 transition-colors border border-slate-200 shadow-xs cursor-pointer"
@@ -756,7 +836,6 @@ export default function SuperAdminDashboard() {
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-600' : ''}`} />
             </button>
-
             <button
               onClick={handleLogout}
               className="p-2 rounded-xl bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200 shadow-xs cursor-pointer"
@@ -766,51 +845,61 @@ export default function SuperAdminDashboard() {
             </button>
           </div>
         </div>
+      </aside>
 
-        {/* Commercial Workstation Tab Navigation Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto scrollbar-none border-t border-slate-100 py-1.5 text-xs font-semibold">
-          {[
-            { id: 'OVERVIEW', label: 'Overview & Telemetry', icon: Activity },
-            { id: 'PRINT_QUEUE', label: 'Live Print Queue', icon: Printer, badge: printQueue.filter(q => q.status === 'PRINTING' || q.status === 'QUEUED').length },
-            { id: 'ORDERS', label: 'Orders & Receipts', icon: FileText, badge: data?.recentOrders?.length },
-            { id: 'PRINTERS', label: 'Printer Fleet', icon: Zap },
-            { id: 'PRICING', label: 'Rates & Price Engine', icon: Tag },
-            { id: 'INVENTORY', label: 'Inventory & Supplies', icon: Package, badge: inventory.filter(i => i.status !== 'NORMAL').length },
-            { id: 'CUSTOMERS', label: 'Customer CRM', icon: Users },
-            { id: 'REPORTS', label: 'Business Reports', icon: BarChart3 },
-            { id: 'SETTINGS', label: 'Shop Settings', icon: Settings },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as AdminTab)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20 font-bold'
-                    : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                <span>{tab.label}</span>
-                {tab.badge !== undefined && tab.badge > 0 ? (
-                  <span
-                    className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                      isActive ? 'bg-white text-blue-700' : 'bg-blue-100 text-blue-700'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </header>
+      {/* Main Right Workspace Container */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        {/* Top Header for Workspace */}
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 cursor-pointer"
+              aria-label="Open Sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                {[
+                  { id: 'OVERVIEW', label: 'Overview & Telemetry' },
+                  { id: 'PRINT_QUEUE', label: 'Live Print Queue' },
+                  { id: 'ORDERS', label: 'Orders & Receipts' },
+                  { id: 'PRINTERS', label: 'Printer Fleet' },
+                  { id: 'PRICING', label: 'Rates & Price Engine' },
+                  { id: 'INVENTORY', label: 'Inventory & Supplies' },
+                  { id: 'CUSTOMERS', label: 'Customer CRM' },
+                  { id: 'REPORTS', label: 'Business Reports' },
+                  { id: 'SETTINGS', label: 'Shop Settings' },
+                ].find((t) => t.id === activeTab)?.label}
+              </h2>
+              <p className="text-[11px] text-slate-500 hidden sm:block">
+                Dingal 4 No Canel Road • Live Realtime Telemetry
+              </p>
+            </div>
+          </div>
 
-      {/* Main OS Workstation Body */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a
+              href="https://printx-customer.vercel.app/shop/printx-shop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+              <span>Customer Portal</span>
+            </a>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="hidden md:inline">Live Printer: Canon G3010</span>
+              <span className="md:hidden">Live</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Main OS Workstation Body */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         {/* ========================================================================= */}
         {/* TAB 1: OVERVIEW & MASTER TELEMETRY                                        */}
         {/* ========================================================================= */}
@@ -2545,6 +2634,7 @@ export default function SuperAdminDashboard() {
           </div>
         )}
       </main>
+    </div>
 
       {/* ========================================================================= */}
       {/* DIGITAL RECEIPT MODAL                                                     */}
