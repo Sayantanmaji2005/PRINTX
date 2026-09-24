@@ -14,19 +14,45 @@ import {
   PrintJobStatus,
   PrinterStatus,
 } from '@prisma/client';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
-export interface CalculatePriceDto {
+export class CalculatePriceDto {
+  @IsString()
+  @IsNotEmpty()
   shopId: string;
+
+  @IsString()
+  @IsNotEmpty()
   documentId: string;
+
+  @IsString()
+  @IsNotEmpty()
   paperSize: PaperSize;
+
+  @IsString()
+  @IsNotEmpty()
   colorMode: ColorMode;
+
+  @IsString()
+  @IsNotEmpty()
   printSide: PrintSide;
-  copies: number;
+
+  @IsNumber()
+  @IsOptional()
+  copies?: number;
+
+  @IsString()
+  @IsOptional()
   pageRange?: string;
 }
 
-export interface CreateOrderDto extends CalculatePriceDto {
+export class CreateOrderDto extends CalculatePriceDto {
+  @IsString()
+  @IsNotEmpty()
   customerSessionId: string;
+
+  @IsString()
+  @IsOptional()
   notes?: string;
 }
 

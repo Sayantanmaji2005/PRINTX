@@ -61,8 +61,23 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [copies, setCopies] = useState(1);
   const [pageRangeType, setPageRangeType] = useState<'all' | 'custom'>('all');
   const [customPageRange, setCustomPageRange] = useState('');
+  const [customNotes, setCustomNotes] = useState('');
   const [priceBreakdown, setPriceBreakdown] = useState<any>(null);
   const [calculatingPrice, setCalculatingPrice] = useState(false);
+
+  // Helper to get exact live shop rate
+  const getRate = (size: string, color: string, side: string) => {
+    if (!shop?.pricingRules || !Array.isArray(shop.pricingRules)) {
+      if (color === 'COLOR') return side === 'DOUBLE' ? 8.0 : 5.0;
+      return side === 'DOUBLE' ? 1.5 : 1.0;
+    }
+    const rule = shop.pricingRules.find(
+      (r: any) => r.paperSize === size && r.colorMode === color && r.printSide === side
+    );
+    if (rule) return rule.pricePerUnit;
+    if (color === 'COLOR') return side === 'DOUBLE' ? 8.0 : 5.0;
+    return side === 'DOUBLE' ? 1.5 : 1.0;
+  };
 
   // Step 3: Order & UPI Payment
   const [creatingOrder, setCreatingOrder] = useState(false);
@@ -213,6 +228,7 @@ export default function DocumentUploadAndPrintFlowPage() {
         printSide,
         copies,
         pageRange: pageRangeType === 'all' ? 'all' : customPageRange,
+        notes: customNotes.trim() || undefined,
       });
 
       setOrder(newOrder);
@@ -487,7 +503,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                   >
                     <div>
                       <span className="text-xs block">Black & White</span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">₹1.00/page</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        ₹{getRate(paperSize, 'BW', printSide).toFixed(2)} / page
+                      </span>
                     </div>
                     {colorMode === 'BW' && <Check className="w-4 h-4 text-brand-600" />}
                   </button>
@@ -503,7 +521,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                   >
                     <div>
                       <span className="text-xs block">Full Color</span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">₹5.00/page</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        ₹{getRate(paperSize, 'COLOR', printSide).toFixed(2)} / page
+                      </span>
                     </div>
                     {colorMode === 'COLOR' && <Check className="w-4 h-4 text-brand-600" />}
                   </button>
@@ -527,7 +547,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                   >
                     <div>
                       <span className="text-xs block">Single Side</span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">1 page per sheet</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        ₹{getRate(paperSize, colorMode, 'SINGLE').toFixed(2)} / page
+                      </span>
                     </div>
                     {printSide === 'SINGLE' && <Check className="w-4 h-4 text-brand-600" />}
                   </button>
@@ -543,7 +565,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                   >
                     <div>
                       <span className="text-xs block">Both Side (Duplex)</span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">Save paper (2 pgs/sheet)</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        ₹{getRate(paperSize, colorMode, 'DOUBLE').toFixed(2)} / sheet
+                      </span>
                     </div>
                     {printSide === 'DOUBLE' && <Check className="w-4 h-4 text-brand-600" />}
                   </button>
@@ -631,6 +655,20 @@ export default function DocumentUploadAndPrintFlowPage() {
                     className="w-full mt-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500"
                   />
                 )}
+              </div>
+
+              {/* Custom Instructions for Shopkeeper */}
+              <div className="p-4 rounded-3xl bg-white border border-blue-100 shadow-sm">
+                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                  Special Instructions for Shopkeeper (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Spiral binding, Staple top-left, Glossy sheet"
+                  value={customNotes}
+                  onChange={(e) => setCustomNotes(e.target.value)}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 transition-all"
+                />
               </div>
 
               {/* Live Pricing Breakdown Card */}

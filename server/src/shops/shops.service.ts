@@ -89,9 +89,10 @@ export class ShopsService {
     const shop = await this.prisma.shop.findUnique({
       where: { slug: cleanSlug },
       include: {
+        pricingRules: { where: { isActive: true } },
         printers: {
           where: { status: { in: [PrinterStatus.READY, PrinterStatus.PRINTING] } },
-          select: { id: true, name: true, status: true },
+          select: { id: true, name: true, status: true, capabilities: true },
         },
       },
     });
@@ -115,7 +116,9 @@ export class ShopsService {
       logoUrl: shop.logoUrl,
       upiId: shop.upiId,
       hasActivePrinter: shop.printers.length > 0,
-    };
+      pricingRules: shop.pricingRules,
+      printers: shop.printers,
+    } as any;
   }
 
   async findById(id: string) {

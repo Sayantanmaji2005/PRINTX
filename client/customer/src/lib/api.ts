@@ -73,6 +73,7 @@ export async function createOrder(data: {
   printSide: string;
   copies: number;
   pageRange?: string;
+  notes?: string;
 }) {
   const res = await fetch(`${API_BASE_URL}/orders`, {
     method: 'POST',

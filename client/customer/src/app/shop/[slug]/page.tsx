@@ -214,16 +214,51 @@ export default function ShopCustomerPage() {
           </div>
 
           {/* Pricing Info Banner */}
-          <div className="mt-6 p-3.5 rounded-2xl bg-white border border-blue-100 shadow-xs flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-            <div className="text-[11px] text-slate-600">
-              <span className="text-slate-900 font-bold">Standard Rates at this shop:</span>
-              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-slate-700 font-medium">
-                <span>A4 B&W: ₹1.00/page</span>
-                <span>•</span>
-                <span>Both Side: ₹1.50/sheet</span>
-                <span>•</span>
-                <span>Color: ₹5.00/page</span>
+          <div className="mt-6 p-4 rounded-2xl bg-white border border-blue-100 shadow-xs flex items-start gap-3">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+              <Info className="w-4 h-4" />
+            </div>
+            <div className="text-xs text-slate-600 flex-1">
+              <div className="text-slate-900 font-bold flex items-center justify-between">
+                <span>Verified Rates for {shop.name}</span>
+                <span className="text-[10px] text-emerald-600 font-semibold px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                  Live Rates
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-700">
+                {shop.pricingRules && shop.pricingRules.length > 0 ? (
+                  shop.pricingRules.slice(0, 4).map((rule: any) => (
+                    <div
+                      key={rule.id || `${rule.paperSize}-${rule.colorMode}-${rule.printSide}`}
+                      className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between"
+                    >
+                      <span>
+                        {rule.paperSize} {rule.colorMode === 'BW' ? 'B&W' : 'Color'}{' '}
+                        {rule.printSide === 'DOUBLE' ? '(Both)' : '(Single)'}
+                      </span>
+                      <strong className="text-brand-600 font-bold">₹{rule.pricePerUnit.toFixed(2)}</strong>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                      <span>A4 B&W (Single)</span>
+                      <strong className="text-brand-600 font-bold">₹1.00</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                      <span>A4 B&W (Both Side)</span>
+                      <strong className="text-brand-600 font-bold">₹1.50</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                      <span>A4 Color (Single)</span>
+                      <strong className="text-brand-600 font-bold">₹5.00</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                      <span>A4 Color (Both Side)</span>
+                      <strong className="text-brand-600 font-bold">₹8.00</strong>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
