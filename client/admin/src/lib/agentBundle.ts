@@ -318,8 +318,7 @@ while ($true) {
                         Write-Host ("✅ [ORDER " + $job.orderNumber + "] PRINT COMPLETED SUCCESSFULLY!") -ForegroundColor Green
                         Write-Host ""
                     } catch {
-                        $errText = $_.Exception.Message
-                        Write-Host ("❌ [ORDER " + $job.orderNumber + "] Print failed: " + $errText) -ForegroundColor Red
+                        Write-Host ("Print error occurred for order " + $job.orderNumber) -ForegroundColor Red
                     }
                 }
             }
