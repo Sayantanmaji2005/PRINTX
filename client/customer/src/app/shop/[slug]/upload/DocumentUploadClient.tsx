@@ -1217,7 +1217,7 @@ export default function DocumentUploadAndPrintFlowPage() {
             <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs mb-4">
               <div>
                 <span className="text-slate-500 font-medium block">Customer Session ID:</span>
-                <span className="font-mono font-bold text-slate-800">{customerSessionId ? customerSessionId.substring(0, 16) : 'Guest Session'}</span>
+                <span className="font-mono font-bold text-slate-800">{sessionId ? sessionId.substring(0, 16) : 'Guest Session'}</span>
               </div>
               <div>
                 <span className="text-slate-500 font-medium block">Payment Method:</span>

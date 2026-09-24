@@ -1381,9 +1381,9 @@ export default function ShopCustomerPage() {
                 <span className="text-2xl font-black tracking-tight text-slate-900 font-['Outfit']">PRINT<span className="text-blue-600">X</span></span>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-300">TAX INVOICE / CASH RECEIPT</span>
               </div>
-              <h1 className="text-lg font-bold text-slate-900 mt-1">{shop.name || 'PRINTX SHOP'}</h1>
-              <p className="text-xs text-slate-600">{shop.address || 'Dingal 4 No Canel Road'}</p>
-              <p className="text-xs text-slate-600">Phone: {shop.owner?.phone || '+91 9002761536'} | UPI VPA: {shop.upiId || '9002761536@axl'}</p>
+              <h1 className="text-lg font-bold text-slate-900 mt-1">{shop?.name || 'PRINTX SHOP'}</h1>
+              <p className="text-xs text-slate-600">{shop?.address || 'Dingal 4 No Canel Road'}</p>
+              <p className="text-xs text-slate-600">Phone: {shop?.owner?.phone || '+91 9002761536'} | UPI VPA: {shop?.upiId || '9002761536@axl'}</p>
             </div>
             <div className="text-right">
               <div className="inline-block px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold uppercase tracking-wider">
@@ -1450,7 +1450,7 @@ export default function ShopCustomerPage() {
           <div className="mt-6 pt-4 border-t border-dashed border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
             <div className="space-y-1 max-w-sm">
               <p className="font-semibold text-slate-700">Automated Direct Printer Hardware Spool</p>
-              <p>Collect prints at shop counter. Thank you for choosing {shop.name || 'PRINTX'}!</p>
+              <p>Collect prints at shop counter. Thank you for choosing {shop?.name || 'PRINTX'}!</p>
               <p className="text-[9px] text-slate-400">Computer generated bill. No physical signature required.</p>
             </div>
             <div className="text-center p-2 rounded-lg border border-emerald-400 bg-emerald-50/50">
