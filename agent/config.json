@@ -1,9 +1,10 @@
 {
   "serverUrl": "https://printx-cib8.onrender.com",
-  "shopSlug": "maji-xerox-station",
-  "agentName": "Shop Counter PC",
+  "shopSlug": "printx-shop",
+  "agentName": "PRINTX SHOP Counter PC",
   "pollIntervalMs": 3000,
   "heartbeatIntervalMs": 10000,
   "autoPrint": true,
   "preferredPrinter": ""
 }
+
