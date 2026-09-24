@@ -1,0 +1,9 @@
+{
+  "serverUrl": "http://localhost:4000",
+  "shopSlug": "maji-xerox-station",
+  "agentName": "Maji Xerox Counter PC",
+  "pollIntervalMs": 3000,
+  "heartbeatIntervalMs": 10000,
+  "autoPrint": true,
+  "preferredPrinter": ""
+}

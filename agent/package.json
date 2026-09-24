@@ -1,0 +1,12 @@
+{
+  "name": "@printx/desktop-agent",
+  "version": "1.0.0",
+  "description": "PrintX Shop Desktop Agent - Auto Hardware Printer Bridge for Xerox Stations",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "keywords": ["printx", "printer", "spooler", "xerox", "agent"],
+  "author": "PrintX",
+  "license": "ISC"
+}

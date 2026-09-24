@@ -11,6 +11,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { OrdersModule } from './orders/orders.module';
 import { AdminModule } from './admin/admin.module';
 import { HealthModule } from './health/health.module';
+import { AgentModule } from './agent/agent.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -32,6 +33,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     OrdersModule,
     AdminModule,
     HealthModule,
+    AgentModule,
   ],
   providers: [
     {

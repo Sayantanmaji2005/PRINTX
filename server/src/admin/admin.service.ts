@@ -231,4 +231,94 @@ export class AdminService {
       data: { status: status as any },
     });
   }
+
+  async deleteShopPermanently(shopId: string) {
+    const shop = await this.prisma.shop.findUnique({ where: { id: shopId } });
+    if (!shop) {
+      throw new ConflictException(`Shop with ID ${shopId} not found`);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Get all orders for this shop
+      const orders = await tx.order.findMany({
+        where: { shopId },
+        select: { id: true },
+      });
+      const orderIds = orders.map((o) => o.id);
+
+      if (orderIds.length > 0) {
+        // Delete print jobs
+        await tx.printJob.deleteMany({ where: { orderId: { in: orderIds } } });
+        // Delete print configs
+        await tx.printConfiguration.deleteMany({ where: { orderId: { in: orderIds } } });
+        // Delete order items
+        await tx.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
+        // Delete refunds
+        await tx.refund.deleteMany({ where: { orderId: { in: orderIds } } });
+        // Delete invoices
+        await tx.invoice.deleteMany({ where: { orderId: { in: orderIds } } });
+        // Delete payments and events
+        const payments = await tx.payment.findMany({
+          where: { orderId: { in: orderIds } },
+          select: { id: true },
+        });
+        const paymentIds = payments.map((p) => p.id);
+        if (paymentIds.length > 0) {
+          await tx.paymentEvent.deleteMany({ where: { paymentId: { in: paymentIds } } });
+          await tx.payment.deleteMany({ where: { id: { in: paymentIds } } });
+        }
+        // Delete orders
+        await tx.order.deleteMany({ where: { id: { in: orderIds } } });
+      }
+
+      // 2. Get customer sessions and documents
+      const customerSessions = await tx.customerSession.findMany({
+        where: { shopId },
+        select: { id: true },
+      });
+      const sessionIds = customerSessions.map((s) => s.id);
+
+      if (sessionIds.length > 0) {
+        const documents = await tx.document.findMany({
+          where: { customerSessionId: { in: sessionIds } },
+          select: { id: true },
+        });
+        const docIds = documents.map((d) => d.id);
+        if (docIds.length > 0) {
+          await tx.documentPage.deleteMany({ where: { documentId: { in: docIds } } });
+          await tx.document.deleteMany({ where: { id: { in: docIds } } });
+        }
+        await tx.customerSession.deleteMany({ where: { id: { in: sessionIds } } });
+      }
+
+      // 3. Delete Print Agents & Heartbeats
+      const agents = await tx.printAgent.findMany({
+        where: { shopId },
+        select: { id: true },
+      });
+      const agentIds = agents.map((a) => a.id);
+      if (agentIds.length > 0) {
+        await tx.printAgentHeartbeat.deleteMany({ where: { agentId: { in: agentIds } } });
+        await tx.printAgent.deleteMany({ where: { id: { in: agentIds } } });
+      }
+
+      // 4. Delete Printers & Scanners
+      await tx.printer.deleteMany({ where: { shopId } });
+      await tx.scanner.deleteMany({ where: { shopId } });
+
+      // 5. Delete Pricing Rules
+      await tx.pricingRule.deleteMany({ where: { shopId } });
+
+      // 6. Delete QR Codes
+      await tx.shopQrCode.deleteMany({ where: { shopId } });
+
+      // 7. Delete Shop Members, Notifications, Audit Logs
+      await tx.shopMember.deleteMany({ where: { shopId } });
+      await tx.notification.deleteMany({ where: { shopId } });
+      await tx.auditLog.deleteMany({ where: { shopId } });
+
+      // 8. Delete Shop
+      return tx.shop.delete({ where: { id: shopId } });
+    });
+  }
 }

@@ -283,25 +283,24 @@ export class OrdersService {
         where: { shopId: order.shopId, status: PrinterStatus.READY },
       });
 
-      // 3. Create Print Job in Queue
+      // 3. Create Print Job in Queue (Ready for Desktop Agent)
       await tx.printJob.create({
         data: {
           jobId: `PJ-${order.orderNumber}-1`,
           orderId: order.id,
           printerId: printer ? printer.id : undefined,
-          status: PrintJobStatus.PRINTED,
+          status: PrintJobStatus.QUEUED,
           startedAt: new Date(),
-          completedAt: new Date(),
         },
       });
 
-      // 4. Update Order status
+      // 4. Update Order status to PAID & QUEUED
       const updatedOrder = await tx.order.update({
         where: { id: order.id },
         data: {
-          status: OrderStatus.PRINTED,
+          status: OrderStatus.PAID,
           paymentStatus: PaymentStatus.SUCCESS,
-          printStatus: PrintJobStatus.PRINTED,
+          printStatus: PrintJobStatus.QUEUED,
         },
         include: {
           configuration: true,

@@ -24,6 +24,7 @@ import {
   X,
   CreditCard,
   Zap,
+  Trash2,
 } from 'lucide-react';
 import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
 
@@ -46,6 +47,11 @@ export default function SuperAdminDashboard() {
     address: '',
     upiId: '',
   });
+
+  // Modal & Action State for Deleting Shop
+  const [shopToDelete, setShopToDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -99,6 +105,24 @@ export default function SuperAdminDashboard() {
       setCreateError(err.message || 'Failed to create shop');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDeleteShop = async () => {
+    if (!shopToDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await apiRequest(`/admin/shops/${shopToDelete.id}`, {
+        method: 'DELETE',
+      });
+      setShopToDelete(null);
+      await loadData();
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete shop');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -302,7 +326,7 @@ export default function SuperAdminDashboard() {
                     <th className="pb-3 px-3">Owner & Contact</th>
                     <th className="pb-3 px-3">UPI ID</th>
                     <th className="pb-3 px-3 text-center">Status</th>
-                    <th className="pb-3 px-3 text-right">Counter QR Standee</th>
+                    <th className="pb-3 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -366,6 +390,17 @@ export default function SuperAdminDashboard() {
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
+
+                          <button
+                            onClick={() => {
+                              setShopToDelete(shop);
+                              setDeleteError(null);
+                            }}
+                            className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 transition-colors"
+                            title="Delete Shop Permanently"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -519,6 +554,71 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Shop Confirmation Modal */}
+      {shopToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-red-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">
+                    Delete Xerox Shop?
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Permanent Database Deletion</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShopToDelete(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {deleteError && (
+              <div className="mt-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            <div className="mt-4 p-4 rounded-2xl bg-red-50/50 border border-red-100 text-xs text-slate-700 space-y-2">
+              <p>
+                Are you sure you want to permanently delete{' '}
+                <strong className="text-red-700">{shopToDelete.name}</strong>?
+              </p>
+              <ul className="list-disc pl-4 text-[11px] text-slate-600 space-y-1">
+                <li>Counter Standee QR code will stop working</li>
+                <li>All customer print orders and uploaded docs will be wiped</li>
+                <li>Printers and settings linked to this shop will be removed</li>
+              </ul>
+            </div>
+
+            <div className="pt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShopToDelete(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteShop}
+                disabled={deleting}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-md shadow-red-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleting ? 'Deleting Shop...' : 'Yes, Delete Completely'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

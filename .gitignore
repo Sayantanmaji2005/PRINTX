@@ -19,4 +19,5 @@ coverage/
 scratch/
 .turbo/
 *.tsbuildinfo
+agent/temp_jobs/
 

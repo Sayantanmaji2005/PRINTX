@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
 } from '@nestjs/common';
@@ -61,6 +62,15 @@ export class AdminController {
     const shop = await this.adminService.updateShopStatus(id, status);
     return {
       message: `Shop status updated to ${status}`,
+      data: shop,
+    };
+  }
+
+  @Delete('shops/:id')
+  async deleteShop(@Param('id') id: string) {
+    const shop = await this.adminService.deleteShopPermanently(id);
+    return {
+      message: `Shop "${shop.name}" and all related data deleted permanently`,
       data: shop,
     };
   }
