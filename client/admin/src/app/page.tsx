@@ -58,12 +58,9 @@ import { downloadAgentZip } from '@/lib/agentBundle';
 
 type AdminTab =
   | 'OVERVIEW'
-  | 'PRINT_QUEUE'
   | 'ORDERS'
   | 'PRINTERS'
   | 'PRICING'
-  | 'INVENTORY'
-  | 'CUSTOMERS'
   | 'REPORTS';
 
 export default function SuperAdminDashboard() {
@@ -123,20 +120,7 @@ export default function SuperAdminDashboard() {
   const [selectedPrinterShop, setSelectedPrinterShop] = useState<any>(null);
 
   // ==========================================
-  // 1. PRINT QUEUE STATE (Live Connected)
-  // ==========================================
-  const [printQueue, setPrintQueue] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('printx_live_queue');
-        if (saved) return JSON.parse(saved);
-      } catch {}
-    }
-    return [];
-  });
-
-  // ==========================================
-  // 2. PRINTER HARDWARE FLEET STATE
+  // 1. PRINTER HARDWARE FLEET STATE
   // ==========================================
   const [printers, setPrinters] = useState<any[]>([
     {
@@ -155,7 +139,7 @@ export default function SuperAdminDashboard() {
   ]);
 
   // ==========================================
-  // 3. SMART PRICE ENGINE STATE
+  // 2. SMART PRICE ENGINE STATE
   // ==========================================
   const [pricingRates, setPricingRates] = useState<any>(() => {
     if (typeof window !== 'undefined') {
@@ -191,54 +175,6 @@ export default function SuperAdminDashboard() {
     };
   });
   const [priceSavedNotice, setPriceSavedNotice] = useState(false);
-
-  // ==========================================
-  // 4. INVENTORY SUPPLIES STATE (Clean Store)
-  // ==========================================
-  const [inventory, setInventory] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('printx_inventory');
-        if (saved) return JSON.parse(saved);
-      } catch {}
-    }
-    return [];
-  });
-
-  // ==========================================
-  // 5. CUSTOMER CRM (Dynamically derived from real orders)
-  // ==========================================
-  const customers = useMemo(() => {
-    const orders = data?.recentOrders || [];
-    if (orders.length === 0) return [];
-    const map = new Map<string, any>();
-    orders.forEach((ord: any) => {
-      const key = ord.customerPhone || ord.customerName || ord.id;
-      if (!map.has(key)) {
-        map.set(key, {
-          id: `CUST-${key.slice(-4)}`,
-          name: ord.customerName || 'Walk-in Customer',
-          phone: ord.customerPhone || 'N/A',
-          email: ord.customerEmail || '—',
-          totalOrders: 1,
-          totalSpend: Number(ord.total || 0),
-          lastOrder: new Date(ord.createdAt).toLocaleDateString('en-IN', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          favoriteService: ord.configuration?.serviceType || 'Standard Print',
-          tier: Number(ord.total || 0) > 500 ? 'VIP Gold' : 'Regular',
-        });
-      } else {
-        const c = map.get(key);
-        c.totalOrders += 1;
-        c.totalSpend += Number(ord.total || 0);
-      }
-    });
-    return Array.from(map.values());
-  }, [data?.recentOrders]);
 
   const loadData = async (silent = false) => {
     try {
@@ -360,47 +296,6 @@ export default function SuperAdminDashboard() {
     }
     setPriceSavedNotice(true);
     setTimeout(() => setPriceSavedNotice(false), 3000);
-  };
-
-  // Queue Item Actions
-  const handleUpdateQueueStatus = (id: string, newStatus: string) => {
-    setPrintQueue((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
-    );
-  };
-
-  const handleMoveQueueItem = (index: number, direction: 'UP' | 'DOWN') => {
-    if (direction === 'UP' && index === 0) return;
-    if (direction === 'DOWN' && index === printQueue.length - 1) return;
-
-    const newQueue = [...printQueue];
-    const targetIndex = direction === 'UP' ? index - 1 : index + 1;
-    const temp = newQueue[index];
-    newQueue[index] = newQueue[targetIndex];
-    newQueue[targetIndex] = temp;
-    setPrintQueue(newQueue);
-  };
-
-  const handleAssignPrinter = (id: string, newPrinter: string) => {
-    setPrintQueue((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, printer: newPrinter } : item))
-    );
-  };
-
-  // Inventory Stock Adjustment
-  const handleAdjustStock = (id: string, delta: number) => {
-    setInventory((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextStock = Math.max(0, item.stock + delta);
-          let nextStatus = 'NORMAL';
-          if (nextStock <= 2) nextStatus = 'CRITICAL';
-          else if (nextStock <= item.threshold) nextStatus = 'LOW';
-          return { ...item, stock: nextStock, status: nextStatus };
-        }
-        return item;
-      })
-    );
   };
 
   // Export Financial CSV Report
@@ -570,12 +465,9 @@ export default function SuperAdminDashboard() {
             </div>
             {[
               { id: 'OVERVIEW', label: 'Overview & Telemetry', icon: Activity },
-              { id: 'PRINT_QUEUE', label: 'Live Print Queue', icon: Printer, badge: printQueue.filter(q => q.status === 'PRINTING' || q.status === 'QUEUED').length },
               { id: 'ORDERS', label: 'Orders & Receipts', icon: FileText, badge: data?.recentOrders?.length },
               { id: 'PRINTERS', label: 'Printer Fleet', icon: Zap },
               { id: 'PRICING', label: 'Rates & Price Engine', icon: Tag },
-              { id: 'INVENTORY', label: 'Inventory & Supplies', icon: Package, badge: inventory.filter(i => i.status !== 'NORMAL').length },
-              { id: 'CUSTOMERS', label: 'Customer CRM', icon: Users },
               { id: 'REPORTS', label: 'Business Reports', icon: BarChart3 },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -668,14 +560,10 @@ export default function SuperAdminDashboard() {
               <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                 {[
                   { id: 'OVERVIEW', label: 'Overview & Telemetry' },
-                  { id: 'PRINT_QUEUE', label: 'Live Print Queue' },
                   { id: 'ORDERS', label: 'Orders & Receipts' },
                   { id: 'PRINTERS', label: 'Printer Fleet' },
                   { id: 'PRICING', label: 'Rates & Price Engine' },
-                  { id: 'INVENTORY', label: 'Inventory & Supplies' },
-                  { id: 'CUSTOMERS', label: 'Customer CRM' },
                   { id: 'REPORTS', label: 'Business Reports' },
-                  { id: 'SETTINGS', label: 'Shop Settings' },
                 ].find((t) => t.id === activeTab)?.label}
               </h2>
               <p className="text-[11px] text-slate-500 hidden sm:block">
@@ -827,15 +715,28 @@ export default function SuperAdminDashboard() {
             {/* Quick Actions Shortcuts */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
-                onClick={() => setActiveTab('PRINT_QUEUE')}
+                onClick={() => setActiveTab('ORDERS')}
                 className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
               >
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <Printer className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Print Queue</div>
-                  <div className="text-[10px] text-slate-500">Manage active jobs</div>
+                  <div className="text-xs font-bold text-slate-900">Orders & Invoices</div>
+                  <div className="text-[10px] text-slate-500">View customer prints</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('PRINTERS')}
+                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Printer Fleet</div>
+                  <div className="text-[10px] text-slate-500">Hardware telemetry</div>
                 </div>
               </button>
 
@@ -849,19 +750,6 @@ export default function SuperAdminDashboard() {
                 <div>
                   <div className="text-xs font-bold text-slate-900">Rate Config</div>
                   <div className="text-[10px] text-slate-500">Edit page prices</div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('INVENTORY')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
-              >
-                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <Package className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Paper Inventory</div>
-                  <div className="text-[10px] text-slate-500">Check reams & ink</div>
                 </div>
               </button>
 
@@ -1104,257 +992,7 @@ export default function SuperAdminDashboard() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: LIVE PRINT QUEUE WORKSTATION                                       */}
-        {/* ========================================================================= */}
-        {activeTab === 'PRINT_QUEUE' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
-                  <span>Live Print Spooler Queue</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    AUTO-PRINT READY
-                  </span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Real-time document queue dispatched directly to connected shop USB & Wi-Fi printers.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const newItem = {
-                      id: `PX-${Date.now().toString().slice(-6)}`,
-                      customer: 'Counter Walk-in',
-                      phone: '9002761536',
-                      document: 'Express_Document_Print.pdf',
-                      pages: 4,
-                      copies: 1,
-                      color: 'B&W',
-                      paper: 'A4 75 GSM',
-                      sides: 'Single-sided',
-                      printer: 'Canon PIXMA G3010 (USB)',
-                      priority: 'URGENT',
-                      status: 'QUEUED',
-                      progress: 0,
-                      createdAt: new Date().toISOString(),
-                    };
-                    setPrintQueue([newItem, ...printQueue]);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Quick Counter Job</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Queue KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-              <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Printing Now</span>
-                <div className="text-2xl font-extrabold text-blue-600 mt-1">
-                  {printQueue.filter((q) => q.status === 'PRINTING').length}
-                </div>
-                <span className="text-[10px] text-slate-400">Spooling to Canon G3010</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Waiting in Queue</span>
-                <div className="text-2xl font-extrabold text-amber-600 mt-1">
-                  {printQueue.filter((q) => q.status === 'QUEUED').length}
-                </div>
-                <span className="text-[10px] text-slate-400">Next in line</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Ready for Pickup</span>
-                <div className="text-2xl font-extrabold text-emerald-600 mt-1">
-                  {printQueue.filter((q) => q.status === 'READY').length}
-                </div>
-                <span className="text-[10px] text-slate-400">At counter tray</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Urgent Priority</span>
-                <div className="text-2xl font-extrabold text-red-600 mt-1">
-                  {printQueue.filter((q) => q.priority === 'URGENT').length}
-                </div>
-                <span className="text-[10px] text-slate-400">Fast-track jobs</span>
-              </div>
-            </div>
-
-            {/* Print Queue Table */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
-                      <th className="pb-3 px-3">Order / Customer</th>
-                      <th className="pb-3 px-3">Document & Specs</th>
-                      <th className="pb-3 px-3">Assigned Printer</th>
-                      <th className="pb-3 px-3 text-center">Priority</th>
-                      <th className="pb-3 px-3 text-center">Job Status</th>
-                      <th className="pb-3 px-3 text-right">Queue Operations</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {printQueue.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          <Printer className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                          <div className="font-semibold text-slate-700 text-sm">No Active Print Jobs in Queue</div>
-                          <div className="text-xs text-slate-400 mt-1">
-                            Incoming customer print orders will automatically appear here in real time.
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      printQueue.map((item, idx) => (
-                      <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
-                        <td className="py-4 px-3">
-                          <div className="font-bold text-slate-900 font-mono">{item.id}</div>
-                          <div className="text-slate-800 font-medium text-xs mt-0.5">
-                            {item.customer}
-                          </div>
-                          <div className="text-[10px] text-slate-400">{item.phone}</div>
-                        </td>
-
-                        <td className="py-4 px-3">
-                          <div className="font-semibold text-slate-900 truncate max-w-xs">
-                            {item.document}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[10px]">
-                              {item.pages} pp × {item.copies} cp
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                item.color === 'COLOR'
-                                  ? 'bg-purple-100 text-purple-700'
-                                  : 'bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              {item.color}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">
-                              {item.paper}
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-3">
-                          <select
-                            value={item.printer}
-                            onChange={(e) => handleAssignPrinter(item.id, e.target.value)}
-                            className="px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500"
-                          >
-                            <option value="Canon PIXMA G3010 (USB)">Canon G3010 (USB)</option>
-                            <option value="HP LaserJet Enterprise M506">HP LaserJet M506</option>
-                            <option value="Epson EcoTank L805 Series">Epson L805 (A3/Photo)</option>
-                          </select>
-                        </td>
-
-                        <td className="py-4 px-3 text-center">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              item.priority === 'URGENT'
-                                ? 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            {item.priority}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-3 text-center">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                              item.status === 'PRINTING'
-                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                : item.status === 'QUEUED'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : item.status === 'READY'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200'
-                            }`}
-                          >
-                            {item.status === 'PRINTING' && (
-                              <Printer className="w-3 h-3 animate-bounce" />
-                            )}
-                            {item.status === 'READY' && <CheckCircle2 className="w-3 h-3" />}
-                            {item.status}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* Reorder Buttons */}
-                            <button
-                              onClick={() => handleMoveQueueItem(idx, 'UP')}
-                              disabled={idx === 0}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-30 cursor-pointer"
-                              title="Move Up in Queue"
-                            >
-                              <ChevronUp className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleMoveQueueItem(idx, 'DOWN')}
-                              disabled={idx === printQueue.length - 1}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-30 cursor-pointer"
-                              title="Move Down in Queue"
-                            >
-                              <ChevronDown className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* Start/Pause/Ready Controls */}
-                            {item.status === 'QUEUED' && (
-                              <button
-                                onClick={() => handleUpdateQueueStatus(item.id, 'PRINTING')}
-                                className="px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
-                              >
-                                <Play className="w-3 h-3" />
-                                <span>Print</span>
-                              </button>
-                            )}
-
-                            {item.status === 'PRINTING' && (
-                              <button
-                                onClick={() => handleUpdateQueueStatus(item.id, 'READY')}
-                                className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
-                              >
-                                <Check className="w-3 h-3" />
-                                <span>Mark Ready</span>
-                              </button>
-                            )}
-
-                            {item.status === 'READY' && (
-                              <button
-                                onClick={() => handleUpdateQueueStatus(item.id, 'COLLECTED')}
-                                className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-black text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
-                              >
-                                <span>Handover</span>
-                              </button>
-                            )}
-
-                            <button
-                              onClick={() => handleUpdateQueueStatus(item.id, 'QUEUED')}
-                              className="p-1.5 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                              title="Reprint Spool"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: ORDER MANAGEMENT & DIGITAL RECEIPTS                                */}
+        {/* TAB 2: ORDER MANAGEMENT & DIGITAL RECEIPTS                                */}
         {/* ========================================================================= */}
         {activeTab === 'ORDERS' && (
           <div className="space-y-6">
@@ -2009,242 +1647,7 @@ export default function SuperAdminDashboard() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 6: INVENTORY & STOCK TRACKING                                         */}
-        {/* ========================================================================= */}
-        {activeTab === 'INVENTORY' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit']">
-                  Shop Supplies & Paper Inventory
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Track physical paper reams, toner cartridges, ink bottles, and binding materials with low-stock warnings.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>2 Items Below Threshold</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Inventory Table */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
-                      <th className="pb-3 px-3">Item & Specification</th>
-                      <th className="pb-3 px-3">Category</th>
-                      <th className="pb-3 px-3">Stock Level</th>
-                      <th className="pb-3 px-3">Wholesale Cost</th>
-                      <th className="pb-3 px-3">Supplier</th>
-                      <th className="pb-3 px-3 text-center">Status</th>
-                      <th className="pb-3 px-3 text-right">Adjust Stock</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {inventory.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-400">
-                          <Package className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                          <div className="font-semibold text-slate-700 text-sm">No Supply Inventory Items Added</div>
-                          <div className="text-xs text-slate-400 mt-1">
-                            Paper reams, cartridges, and binding stock will appear here when tracked.
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      inventory.map((item) => (
-                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
-                          <td className="py-4 px-3">
-                            <div className="font-bold text-slate-900 text-xs">{item.name}</div>
-                            <div className="text-[10px] text-slate-400">{item.unit}</div>
-                          </td>
-
-                          <td className="py-4 px-3">
-                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium">
-                              {item.category}
-                            </span>
-                          </td>
-
-                          <td className="py-4 px-3">
-                            <div className="font-bold text-slate-900 text-sm">
-                              {item.stock} <span className="text-[10px] text-slate-500 font-normal">units</span>
-                            </div>
-                            <div className="text-[10px] text-slate-400">Alert at: {item.threshold}</div>
-                          </td>
-
-                          <td className="py-4 px-3">
-                            <span className="font-mono font-bold text-slate-800">
-                              ₹{item.purchasePrice}
-                            </span>
-                          </td>
-
-                          <td className="py-4 px-3 text-slate-600 text-xs">
-                            {item.supplier}
-                          </td>
-
-                          <td className="py-4 px-3 text-center">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                item.status === 'NORMAL'
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  : item.status === 'LOW'
-                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                  : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </td>
-
-                          <td className="py-4 px-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => handleAdjustStock(item.id, -1)}
-                                className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs cursor-pointer"
-                                title="Used 1 unit"
-                              >
-                                -
-                              </button>
-                              <span className="w-6 text-center font-bold text-slate-800">{item.stock}</span>
-                              <button
-                                onClick={() => handleAdjustStock(item.id, 1)}
-                                className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs cursor-pointer"
-                                title="Restocked +1 unit"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 7: CUSTOMER CRM DIRECTORY                                             */}
-        {/* ========================================================================= */}
-        {activeTab === 'CUSTOMERS' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit']">
-                  Customer Profiles & Loyalty CRM
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Registered customer contacts, lifetime printing spend, frequency, and WhatsApp outreach.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-600">Total Customers: </span>
-                <span className="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 font-mono font-bold text-xs">
-                  {customers.length}
-                </span>
-              </div>
-            </div>
-
-            {customers.length === 0 ? (
-              <div className="p-12 text-center text-slate-400 bg-white rounded-3xl border border-blue-100 shadow-sm">
-                <Users className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                <div className="font-semibold text-slate-700 text-sm">No Customer CRM Records Yet</div>
-                <div className="text-xs text-slate-400 mt-1">
-                  Customer profiles and lifetime spending will be tracked automatically as customers place print orders.
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {customers.map((cust) => (
-                  <div
-                    key={cust.id}
-                    className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                            {cust.name.slice(0, 2).toUpperCase()}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-sm">{cust.name}</h3>
-                            <span className="text-[10px] text-slate-400 font-mono">{cust.phone}</span>
-                          </div>
-                        </div>
-
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            cust.tier.includes('Gold')
-                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                              : 'bg-blue-50 text-blue-700 border border-blue-200'
-                          }`}
-                        >
-                          {cust.tier}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 my-3 p-3 rounded-2xl bg-slate-50 text-xs">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block">Total Orders</span>
-                          <strong className="text-slate-800 text-sm">{cust.totalOrders} prints</strong>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block">Lifetime Spend</span>
-                          <strong className="text-emerald-600 text-sm">₹{cust.totalSpend.toFixed(2)}</strong>
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] text-slate-600 space-y-1">
-                        <div>
-                          <span className="text-slate-400">Favorite: </span>
-                          <span className="font-medium text-slate-800">{cust.favoriteService}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Last visit: </span>
-                          <span className="font-medium text-slate-800">{cust.lastOrder}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <a
-                        href={`https://wa.me/91${cust.phone}?text=Hello%20${encodeURIComponent(
-                          cust.name
-                        )},%20your%20print%20order%20from%20PRINTX%20is%20ready!`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex-1 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>WhatsApp</span>
-                      </a>
-
-                      <a
-                        href={`tel:${cust.phone}`}
-                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
-                        title="Call Customer"
-                      >
-                        <Phone className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 8: BUSINESS FINANCIAL REPORTS                                         */}
+        {/* TAB 5: BUSINESS FINANCIAL REPORTS                                         */}
         {/* ========================================================================= */}
         {activeTab === 'REPORTS' && (
           <div className="space-y-6">
