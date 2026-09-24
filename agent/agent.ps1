@@ -132,6 +132,15 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
     $cleanPath = (Resolve-Path $filePath).Path
     
+    # Auto-recover printer to ONLINE if Windows marked it offline
+    try {
+        $wmiPrn = Get-WmiObject -Class Win32_Printer -Filter "Name='$printerName'" -ErrorAction SilentlyContinue
+        if ($wmiPrn -and $wmiPrn.WorkOffline) {
+            $wmiPrn.WorkOffline = $false
+            $wmiPrn.Put() | Out-Null
+        }
+    } catch {}
+
     Write-Host ("[PRINT] Spooling to: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ")") -ForegroundColor Cyan
 
     # A. If Image (.jpg, .jpeg, .png, .bmp, .webp, .gif, .tif, .tiff), use Native .NET PrintDocument
