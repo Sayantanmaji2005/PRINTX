@@ -7,10 +7,10 @@ $Host.UI.RawUI.WindowTitle = "PrintX Shop Printer Connector - Live Hardware Brid
 [Console]::ForegroundColor = [ConsoleColor]::Cyan
 
 Clear-Host
-Write-Host "╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║             PRINTX SHOP DESKTOP PRINTER AGENT              ║" -ForegroundColor Cyan
-Write-Host "║     Automated Hardware Spooler for Xerox Stations (Native) ║" -ForegroundColor Cyan
-Write-Host "╚════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "================================================================" -ForegroundColor Cyan
+Write-Host "             PRINTX SHOP DESKTOP PRINTER AGENT                  " -ForegroundColor Cyan
+Write-Host "     Automated Hardware Spooler for Xerox Stations (Native)     " -ForegroundColor Cyan
+Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -38,17 +38,17 @@ if (Test-Path $configPath) {
         if ($rawConfig.agentName) { $agentName = $rawConfig.agentName }
         if ($rawConfig.preferredPrinter) { $preferredPrinter = $rawConfig.preferredPrinter }
     } catch {
-        Write-Host "⚠️ Warning: Could not parse config.json, using defaults." -ForegroundColor Yellow
+        Write-Host "Warning: Could not parse config.json, using defaults." -ForegroundColor Yellow
     }
 }
 
-Write-Host "📍 Connecting to Server : $serverUrl" -ForegroundColor Green
-Write-Host "🏪 Shop Slug           : $shopSlug" -ForegroundColor Green
-Write-Host "🖥️ Agent Name          : $agentName" -ForegroundColor Green
+Write-Host ("Connecting to Server : " + $serverUrl) -ForegroundColor Green
+Write-Host ("Shop Slug           : " + $shopSlug) -ForegroundColor Green
+Write-Host ("Agent Name          : " + $agentName) -ForegroundColor Green
 Write-Host ""
 
-# Enable TLS 1.2 & 1.3
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
+# Enable TLS 1.2
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 # 2. Function to detect physical printers
 function Get-ShopPrinters {
@@ -74,19 +74,18 @@ function Get-ShopPrinters {
     }
 }
 
-# Display detected printers
 $activePrinters = Get-ShopPrinters
-Write-Host "🖨️ Detected Hardware Printers ($($activePrinters.Count)):" -ForegroundColor Yellow
+Write-Host ("Detected Hardware Printers (" + $activePrinters.Count + "):") -ForegroundColor Yellow
 $defaultPrinter = ""
-$i = 1
+$idx = 1
 foreach ($p in $activePrinters) {
     $tag = if ($p.isOnline) { "ONLINE" } else { "OFFLINE" }
     $def = if ($p.isDefault) { " (DEFAULT / ACTIVE)" } else { "" }
     if ($p.isDefault -and [string]::IsNullOrEmpty($defaultPrinter)) {
         $defaultPrinter = $p.name
     }
-    Write-Host "   $i. [$tag] $($p.name)$def" -ForegroundColor White
-    $i++
+    Write-Host ("   " + $idx + ". [" + $tag + "] " + $p.name + $def) -ForegroundColor White
+    $idx++
 }
 
 if ([string]::IsNullOrEmpty($defaultPrinter) -and $activePrinters.Count -gt 0) {
@@ -98,8 +97,9 @@ if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
 }
 
 Write-Host ""
-Write-Host "🚀 Agent is connected & listening for customer print jobs..." -ForegroundColor Green
-Write-Host "   (Keep this window open on shop computer during working hours)`n" -ForegroundColor Gray
+Write-Host "Agent is connected & listening for customer print jobs..." -ForegroundColor Green
+Write-Host "   (Keep this window open on shop computer during working hours)" -ForegroundColor Gray
+Write-Host ""
 
 # 3. Heartbeat Function
 function Send-Heartbeat {
@@ -114,7 +114,7 @@ function Send-Heartbeat {
             printers = $currentPrinters
         } | ConvertTo-Json -Depth 4
 
-        $res = Invoke-RestMethod -Uri "$serverUrl/api/agent/heartbeat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue
+        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/heartbeat") -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
     } catch {
         # Silent retry
     }
@@ -122,12 +122,16 @@ function Send-Heartbeat {
 
 # 4. Silent Print Spooling Function
 function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfig) {
-    Write-Host "🖨️ Spooling to printer: `"$printerName`" (Copies: $($printConfig.copies), Mode: $($printConfig.colorMode), Duplex: $($printConfig.printSide))" -ForegroundColor Cyan
+    $copies = if ($printConfig.copies) { $printConfig.copies } else { 1 }
+    $mode = if ($printConfig.colorMode) { $printConfig.colorMode } else { "BW" }
+    $side = if ($printConfig.printSide) { $printConfig.printSide } else { "SINGLE" }
+    
+    Write-Host ("Spooling to printer: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ")") -ForegroundColor Cyan
     try {
         $cleanPrinter = $printerName.Replace('"', '""')
         $cleanPath = (Resolve-Path $filePath).Path.Replace("'", "''")
 
-        $proc = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "`"$cleanPrinter`"" -PassThru -WindowStyle Hidden
+        $proc = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList ('"' + $cleanPrinter + '"') -PassThru -WindowStyle Hidden
         Start-Sleep -Seconds 4
         if ($proc -and !$proc.HasExited) {
             $proc.Kill()
@@ -138,7 +142,6 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     }
 }
 
-# Send Initial Heartbeat
 Send-Heartbeat
 
 $lastHeartbeat = [DateTime]::UtcNow
@@ -147,15 +150,13 @@ $processedJobs = @{}
 # 5. Main Job Polling Loop
 while ($true) {
     try {
-        # Check Heartbeat Interval
         if (([DateTime]::UtcNow - $lastHeartbeat).TotalSeconds -ge $heartbeatIntervalSec) {
             Send-Heartbeat
             $lastHeartbeat = [DateTime]::UtcNow
         }
 
-        # Poll Paid Print Jobs
         $encodedSlug = [System.Uri]::EscapeDataString($shopSlug)
-        $jobsResponse = Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs?shopSlug=$encodedSlug" -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
+        $jobsResponse = Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs?shopSlug=" + $encodedSlug) -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
 
         $jobs = if ($jobsResponse.data) { $jobsResponse.data } else { $jobsResponse }
 
@@ -168,49 +169,47 @@ while ($true) {
 
                     Write-Host ""
                     Write-Host "======================================================" -ForegroundColor Magenta
-                    Write-Host "🔔 NEW PAID PRINT ORDER RECEIVED: $($job.orderNumber)" -ForegroundColor Yellow
-                    Write-Host "📄 Document: $($job.documentName)" -ForegroundColor White
-                    Write-Host "⚙️ Config: $($job.config.copies) Copies | $($job.config.colorMode) | $($job.config.printSide)" -ForegroundColor Gray
+                    Write-Host ("NEW PAID PRINT ORDER RECEIVED: " + $job.orderNumber) -ForegroundColor Yellow
+                    Write-Host ("Document: " + $job.documentName) -ForegroundColor White
+                    Write-Host ("Config: " + $job.config.copies + " Copies | " + $job.config.colorMode + " | " + $job.config.printSide) -ForegroundColor Gray
                     Write-Host "======================================================" -ForegroundColor Magenta
 
                     try {
-                        # A. Mark PRINTING
                         $statusBody = @{
                             orderNumber = $job.orderNumber
                             status = "PRINTING"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        # B. Download PDF
-                        $localPdf = Join-Path $tempDir "$($job.orderNumber)_$($job.fileKey)"
-                        Write-Host "📥 Downloading customer document from cloud..." -ForegroundColor Cyan
+                        $localPdf = Join-Path $tempDir ($job.orderNumber + "_" + $job.fileKey)
+                        Write-Host "Downloading customer document from cloud..." -ForegroundColor Cyan
                         
-                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { "$serverUrl$($job.downloadUrl)" }
+                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { $serverUrl + $job.downloadUrl }
                         Invoke-WebRequest -Uri $downloadUri -OutFile $localPdf -TimeoutSec 30
 
-                        # C. Send to Physical Printer
                         if ($autoPrint) {
                             Invoke-SilentPrint -filePath $localPdf -printerName $defaultPrinter -printConfig $job.config
                         }
 
-                        # D. Mark PRINTED
                         $doneBody = @{
                             orderNumber = $job.orderNumber
                             status = "PRINTED"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        Write-Host "✅ [ORDER $($job.orderNumber)] PRINT COMPLETED SUCCESSFULLY!`n" -ForegroundColor Green
+                        Write-Host ("ORDER " + $job.orderNumber + " PRINT COMPLETED SUCCESSFULLY!") -ForegroundColor Green
+                        Write-Host ""
                     } catch {
-                        Write-Host "❌ [ORDER $($job.orderNumber)] Print failed: $($_.Exception.Message)" -ForegroundColor Red
+                        $errText = $_.Exception.Message
+                        Write-Host ("ORDER " + $job.orderNumber + " Print failed: " + $errText) -ForegroundColor Red
                     }
                 }
             }
         }
     } catch {
-        # Continue loop on network glitch
+        # Continue loop
     }
 
     Start-Sleep -Seconds $pollIntervalSec
