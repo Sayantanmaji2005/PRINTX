@@ -301,6 +301,35 @@ export default function ShopCustomerPage() {
     );
   }
 
+  if (shop && (shop.status === 'SUSPENDED' || shop.status === 'INACTIVE')) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/70 via-slate-50 to-white text-slate-800 text-center font-sans">
+        <div className="w-16 h-16 rounded-3xl bg-amber-100 border border-amber-300 flex items-center justify-center mb-4 text-amber-700 shadow-xl shadow-amber-500/10">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-wider mb-2 border border-amber-200">
+          Subscription Inactive
+        </span>
+        <h2 className="text-2xl font-extrabold text-slate-900 font-['Outfit']">{shop.name}</h2>
+        <p className="text-xs text-slate-600 mt-2 max-w-md leading-relaxed">
+          This Xerox counter's <strong>PRINTX Software Subscription (₹299/mo)</strong> is currently expired or paused.
+          Please inform the shop counter staff to recharge their PRINTX software license to enable customer QR printing.
+        </p>
+
+        <div className="mt-6 p-4 rounded-2xl bg-white border border-slate-200 max-w-sm w-full text-xs text-left shadow-xs space-y-1.5">
+          <div className="font-bold text-slate-800">Counter Information:</div>
+          <div className="text-slate-600">Location: {shop.address || 'Dingal 4 No Canel Road'}</div>
+          {shop.owner?.phone && (
+            <div className="text-slate-600">Phone: {shop.owner.phone}</div>
+          )}
+          <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+            Powered by PRINTX SaaS Platform
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/70 via-slate-50 to-white text-slate-900 relative overflow-hidden">
       {/* Decorative ambient glowing orbs */}

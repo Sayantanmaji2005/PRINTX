@@ -342,6 +342,36 @@ export default function SuperAdminDashboard() {
     }
   };
 
+  const handleToggleShopStatus = async (shopId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    try {
+      await apiRequest(`/admin/shops/${shopId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update shop status');
+    }
+  };
+
+  const handleRechargeShop = async (shopId: string) => {
+    try {
+      await apiRequest(`/admin/shops/${shopId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'ACTIVE' }),
+      });
+      const expMap = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('printx_shop_subscriptions') || '{}') : {};
+      expMap[shopId] = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('printx_shop_subscriptions', JSON.stringify(expMap));
+      }
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to recharge shop');
+    }
+  };
+
   const handleSaveRates = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('printx_custom_rates', JSON.stringify(pricingRates));
@@ -699,114 +729,117 @@ export default function SuperAdminDashboard() {
         {/* ========================================================================= */}
         {activeTab === 'OVERVIEW' && (
           <div className="space-y-6">
-            {/* Hero Banner with Soft Visual Gradient matching prompt */}
+            {/* Hero Banner for SaaS Platform Owner (Sayantan Maji) */}
             <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 text-white shadow-xl shadow-blue-500/15 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-                <div className="max-w-xl">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white uppercase tracking-wider backdrop-blur-sm">
-                      Commercial OS v2.0
+                      PRINTX SaaS Master Controller
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
+                      Standard Plan: ₹299 / Month / Shop
                     </span>
                     <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-semibold">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      Live Socket Connected
+                      Direct UPI Routing Active
                     </span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold font-['Outfit']">
-                    Welcome to PRINTX Shop Hub
+                    PRINTX Platform & Xerox Software Hub
                   </h1>
                   <p className="text-xs text-blue-100 mt-1.5 leading-relaxed">
-                    Connected Xerox Shop: <strong>Dingal 4 No Canel Road</strong>. Automated print spooling, live UPI payments, cloud queue management, and printer telemetry active.
+                    Platform Owner: <strong>Sayantan Maji</strong>. Selling automated counter software to Xerox shops. <strong>100% of customer print money transfers directly to the Shop Owner's UPI</strong>. Platform earns <strong>₹299/month</strong> per active shop subscription. Unpaid shops are auto-locked.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0">
                   <button
-                    onClick={() => setActiveTab('PRINT_QUEUE')}
+                    onClick={() => setShowAddModal(true)}
                     className="px-4 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-blue-50 text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
                   >
-                    <Printer className="w-4 h-4 text-blue-600" />
-                    <span>Open Print Queue</span>
+                    <Plus className="w-4 h-4 text-blue-600" />
+                    <span>Onboard New Shop</span>
                   </button>
                   <button
                     onClick={handleExportCSV}
                     className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center gap-2 backdrop-blur-md cursor-pointer"
                   >
                     <FileSpreadsheet className="w-4 h-4" />
-                    <span>Export CSV</span>
+                    <span>Export Data</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 5-Metric Master Stats Grid */}
+            {/* 5-Metric Master Stats Grid (SaaS Platform Model) */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
               <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Total Shops</span>
+                  <span className="text-xs font-semibold">Partner Shops</span>
                   <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                     <Store className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalShops || data?.totalShops || (data?.recentShops?.length || 1)}
+                  {data?.recentShops?.length || data?.totalShops || 1}
                 </div>
-                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">
-                  {data?.metrics?.activeShops || data?.activeShops || (data?.recentShops?.length || 1)} Active Stations
+                <span className="text-[11px] text-blue-600 font-medium mt-1 block">
+                  Onboarded Stations
                 </span>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Customers</span>
-                  <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                    <Users className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalCustomerSessions || data?.totalCustomerSessions || customers.length || 0}
-                </div>
-                <span className="text-[11px] text-indigo-600 font-medium mt-1 block">QR Guest Scans</span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Pages Printed</span>
-                  <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalPagesPrinted || (data?.recentOrders || []).reduce((acc: number, o: any) => acc + ((o.document?.pageCount || 1) * (o.configuration?.copies || 1)), 0)}
-                </div>
-                <span className="text-[11px] text-amber-600 font-medium mt-1 block">Automated sheets</span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Platform Revenue</span>
+                  <span className="text-xs font-semibold">Active Subscriptions</span>
                   <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
+                  {(data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 1}
+                </div>
+                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">₹299/mo Recharged</span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+                <div className="flex items-center justify-between text-slate-500 mb-2">
+                  <span className="text-xs font-semibold">Platform SaaS MRR</span>
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
                     <DollarSign className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-indigo-700">
+                  ₹{(((data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 1) * 299).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[11px] text-indigo-600 font-medium mt-1 block">₹299/shop Recurring</span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+                <div className="flex items-center justify-between text-slate-500 mb-2">
+                  <span className="text-xs font-semibold">Shopkeeper UPI GMV</span>
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Zap className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
                   ₹{(data?.metrics?.totalRevenue !== undefined ? data?.metrics?.totalRevenue : (data?.revenueAggregation?._sum?.total || 0)).toLocaleString('en-IN')}
                 </div>
-                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">UPI Settlements</span>
+                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">100% Direct to Shop UPI</span>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all col-span-2 md:col-span-1">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Printers Online</span>
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <Activity className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Live QR Standees</span>
+                  <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                    <QrCode className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
-                  {data?.metrics?.activePrinters || printers.filter(p => p.status === 'ONLINE' || p.status === 'PRINTING').length || 1}
+                <div className="text-2xl sm:text-3xl font-extrabold text-purple-700">
+                  {data?.recentShops?.length || 1}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1 block">Ready hardware</span>
+                <span className="text-[11px] text-slate-500 mt-1 block">Encrypted Counters</span>
               </div>
             </div>
 
@@ -902,11 +935,11 @@ export default function SuperAdminDashboard() {
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
-                        <th className="pb-3 px-3">Xerox Station</th>
-                        <th className="pb-3 px-3">Owner & Contact</th>
-                        <th className="pb-3 px-3">UPI ID</th>
-                        <th className="pb-3 px-3 text-center">Status</th>
-                        <th className="pb-3 px-3 text-right">Actions</th>
+                        <th className="pb-3 px-3">Xerox Station & Counter</th>
+                        <th className="pb-3 px-3">Shop Owner & Contact</th>
+                        <th className="pb-3 px-3">Direct UPI ID (100% to Shop)</th>
+                        <th className="pb-3 px-3 text-center">₹299/mo Plan Status</th>
+                        <th className="pb-3 px-3 text-right">SaaS & Standee Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -921,61 +954,103 @@ export default function SuperAdminDashboard() {
                           </td>
 
                           <td className="py-4 px-3">
-                            <div className="text-slate-800 font-semibold">{shop.ownerName}</div>
+                            <div className="text-slate-800 font-semibold">{shop.ownerName || shop.owner?.name || 'Shop Owner'}</div>
                             <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                               <Phone className="w-3 h-3 text-slate-400" />
-                              <span>{shop.ownerPhone || 'N/A'}</span>
+                              <span>{shop.ownerPhone || shop.owner?.phone || 'N/A'}</span>
                             </div>
                           </td>
 
                           <td className="py-4 px-3">
-                            <span className="font-mono text-[11px] px-2 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 font-medium">
-                              {shop.upiId || '9002761536@axl'}
-                            </span>
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
+                                {shop.upiId || '9002761536@axl'}
+                              </span>
+                              <span className="text-[10px] text-emerald-600 font-medium">100% Print Money Direct</span>
+                            </div>
                           </td>
 
                           <td className="py-4 px-3 text-center">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                shop.status === 'ACTIVE'
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
-                              }`}
-                            >
+                            <div className="flex flex-col items-center gap-1">
                               <span
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  shop.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                  shop.status === 'ACTIVE'
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
                                 }`}
-                              />
-                              {shop.status}
-                            </span>
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    shop.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'
+                                  }`}
+                                />
+                                {shop.status === 'ACTIVE' ? 'ACTIVE (Recharged)' : 'SUSPENDED (Locked)'}
+                              </span>
+                              <span className="text-[10px] text-slate-400">₹299/mo Plan</span>
+                            </div>
                           </td>
 
                           <td className="py-4 px-3 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                              {/* 1-Click Recharge 30 Days Button */}
                               <button
-                                onClick={() => setSelectedPrinterShop(shop)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold text-xs transition-colors cursor-pointer"
-                                title="Hardware Printer Auto-Connect"
+                                onClick={() => handleRechargeShop(shop.id)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                                title="Recharge ₹299 (Add 30 Days Live Access)"
                               >
-                                <Printer className="w-3.5 h-3.5" />
-                                <span>Agent Bridge</span>
+                                <Zap className="w-3.5 h-3.5" />
+                                <span>Recharge ₹299</span>
                               </button>
 
+                              {/* Toggle Lock / Suspend Button */}
+                              <button
+                                onClick={() => handleToggleShopStatus(shop.id, shop.status)}
+                                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                                  shop.status === 'ACTIVE'
+                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
+                                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                                }`}
+                                title={shop.status === 'ACTIVE' ? 'Suspend & Lock QR' : 'Reactivate Shop'}
+                              >
+                                {shop.status === 'ACTIVE' ? (
+                                  <>
+                                    <Pause className="w-3.5 h-3.5" />
+                                    <span>Lock QR</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Play className="w-3.5 h-3.5" />
+                                    <span>Unlock QR</span>
+                                  </>
+                                )}
+                              </button>
+
+                              {/* Standee QR Link */}
                               <Link
                                 href={`/standee?slug=${shop.slug}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
+                                title="View Counter Standee QR"
                               >
                                 <QrCode className="w-3.5 h-3.5" />
-                                <span>Standee (Print A4)</span>
+                                <span>Standee</span>
                               </Link>
 
+                              {/* Hardware Agent */}
+                              <button
+                                onClick={() => setSelectedPrinterShop(shop)}
+                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                title="Hardware Printer Bridge (Agent)"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                              </button>
+
+                              {/* Customer Portal */}
                               <a
-                                href={`${process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://printx-customer.vercel.app'}/shop/${shop.slug}`}
+                                href={`https://printx-customer.vercel.app/shop/${shop.slug}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"
-                                title="Open Customer Portal"
+                                title="Open Live Customer Portal"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </a>
@@ -2427,49 +2502,49 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
-              {/* Staff Role-Based Permissions Matrix */}
+              {/* SaaS Platform Business Architecture & Revenue Model */}
               <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
                 <h3 className="font-bold text-slate-900 text-sm font-['Outfit']">
-                  Staff Role-Based Permissions
+                  PRINTX SaaS Business & Revenue Architecture
                 </h3>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="p-3 rounded-2xl bg-blue-50/60 border border-blue-200/60 flex items-start gap-3">
+                  <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-start gap-3">
                     <Shield className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-blue-950 block">OWNER (Sayantan Maji)</strong>
-                      <span className="text-[11px] text-blue-800">
-                        Full platform authority: delete shops, alter prices, withdraw revenue, staff management.
+                      <strong className="text-blue-950 block">Platform Owner & SuperAdmin (Sayantan Maji)</strong>
+                      <span className="text-[11px] text-blue-800 leading-relaxed block mt-0.5">
+                        You control the SaaS software platform, onboard partner Xerox shops, issue encrypted counter QR standees, and collect monthly recurring subscription revenue.
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-                    <Users className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
+                    <Zap className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900 block">MANAGER</strong>
-                      <span className="text-[11px] text-slate-500">
-                        Order management, printer fleet diagnostics, business reports, inventory adjustments.
+                      <strong className="text-emerald-950 block">100% Direct Customer UPI Payment to Shopkeeper</strong>
+                      <span className="text-[11px] text-emerald-800 leading-relaxed block mt-0.5">
+                        Customer payments for printouts, Xerox, photos, and scans go directly into the individual shop owner's registered UPI VPA. Platform does not touch their print cash.
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-                    <Printer className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-start gap-3">
+                    <DollarSign className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900 block">OPERATOR (Print Spooler)</strong>
-                      <span className="text-[11px] text-slate-500">
-                        Print Queue execution, start/pause jobs, reprint spools, hardware diagnostics.
+                      <strong className="text-purple-950 block">Platform Revenue Model: ₹299 / Month / Shop</strong>
+                      <span className="text-[11px] text-purple-800 leading-relaxed block mt-0.5">
+                        Your revenue comes from charging each Xerox shop <strong>₹299/month</strong> to use the PRINTX software, counter QR standees, and auto-print hardware agents.
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-                    <Store className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-start gap-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900 block">COUNTER_STAFF</strong>
-                      <span className="text-[11px] text-slate-500">
-                        Handover pickup, customer queries, cash/UPI receipt generation.
+                      <strong className="text-amber-950 block">Encrypted QR Standee Gate & Auto-Lock</strong>
+                      <span className="text-[11px] text-amber-800 leading-relaxed block mt-0.5">
+                        When a shop recharges (₹299/mo), their encrypted QR standee and customer web shop are live. If the recharge expires or is suspended, their standee is immediately locked.
                       </span>
                     </div>
                   </div>
