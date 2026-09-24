@@ -1,44 +1,4 @@
-import JSZip from 'jszip';
-
-export async function downloadAgentZip(shop: { name: string; slug: string }) {
-  const zip = new JSZip();
-
-  const configJson = JSON.stringify(
-    {
-      serverUrl: 'https://printx-cib8.onrender.com',
-      shopSlug: shop.slug,
-      agentName: `${shop.name} Counter PC`,
-      pollIntervalMs: 3000,
-      heartbeatIntervalMs: 10000,
-      autoPrint: true,
-      preferredPrinter: '',
-    },
-    null,
-    2
-  );
-
-  const startBat = `@echo off
-title PrintX Shop Printer Agent - Live Hardware Bridge
-color 0B
-cls
-cd /d "%~dp0"
-
-echo ======================================================================
-echo             PRINTX AUTOMATED PRINTER CONNECTOR AGENT
-echo                  Shop: ${shop.name}
-echo               Zero Setup - Pure Native Windows
-echo ======================================================================
-echo.
-
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent.ps1"
-if %errorlevel% neq 0 (
-    echo.
-    echo Press any key to retry or exit...
-    pause
-)
-`;
-
-  const agentPs1 = `# =====================================================================
+# =====================================================================
 #             PRINTX SHOP NATIVE DESKTOP PRINTER AGENT
 #  Pure Native Windows PowerShell - Zero Software/Node Installation!
 # =====================================================================
@@ -63,8 +23,8 @@ if (!(Test-Path $tempDir)) {
 
 # 1. Load Configuration
 $serverUrl = "https://printx-cib8.onrender.com"
-$shopSlug = "${shop.slug}"
-$agentName = "${shop.name} Counter PC"
+$shopSlug = "printx-shop"
+$agentName = "Shop Counter PC"
 $pollIntervalSec = 3
 $heartbeatIntervalSec = 10
 $autoPrint = $true
@@ -114,6 +74,7 @@ function Get-ShopPrinters {
     }
 }
 
+# Display detected printers
 $activePrinters = Get-ShopPrinters
 Write-Host "🖨️ Detected Hardware Printers ($($activePrinters.Count)):" -ForegroundColor Yellow
 $defaultPrinter = ""
@@ -138,7 +99,7 @@ if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
 
 Write-Host ""
 Write-Host "🚀 Agent is connected & listening for customer print jobs..." -ForegroundColor Green
-Write-Host "   (Keep this window open on shop computer during working hours)\`n" -ForegroundColor Gray
+Write-Host "   (Keep this window open on shop computer during working hours)`n" -ForegroundColor Gray
 
 # 3. Heartbeat Function
 function Send-Heartbeat {
@@ -153,7 +114,7 @@ function Send-Heartbeat {
             printers = $currentPrinters
         } | ConvertTo-Json -Depth 4
 
-        Invoke-RestMethod -Uri "$serverUrl/api/agent/heartbeat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
+        $res = Invoke-RestMethod -Uri "$serverUrl/api/agent/heartbeat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue
     } catch {
         # Silent retry
     }
@@ -161,12 +122,12 @@ function Send-Heartbeat {
 
 # 4. Silent Print Spooling Function
 function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfig) {
-    Write-Host "🖨️ Spooling to printer: \`"$printerName\`" (Copies: $($printConfig.copies), Mode: $($printConfig.colorMode), Duplex: $($printConfig.printSide))" -ForegroundColor Cyan
+    Write-Host "🖨️ Spooling to printer: `"$printerName`" (Copies: $($printConfig.copies), Mode: $($printConfig.colorMode), Duplex: $($printConfig.printSide))" -ForegroundColor Cyan
     try {
         $cleanPrinter = $printerName.Replace('"', '""')
         $cleanPath = (Resolve-Path $filePath).Path.Replace("'", "''")
 
-        $proc = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "\`"$cleanPrinter\`"" -PassThru -WindowStyle Hidden
+        $proc = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "`"$cleanPrinter`"" -PassThru -WindowStyle Hidden
         Start-Sleep -Seconds 4
         if ($proc -and !$proc.HasExited) {
             $proc.Kill()
@@ -177,6 +138,7 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     }
 }
 
+# Send Initial Heartbeat
 Send-Heartbeat
 
 $lastHeartbeat = [DateTime]::UtcNow
@@ -185,11 +147,13 @@ $processedJobs = @{}
 # 5. Main Job Polling Loop
 while ($true) {
     try {
+        # Check Heartbeat Interval
         if (([DateTime]::UtcNow - $lastHeartbeat).TotalSeconds -ge $heartbeatIntervalSec) {
             Send-Heartbeat
             $lastHeartbeat = [DateTime]::UtcNow
         }
 
+        # Poll Paid Print Jobs
         $encodedSlug = [System.Uri]::EscapeDataString($shopSlug)
         $jobsResponse = Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs?shopSlug=$encodedSlug" -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
 
@@ -210,6 +174,7 @@ while ($true) {
                     Write-Host "======================================================" -ForegroundColor Magenta
 
                     try {
+                        # A. Mark PRINTING
                         $statusBody = @{
                             orderNumber = $job.orderNumber
                             status = "PRINTING"
@@ -217,16 +182,19 @@ while ($true) {
                         } | ConvertTo-Json
                         Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
+                        # B. Download PDF
                         $localPdf = Join-Path $tempDir "$($job.orderNumber)_$($job.fileKey)"
                         Write-Host "📥 Downloading customer document from cloud..." -ForegroundColor Cyan
                         
                         $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { "$serverUrl$($job.downloadUrl)" }
                         Invoke-WebRequest -Uri $downloadUri -OutFile $localPdf -TimeoutSec 30
 
+                        # C. Send to Physical Printer
                         if ($autoPrint) {
                             Invoke-SilentPrint -filePath $localPdf -printerName $defaultPrinter -printConfig $job.config
                         }
 
+                        # D. Mark PRINTED
                         $doneBody = @{
                             orderNumber = $job.orderNumber
                             status = "PRINTED"
@@ -234,7 +202,7 @@ while ($true) {
                         } | ConvertTo-Json
                         Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        Write-Host "✅ [ORDER $($job.orderNumber)] PRINT COMPLETED SUCCESSFULLY!\`n" -ForegroundColor Green
+                        Write-Host "✅ [ORDER $($job.orderNumber)] PRINT COMPLETED SUCCESSFULLY!`n" -ForegroundColor Green
                     } catch {
                         Write-Host "❌ [ORDER $($job.orderNumber)] Print failed: $($_.Exception.Message)" -ForegroundColor Red
                     }
@@ -242,40 +210,8 @@ while ($true) {
             }
         }
     } catch {
-        # Continue loop
+        # Continue loop on network glitch
     }
 
     Start-Sleep -Seconds $pollIntervalSec
-}
-`;
-
-  const readmeTxt = `=======================================================
-          PRINTX SHOP PRINTER CONNECTOR AGENT
-=======================================================
-
-SHOP NAME : ${shop.name}
-SHOP SLUG : ${shop.slug}
-
-QUICK SETUP (NO SOFTWARE INSTALLATION NEEDED):
-----------------------------------------------
-1. Right-click this ZIP file and choose "Extract All..." to extract files to Desktop.
-2. Double-click "start-agent.bat".
-3. That's it! It automatically detects your Canon / HP / Epson printer and connects to the cloud.
-
-When a customer scans your QR standee and pays, prints will come out automatically!
-=======================================================
-`;
-
-  zip.file('start-agent.bat', startBat);
-  zip.file('agent.ps1', agentPs1);
-  zip.file('config.json', configJson);
-  zip.file('README.txt', readmeTxt);
-
-  const content = await zip.generateAsync({ type: 'blob' });
-  const downloadUrl = URL.createObjectURL(content);
-  const a = document.createElement('a');
-  a.href = downloadUrl;
-  a.download = `printx-agent-${shop.slug}.zip`;
-  a.click();
-  URL.revokeObjectURL(downloadUrl);
 }
