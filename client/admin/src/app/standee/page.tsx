@@ -9,6 +9,7 @@ function StandeeContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug') || 'printx-shop';
   const [shop, setShop] = useState<any>(null);
+  const [useLocalWifi, setUseLocalWifi] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -19,14 +20,16 @@ function StandeeContent() {
       .catch((err) => console.error(err));
   }, [slug]);
 
-  const customerBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://no1printx.netlify.app';
-  const customerUrl = `${customerBaseUrl}/shop/${slug}`;
+  const cloudBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://no1printx.netlify.app';
+  const localBaseUrl = 'http://192.168.0.103:3000';
+  const activeBaseUrl = useLocalWifi ? localBaseUrl : cloudBaseUrl;
+  const customerUrl = `${activeBaseUrl}/shop/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(customerUrl)}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/80 via-slate-50 to-white p-6 flex flex-col items-center justify-center print:p-0 print:bg-white text-slate-900">
       {/* Top Actions (hidden during print) */}
-      <div className="mb-6 flex items-center gap-3 print:hidden">
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-3 print:hidden">
         <Link
           href="/"
           className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 border border-slate-200 shadow-xs transition-colors"
@@ -34,6 +37,32 @@ function StandeeContent() {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
         </Link>
+
+        {/* QR Source Mode Selector */}
+        <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setUseLocalWifi(false)}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              !useLocalWifi
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Cloud (Netlify)
+          </button>
+          <button
+            type="button"
+            onClick={() => setUseLocalWifi(true)}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              useLocalWifi
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Shop Wi-Fi (Local LAN)
+          </button>
+        </div>
 
         <button
           onClick={() => window.print()}
@@ -71,12 +100,17 @@ function StandeeContent() {
         </div>
 
         {/* QR Code Container */}
-        <div className="p-4 bg-white border-2 border-slate-900 rounded-2xl shadow-inner mb-4">
+        <div className="p-4 bg-white border-2 border-slate-900 rounded-2xl shadow-inner mb-2">
           <img
             src={qrUrl}
             alt="PrintX Shop QR"
             className="w-56 h-56 object-contain"
           />
+        </div>
+
+        {/* Direct Link Caption */}
+        <div className="mb-4 text-[11px] font-mono text-slate-500 font-semibold max-w-xs break-all bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+          {customerUrl}
         </div>
 
         {/* 3 Steps Badge */}
