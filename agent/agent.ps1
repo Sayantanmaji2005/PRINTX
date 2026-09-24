@@ -181,6 +181,7 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
                 return
             } catch {
                 Write-Host ("[ERROR] Image spool error: " + $_.Exception.Message) -ForegroundColor Red
+                return
             }
         }
     }

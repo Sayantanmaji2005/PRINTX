@@ -4,23 +4,19 @@ color 0B
 cls
 cd /d "%~dp0"
 
-:loop
 echo ======================================================================
 echo             PRINTX AUTOMATED PRINTER CONNECTOR AGENT
 echo                   Zero Setup - Auto Hardware Bridge
 echo ======================================================================
 echo.
 
-where node >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
-    if exist "%~dp0agent.js" (
-        echo [LAUNCH] Node.js runtime detected. Starting high-speed engine...
-        node "%~dp0agent.js"
-        goto restart_prompt
-    )
+:: Clean up any duplicate background PowerShell agent processes for this script
+for /f "tokens=2" %%i in ('wmic process where "name='powershell.exe' and commandline like '%%agent.ps1%%'" get ProcessId 2^>nul ^| findstr /r "[0-9]"') do (
+    taskkill /PID %%i /F >nul 2>nul
 )
 
-echo [LAUNCH] Starting native Windows printer connector...
+:loop
+echo [LAUNCH] Starting native Windows printer hardware bridge...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent.ps1"
 
 :restart_prompt
