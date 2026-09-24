@@ -221,21 +221,26 @@ $doc = New-Object System.Drawing.Printing.PrintDocument;
 $doc.PrinterSettings.PrinterName = '${safePrinter}';
 $doc.PrinterSettings.Copies = ${copies};
 $doc.DefaultPageSettings.Color = ${isColor ? '$true' : '$false'};
-$img = [System.Drawing.Image]::FromFile('${safePath}');
+$script:img = [System.Drawing.Image]::FromFile('${safePath}');
 $doc.add_PrintPage({
   param($s, $e);
-  $b = $e.MarginBounds;
-  $scale = [Math]::Min($b.Width / $img.Width, $b.Height / $img.Height);
-  $w = [int]($img.Width * $scale);
-  $h = [int]($img.Height * $scale);
-  $x = $b.X + [int](($b.Width - $w) / 2);
-  $y = $b.Y + [int](($b.Height - $h) / 2);
-  $e.Graphics.DrawImage($img, $x, $y, $w, $h);
+  if ($script:img) {
+    $b = $e.MarginBounds;
+    $scale = [Math]::Min($b.Width / $script:img.Width, $b.Height / $script:img.Height);
+    $w = [int]($script:img.Width * $scale);
+    $h = [int]($script:img.Height * $scale);
+    $x = $b.X + [int](($b.Width - $w) / 2);
+    $y = $b.Y + [int](($b.Height - $h) / 2);
+    $e.Graphics.DrawImage($script:img, $x, $y, $w, $h);
+  }
   $e.HasMorePages = $false;
 });
 $doc.Print();
 $doc.Dispose();
-$img.Dispose();
+if ($script:img) {
+  $script:img.Dispose();
+  $script:img = $null;
+}
 `;
         const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
         exec(`powershell -NoProfile -EncodedCommand ${encoded}`, { windowsHide: true }, (err) => {
