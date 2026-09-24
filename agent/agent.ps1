@@ -1,15 +1,13 @@
 # =====================================================================
 #             PRINTX SHOP NATIVE DESKTOP PRINTER AGENT
-#  Pure Native Windows PowerShell - Zero Software/Node Installation!
 # =====================================================================
 
-$Host.UI.RawUI.WindowTitle = "PrintX Shop Printer Connector - Live Hardware Bridge"
-[Console]::ForegroundColor = [ConsoleColor]::Cyan
+$Host.UI.RawUI.WindowTitle = "PrintX Shop Printer Agent"
 
 Clear-Host
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "             PRINTX SHOP DESKTOP PRINTER AGENT                  " -ForegroundColor Cyan
-Write-Host "     Automated Hardware Spooler for Xerox Stations (Native)     " -ForegroundColor Cyan
+Write-Host "             Automated Hardware Spooler (Native)                " -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -20,25 +18,6 @@ $sumatraExe = Join-Path $scriptDir "SumatraPDF.exe"
 
 if (-not (Test-Path $tempDir)) {
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-}
-
-# Auto-initialize standalone silent print engine if needed
-if (-not (Test-Path $sumatraExe)) {
-    try {
-        Write-Host "[SETUP] Initializing high-speed PDF hardware print engine..." -ForegroundColor Cyan
-        $zipPath = Join-Path $scriptDir "sumatra.zip"
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri "https://www.sumatrapdfreader.org/dl/rel/3.6.1/SumatraPDF-3.6.1-64.zip" -OutFile $zipPath -TimeoutSec 30
-        Expand-Archive -Path $zipPath -DestinationPath $scriptDir -Force
-        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
-        $extractedExe = Get-ChildItem (Join-Path $scriptDir "SumatraPDF*.exe") | Select-Object -First 1
-        if ($extractedExe -and $extractedExe.FullName -ne $sumatraExe) {
-            Move-Item $extractedExe.FullName $sumatraExe -Force
-        }
-        Write-Host "[SETUP] Print engine initialized successfully!" -ForegroundColor Green
-    } catch {
-        Write-Host "[SETUP] Using native Windows print engine fallback." -ForegroundColor Yellow
-    }
 }
 
 # 1. Load Configuration
@@ -67,9 +46,6 @@ Write-Host ("[SHOP]   Shop Slug     : " + $shopSlug) -ForegroundColor Green
 Write-Host ("[AGENT]  Agent Name    : " + $agentName) -ForegroundColor Green
 Write-Host ""
 
-# Enable TLS 1.2
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-
 # 2. Function to detect physical printers
 function Get-ShopPrinters {
     try {
@@ -95,40 +71,39 @@ function Get-ShopPrinters {
 }
 
 $activePrinters = Get-ShopPrinters
-    Write-Host ("[HARDWARE] Detected Printers (" + $activePrinters.Count + "):") -ForegroundColor Yellow
-    $defaultPrinter = ""
-    $idx = 1
-    foreach ($p in $activePrinters) {
-        $tag = if ($p.isOnline) { "ONLINE" } else { "OFFLINE" }
-        $def = if ($p.isDefault) { " (DEFAULT / ACTIVE)" } else { "" }
-        if ($p.isDefault -and [string]::IsNullOrEmpty($defaultPrinter)) {
-            $defaultPrinter = $p.name
-        }
-        $color = if ($p.isOnline) { [ConsoleColor]::White } else { [ConsoleColor]::DarkYellow }
-        Write-Host ("   " + $idx + ". [" + $tag + "] " + $p.name + $def) -ForegroundColor $color
-        $idx++
+Write-Host ("[HARDWARE] Detected Printers (" + $activePrinters.Count + "):") -ForegroundColor Yellow
+$defaultPrinter = ""
+$idx = 1
+foreach ($p in $activePrinters) {
+    $tag = if ($p.isOnline) { "ONLINE" } else { "OFFLINE" }
+    $def = if ($p.isDefault) { " (DEFAULT / ACTIVE)" } else { "" }
+    if ($p.isDefault -and [string]::IsNullOrEmpty($defaultPrinter)) {
+        $defaultPrinter = $p.name
     }
+    $color = if ($p.isOnline) { [ConsoleColor]::White } else { [ConsoleColor]::DarkYellow }
+    Write-Host ("   " + $idx + ". [" + $tag + "] " + $p.name + $def) -ForegroundColor $color
+    $idx++
+}
 
-    if ([string]::IsNullOrEmpty($defaultPrinter) -and $activePrinters.Count -gt 0) {
-        $defaultPrinter = $activePrinters[0].name
-    }
+if ([string]::IsNullOrEmpty($defaultPrinter) -and $activePrinters.Count -gt 0) {
+    $defaultPrinter = $activePrinters[0].name
+}
 
-    if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
-        $defaultPrinter = $preferredPrinter
-    }
+if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
+    $defaultPrinter = $preferredPrinter
+}
 
-    # Check if target printer is offline
-    $targetObj = $activePrinters | Where-Object { $_.name -eq $defaultPrinter } | Select-Object -First 1
-    if ($targetObj -and -not $targetObj.isOnline) {
-        Write-Host ""
-        Write-Host "[WARNING] '$defaultPrinter' is marked OFFLINE in Windows!" -ForegroundColor Yellow
-        Write-Host "          Please ensure printer is switched ON & USB is firmly plugged in." -ForegroundColor Yellow
-    }
-
+$targetObj = $activePrinters | Where-Object { $_.name -eq $defaultPrinter } | Select-Object -First 1
+if ($targetObj -and -not $targetObj.isOnline) {
     Write-Host ""
-    Write-Host "[STATUS] Agent is connected and listening for print jobs..." -ForegroundColor Green
-    Write-Host "         (Keep this window open during shop working hours)" -ForegroundColor Gray
-    Write-Host ""
+    Write-Host ("[WARNING] '" + $defaultPrinter + "' is marked OFFLINE in Windows.") -ForegroundColor Yellow
+    Write-Host "          Please verify printer power and USB connection." -ForegroundColor Yellow
+}
+
+Write-Host ""
+Write-Host "[STATUS] Agent is connected and listening for print jobs..." -ForegroundColor Green
+Write-Host "         (Keep this window open during shop working hours)" -ForegroundColor Gray
+Write-Host ""
 
 # 3. Heartbeat Function
 function Send-Heartbeat {
@@ -139,17 +114,17 @@ function Send-Heartbeat {
             agentName = $agentName
             hostname = $env:COMPUTERNAME
             ipAddress = "127.0.0.1"
-            version = "1.0.0-native"
+            version = "1.0.0"
             printers = $currentPrinters
         } | ConvertTo-Json -Depth 4
 
         Invoke-RestMethod -Uri ($serverUrl + "/api/agent/heartbeat") -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
     } catch {
-        # Silent retry
+        # Retry on next cycle
     }
 }
 
-# 4. Multi-Engine Silent Print Spooling Function (PDF, JPG, PNG, DOC)
+# 4. Silent Print Spooling Function
 function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfig) {
     $copies = if ($printConfig.copies) { [int]$printConfig.copies } else { 1 }
     $mode = if ($printConfig.colorMode) { $printConfig.colorMode } else { "BW" }
@@ -157,109 +132,37 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
     $cleanPath = (Resolve-Path $filePath).Path
     
-    Write-Host ("[PRINT] Spooling to: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ", Type: " + $ext + ")") -ForegroundColor Cyan
+    Write-Host ("[PRINT] Spooling to: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ")") -ForegroundColor Cyan
 
-    # A. IMAGE PRINTING (.JPG, .JPEG, .PNG, .BMP, .WEBP) via Native .NET GDI Spooler
-    if ($ext -in @('.jpg', '.jpeg', '.png', '.bmp', '.webp')) {
+    # A. If SumatraPDF exists locally, use it for silent high quality printing
+    if (Test-Path $sumatraExe) {
         try {
-            Add-Type -AssemblyName System.Drawing
-            for ($c = 1; $c -le $copies; $c++) {
-                $doc = New-Object System.Drawing.Printing.PrintDocument
-                $doc.PrinterSettings.PrinterName = $printerName
-                $doc.PrinterSettings.Copies = 1
-                if ($doc.PrinterSettings.SupportsColor) {
-                    $doc.DefaultPageSettings.Color = ($mode -eq "COLOR")
-                }
+            $settings = "copies=" + $copies
+            if ($mode -eq "COLOR") { $settings += ",color" } else { $settings += ",monochrome" }
+            if ($side -eq "DOUBLE") { $settings += ",duplex" } else { $settings += ",simplex" }
 
-                $img = [System.Drawing.Image]::FromFile($cleanPath)
-                $doc.add_PrintPage({
-                    param($sender, $e)
-                    $marginBounds = $e.MarginBounds
-                    $imageRatio = $img.Width / $img.Height
-                    $pageRatio = $marginBounds.Width / $marginBounds.Height
-                    
-                    if ($imageRatio -gt $pageRatio) {
-                        $w = $marginBounds.Width
-                        $h = [int]($marginBounds.Width / $imageRatio)
-                    } else {
-                        $h = $marginBounds.Height
-                        $w = [int]($marginBounds.Height * $imageRatio)
-                    }
-                    $x = $marginBounds.X + [int](($marginBounds.Width - $w) / 2)
-                    $y = $marginBounds.Y + [int](($marginBounds.Height - $h) / 2)
-                    
-                    $destRect = New-Object System.Drawing.Rectangle($x, $y, $w, $h)
-                    $e.Graphics.DrawImage($img, $destRect)
-                })
-
-                $doc.Print()
-                $img.Dispose()
-                $doc.Dispose()
-            }
-            Write-Host "   [SUCCESS] Image sent to printer spooler (.NET GDI Engine)." -ForegroundColor Green
+            Start-Process -FilePath $sumatraExe -ArgumentList "-print-to `"$printerName`" -print-settings `"$settings`" -silent `"$cleanPath`"" -Wait -WindowStyle Hidden
+            Write-Host "   [SUCCESS] Print spooled successfully via engine." -ForegroundColor Green
             return
         } catch {
-            try {
-                $p = Start-Process -FilePath "mspaint.exe" -ArgumentList ("/pt `"" + $cleanPath + "`" `"" + $printerName + "`"") -PassThru -WindowStyle Hidden
-                Start-Sleep -Seconds 4
-                if ($p -and -not $p.HasExited) { $p.Kill() }
-                Write-Host "   [SUCCESS] Printed via MS Paint PrintTo." -ForegroundColor Green
-                return
-            } catch {}
+            # Fall through to standard print
         }
     }
 
-        # B. PDF PRINTING (.PDF) via Standalone Hardware Print Engine (100% Silent & Reliable)
-        if ($ext -eq '.pdf') {
-            if (Test-Path $sumatraExe) {
-                try {
-                    $settings = "copies=" + $copies
-                    if ($mode -eq "COLOR") { $settings += ",color" } else { $settings += ",monochrome" }
-                    if ($side -eq "DOUBLE") { $settings += ",duplex" } else { $settings += ",simplex" }
-
-                    & $sumatraExe -print-to $printerName -print-settings $settings -silent $cleanPath
-                    Write-Host "   [SUCCESS] PDF dispatched directly to hardware printer spooler." -ForegroundColor Green
-                    return
-                } catch {
-                    Write-Host "   [NOTICE] Hardware engine fallback..." -ForegroundColor Yellow
-                }
-            }
-
-            # Adobe Acrobat Fallback (if installed)
-            $acrobatPaths = @(
-                "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
-                "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
-            )
-            foreach ($acro in $acrobatPaths) {
-                if (Test-Path $acro) {
-                    try {
-                        $p = Start-Process -FilePath $acro -ArgumentList ("/t `"" + $cleanPath + "`" `"" + $printerName + "`"") -PassThru -WindowStyle Hidden
-                        Start-Sleep -Seconds 4
-                        if ($p -and -not $p.HasExited) { $p.Kill() }
-                        Write-Host "   [SUCCESS] PDF printed via Acrobat engine." -ForegroundColor Green
-                        return
-                    } catch {}
-                }
-            }
-        }
-
-    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
+    # B. Standard Windows Shell PrintTo
     try {
-        $cleanPrinter = $printerName.Replace('"', '""')
-        $p = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList ("`"" + $cleanPrinter + "`"") -PassThru -WindowStyle Hidden
-        Start-Sleep -Seconds 8
-        Write-Host "   [SUCCESS] Document spooled via Windows PrintTo handler." -ForegroundColor Green
+        Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "`"$printerName`"" -PassThru -WindowStyle Hidden | Out-Null
+        Write-Host "   [SUCCESS] Document sent to Windows print spooler." -ForegroundColor Green
     } catch {
-        Write-Host "   [NOTICE] Spooled via default handler." -ForegroundColor Yellow
+        Write-Host ("[ERROR] Failed to spool print: " + $_.Exception.Message) -ForegroundColor Red
     }
 }
 
 Send-Heartbeat
-
 $lastHeartbeat = [DateTime]::UtcNow
 $processedJobs = @{}
 
-# 5. Main Job Polling Loop (With Global Crash Protection)
+# 5. Main Loop
 while ($true) {
     try {
         if (([DateTime]::UtcNow - $lastHeartbeat).TotalSeconds -ge $heartbeatIntervalSec) {
@@ -295,7 +198,7 @@ while ($true) {
                         Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
                         $localFile = Join-Path $tempDir ($job.orderNumber + "_" + $job.fileKey)
-                        Write-Host "[DOWNLOAD] Fetching customer document from cloud..." -ForegroundColor Cyan
+                        Write-Host "[DOWNLOAD] Fetching customer document..." -ForegroundColor Cyan
                         
                         $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { $serverUrl + $job.downloadUrl }
                         Invoke-WebRequest -Uri $downloadUri -OutFile $localFile -TimeoutSec 30
@@ -311,16 +214,16 @@ while ($true) {
                         } | ConvertTo-Json
                         Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        Write-Host ("[SUCCESS] Order " + $job.orderNumber + " printed successfully!") -ForegroundColor Green
+                        Write-Host ("[SUCCESS] Order " + $job.orderNumber + " print sent to printer!") -ForegroundColor Green
                         Write-Host ""
                     } catch {
-                        Write-Host ("[NOTICE] Print completed for order: " + $job.orderNumber) -ForegroundColor Yellow
+                        Write-Host ("[ERROR] Processing order " + $job.orderNumber + ": " + $_.Exception.Message) -ForegroundColor Red
                     }
                 }
             }
         }
     } catch {
-        # Keep loop running continuously even if network drops
+        # Keep loop running continuously
     }
 
     Start-Sleep -Seconds $pollIntervalSec

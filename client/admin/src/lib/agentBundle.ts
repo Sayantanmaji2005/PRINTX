@@ -27,30 +27,40 @@ cd /d "%~dp0"
 echo ======================================================================
 echo             PRINTX AUTOMATED PRINTER CONNECTOR AGENT
 echo                  Shop: ${shop.name}
-echo               Zero Setup - Pure Native Windows
+echo                   Zero Setup - Auto Hardware Bridge
 echo ======================================================================
 echo.
 
+where node >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    if exist "%~dp0agent.js" (
+        echo [LAUNCH] Node.js runtime detected. Starting high-speed engine...
+        node "%~dp0agent.js"
+        goto restart_prompt
+    )
+)
+
+echo [LAUNCH] Starting native Windows printer connector...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent.ps1"
 
+:restart_prompt
 echo.
 echo [AGENT NOTICE] Agent process stopped. Restarting in 3 seconds...
 timeout /t 3 /nobreak >nul
+cls
 goto loop
 `;
 
   const agentPs1 = `# =====================================================================
 #             PRINTX SHOP NATIVE DESKTOP PRINTER AGENT
-#  Pure Native Windows PowerShell - Zero Software/Node Installation!
 # =====================================================================
 
-$Host.UI.RawUI.WindowTitle = "PrintX Shop Printer Connector - Live Hardware Bridge"
-[Console]::ForegroundColor = [ConsoleColor]::Cyan
+$Host.UI.RawUI.WindowTitle = "PrintX Shop Printer Agent"
 
 Clear-Host
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "             PRINTX SHOP DESKTOP PRINTER AGENT                  " -ForegroundColor Cyan
-Write-Host "     Automated Hardware Spooler for Xerox Stations (Native)     " -ForegroundColor Cyan
+Write-Host "             Automated Hardware Spooler (Native)                " -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -61,25 +71,6 @@ $sumatraExe = Join-Path $scriptDir "SumatraPDF.exe"
 
 if (-not (Test-Path $tempDir)) {
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-}
-
-# Auto-initialize standalone silent print engine if needed
-if (-not (Test-Path $sumatraExe)) {
-    try {
-        Write-Host "[SETUP] Initializing high-speed PDF hardware print engine..." -ForegroundColor Cyan
-        $zipPath = Join-Path $scriptDir "sumatra.zip"
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri "https://www.sumatrapdfreader.org/dl/rel/3.6.1/SumatraPDF-3.6.1-64.zip" -OutFile $zipPath -TimeoutSec 30
-        Expand-Archive -Path $zipPath -DestinationPath $scriptDir -Force
-        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
-        $extractedExe = Get-ChildItem (Join-Path $scriptDir "SumatraPDF*.exe") | Select-Object -First 1
-        if ($extractedExe -and $extractedExe.FullName -ne $sumatraExe) {
-            Move-Item $extractedExe.FullName $sumatraExe -Force
-        }
-        Write-Host "[SETUP] Print engine initialized successfully!" -ForegroundColor Green
-    } catch {
-        Write-Host "[SETUP] Using native Windows print engine fallback." -ForegroundColor Yellow
-    }
 }
 
 # 1. Load Configuration
@@ -99,7 +90,7 @@ if (Test-Path $configPath) {
         if ($rawConfig.agentName) { $agentName = $rawConfig.agentName }
         if ($rawConfig.preferredPrinter) { $preferredPrinter = $rawConfig.preferredPrinter }
     } catch {
-        Write-Host "Warning: Could not parse config.json, using defaults." -ForegroundColor Yellow
+        Write-Host "[WARNING] Could not parse config.json, using defaults." -ForegroundColor Yellow
     }
 }
 
@@ -107,9 +98,6 @@ Write-Host ("[SERVER] Connecting to : " + $serverUrl) -ForegroundColor Green
 Write-Host ("[SHOP]   Shop Slug     : " + $shopSlug) -ForegroundColor Green
 Write-Host ("[AGENT]  Agent Name    : " + $agentName) -ForegroundColor Green
 Write-Host ""
-
-# Enable TLS 1.2
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 # 2. Function to detect physical printers
 function Get-ShopPrinters {
@@ -161,8 +149,8 @@ if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
 $targetObj = $activePrinters | Where-Object { $_.name -eq $defaultPrinter } | Select-Object -First 1
 if ($targetObj -and -not $targetObj.isOnline) {
     Write-Host ""
-    Write-Host ("[WARNING] '" + $defaultPrinter + "' is marked OFFLINE in Windows!") -ForegroundColor Yellow
-    Write-Host "          Please ensure printer is switched ON & USB is firmly plugged in." -ForegroundColor Yellow
+    Write-Host ("[WARNING] '" + $defaultPrinter + "' is marked OFFLINE in Windows.") -ForegroundColor Yellow
+    Write-Host "          Please verify printer power and USB connection." -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -179,127 +167,54 @@ function Send-Heartbeat {
             agentName = $agentName
             hostname = $env:COMPUTERNAME
             ipAddress = "127.0.0.1"
-            version = "1.0.0-native"
+            version = "1.0.0"
             printers = $currentPrinters
         } | ConvertTo-Json -Depth 4
 
-        Invoke-RestMethod -Uri "$serverUrl/api/agent/heartbeat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
+        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/heartbeat") -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
     } catch {
-        # Silent retry
+        # Retry on next cycle
     }
 }
 
-# 4. Multi-Engine Silent Print Spooling Function (PDF, JPG, PNG, DOC)
+# 4. Silent Print Spooling Function
 function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfig) {
     $copies = if ($printConfig.copies) { [int]$printConfig.copies } else { 1 }
     $mode = if ($printConfig.colorMode) { $printConfig.colorMode } else { "BW" }
     $side = if ($printConfig.printSide) { $printConfig.printSide } else { "SINGLE" }
-    $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
     $cleanPath = (Resolve-Path $filePath).Path
     
-    Write-Host "Spooling to printer: $printerName (Copies: $copies, Mode: $mode, Duplex: $side, Type: $ext)" -ForegroundColor Cyan
+    Write-Host ("[PRINT] Spooling to: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ")") -ForegroundColor Cyan
 
-    # A. IMAGE PRINTING (.JPG, .JPEG, .PNG, .BMP, .WEBP) via Native .NET GDI Spooler
-    if ($ext -in @('.jpg', '.jpeg', '.png', '.bmp', '.webp')) {
+    if (Test-Path $sumatraExe) {
         try {
-            Add-Type -AssemblyName System.Drawing
-            for ($c = 1; $c -le $copies; $c++) {
-                $doc = New-Object System.Drawing.Printing.PrintDocument
-                $doc.PrinterSettings.PrinterName = $printerName
-                $doc.PrinterSettings.Copies = 1
-                if ($doc.PrinterSettings.SupportsColor) {
-                    $doc.DefaultPageSettings.Color = ($mode -eq "COLOR")
-                }
+            $settings = "copies=" + $copies
+            if ($mode -eq "COLOR") { $settings += ",color" } else { $settings += ",monochrome" }
+            if ($side -eq "DOUBLE") { $settings += ",duplex" } else { $settings += ",simplex" }
 
-                $img = [System.Drawing.Image]::FromFile($cleanPath)
-                $doc.add_PrintPage({
-                    param($sender, $e)
-                    $marginBounds = $e.MarginBounds
-                    $imageRatio = $img.Width / $img.Height
-                    $pageRatio = $marginBounds.Width / $marginBounds.Height
-                    
-                    if ($imageRatio -gt $pageRatio) {
-                        $w = $marginBounds.Width
-                        $h = [int]($marginBounds.Width / $imageRatio)
-                    } else {
-                        $h = $marginBounds.Height
-                        $w = [int]($marginBounds.Height * $imageRatio)
-                    }
-                    $x = $marginBounds.X + [int](($marginBounds.Width - $w) / 2)
-                    $y = $marginBounds.Y + [int](($marginBounds.Height - $h) / 2)
-                    
-                    $destRect = New-Object System.Drawing.Rectangle($x, $y, $w, $h)
-                    $e.Graphics.DrawImage($img, $destRect)
-                })
-
-                $doc.Print()
-                $img.Dispose()
-                $doc.Dispose()
-            }
-            Write-Host "   Image successfully sent directly to printer spooler." -ForegroundColor Green
+            $argList = '-print-to "' + $printerName + '" -print-settings "' + $settings + '" -silent "' + $cleanPath + '"'
+            Start-Process -FilePath $sumatraExe -ArgumentList $argList -Wait -WindowStyle Hidden
+            Write-Host "   [SUCCESS] Print spooled successfully via engine." -ForegroundColor Green
             return
         } catch {
-            try {
-                $p = Start-Process -FilePath "mspaint.exe" -ArgumentList "/pt \`"$cleanPath\`" \`"$printerName\`"" -PassThru -WindowStyle Hidden
-                Start-Sleep -Seconds 4
-                if ($p -and -not $p.HasExited) { $p.Kill() }
-                Write-Host "   Printed via MS Paint PrintTo Spooler." -ForegroundColor Green
-                return
-            } catch {}
+            # Fall through to standard print
         }
     }
 
-        # B. PDF PRINTING (.PDF) via Standalone Hardware Print Engine (100% Silent & Reliable)
-        if ($ext -eq '.pdf') {
-            if (Test-Path $sumatraExe) {
-                try {
-                    $settings = "copies=" + $copies
-                    if ($mode -eq "COLOR") { $settings += ",color" } else { $settings += ",monochrome" }
-                    if ($side -eq "DOUBLE") { $settings += ",duplex" } else { $settings += ",simplex" }
-
-                    & $sumatraExe -print-to $printerName -print-settings $settings -silent $cleanPath
-                    Write-Host "   [SUCCESS] PDF dispatched directly to hardware printer spooler." -ForegroundColor Green
-                    return
-                } catch {
-                    Write-Host "   [NOTICE] Hardware engine fallback..." -ForegroundColor Yellow
-                }
-            }
-
-            # Adobe Acrobat Fallback (if installed)
-            $acrobatPaths = @(
-                "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
-                "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
-            )
-            foreach ($acro in $acrobatPaths) {
-                if (Test-Path $acro) {
-                    try {
-                        $p = Start-Process -FilePath $acro -ArgumentList ("/t \`"" + $cleanPath + "\`" \`"" + $printerName + "\`"") -PassThru -WindowStyle Hidden
-                        Start-Sleep -Seconds 4
-                        if ($p -and -not $p.HasExited) { $p.Kill() }
-                        Write-Host "   [SUCCESS] PDF printed via Acrobat engine." -ForegroundColor Green
-                        return
-                    } catch {}
-                }
-            }
-        }
-
-    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
     try {
-        $cleanPrinter = $printerName.Replace('"', '""')
-        $p = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "\`"$cleanPrinter\`"" -PassThru -WindowStyle Hidden
-        Start-Sleep -Seconds 8
-        Write-Host "   Document spooled via Windows Shell PrintTo handler." -ForegroundColor Green
+        $cleanPrinter = '"' + $printerName + '"'
+        Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList $cleanPrinter -PassThru -WindowStyle Hidden | Out-Null
+        Write-Host "   [SUCCESS] Document sent to Windows print spooler." -ForegroundColor Green
     } catch {
-        Write-Host "   Print handler notice: \$(\$_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host ("[ERROR] Failed to spool print: " + $_.Exception.Message) -ForegroundColor Red
     }
 }
 
 Send-Heartbeat
-
 $lastHeartbeat = [DateTime]::UtcNow
 $processedJobs = @{}
 
-# 5. Main Job Polling Loop (With Global Crash Protection)
+# 5. Main Loop
 while ($true) {
     try {
         if (([DateTime]::UtcNow - $lastHeartbeat).TotalSeconds -ge $heartbeatIntervalSec) {
@@ -308,7 +223,7 @@ while ($true) {
         }
 
         $encodedSlug = [System.Uri]::EscapeDataString($shopSlug)
-        $jobsResponse = Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs?shopSlug=$encodedSlug" -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
+        $jobsResponse = Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs?shopSlug=" + $encodedSlug) -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
 
         $jobs = if ($jobsResponse.data) { $jobsResponse.data } else { $jobsResponse }
 
@@ -321,9 +236,9 @@ while ($true) {
 
                     Write-Host ""
                     Write-Host "======================================================" -ForegroundColor Magenta
-                    Write-Host "NEW PAID PRINT ORDER RECEIVED: $($job.orderNumber)" -ForegroundColor Yellow
-                    Write-Host "Document: $($job.documentName)" -ForegroundColor White
-                    Write-Host "Config: $($job.config.copies) Copies | $($job.config.colorMode) | $($job.config.printSide)" -ForegroundColor Gray
+                    Write-Host ("[NEW ORDER] Paid Job Received: " + $job.orderNumber) -ForegroundColor Yellow
+                    Write-Host ("[DOCUMENT]  " + $job.documentName) -ForegroundColor White
+                    Write-Host ("[CONFIG]    " + $job.config.copies + " Copies | " + $job.config.colorMode + " | " + $job.config.printSide) -ForegroundColor Gray
                     Write-Host "======================================================" -ForegroundColor Magenta
 
                     try {
@@ -332,12 +247,12 @@ while ($true) {
                             status = "PRINTING"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        $localFile = Join-Path $tempDir "$($job.orderNumber)_$($job.fileKey)"
-                        Write-Host "Downloading customer document from cloud..." -ForegroundColor Cyan
+                        $localFile = Join-Path $tempDir ($job.orderNumber + "_" + $job.fileKey)
+                        Write-Host "[DOWNLOAD] Fetching customer document..." -ForegroundColor Cyan
                         
-                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { "$serverUrl$($job.downloadUrl)" }
+                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { $serverUrl + $job.downloadUrl }
                         Invoke-WebRequest -Uri $downloadUri -OutFile $localFile -TimeoutSec 30
 
                         if ($autoPrint) {
@@ -349,22 +264,311 @@ while ($true) {
                             status = "PRINTED"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        Write-Host "ORDER $($job.orderNumber) PRINT COMPLETED SUCCESSFULLY!" -ForegroundColor Green
+                        Write-Host ("[SUCCESS] Order " + $job.orderNumber + " print sent to printer!") -ForegroundColor Green
                         Write-Host ""
                     } catch {
-                        Write-Host "Print processing notice for order: $($job.orderNumber)" -ForegroundColor Yellow
+                        Write-Host ("[ERROR] Processing order " + $job.orderNumber + ": " + $_.Exception.Message) -ForegroundColor Red
                     }
                 }
             }
         }
     } catch {
-        # Keep loop running continuously even if network drops
+        # Keep loop running continuously
     }
 
     Start-Sleep -Seconds $pollIntervalSec
 }
+`;
+
+  const agentJs = `/**
+ * PrintX Shop Desktop Agent
+ * Automated Hardware Printer Bridge & Spooler for Xerox Stations
+ */
+
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+const https = require('https');
+const { exec } = require('child_process');
+const os = require('os');
+
+// Load Configuration
+const configPath = path.join(__dirname, 'config.json');
+let config = {
+  serverUrl: 'https://printx-cib8.onrender.com',
+  shopSlug: '${shop.slug}',
+  agentName: '${shop.name} Counter PC',
+  pollIntervalMs: 3000,
+  heartbeatIntervalMs: 10000,
+  autoPrint: true,
+  preferredPrinter: '',
+};
+
+if (fs.existsSync(configPath)) {
+  try {
+    const raw = fs.readFileSync(configPath, 'utf8');
+    config = { ...config, ...JSON.parse(raw) };
+  } catch (err) {
+    console.error('Could not parse config.json, using defaults.');
+  }
+}
+
+const TEMP_DIR = path.join(__dirname, 'temp_jobs');
+if (!fs.existsSync(TEMP_DIR)) {
+  fs.mkdirSync(TEMP_DIR, { recursive: true });
+}
+
+let activePrinters = [];
+let defaultPrinterName = '';
+const processingJobs = new Set();
+
+function detectPrinters() {
+  return new Promise((resolve) => {
+    if (process.platform === 'win32') {
+      const psCommand = 'powershell -NoProfile -Command "Get-CimInstance Win32_Printer | Select-Object Name,DriverName,Default,WorkOffline | ConvertTo-Json"';
+      exec(psCommand, { windowsHide: true }, (err, stdout) => {
+        if (err || !stdout.trim()) {
+          const fallback = [
+            { name: 'Default Local Printer', driverName: 'Generic / Text Only', isDefault: true, isOnline: true }
+          ];
+          activePrinters = fallback;
+          defaultPrinterName = fallback[0].name;
+          return resolve(fallback);
+        }
+
+        try {
+          let parsed = JSON.parse(stdout);
+          if (!Array.isArray(parsed)) parsed = [parsed];
+
+          activePrinters = parsed.map((p) => ({
+            name: p.Name,
+            driverName: p.DriverName || 'Standard Driver',
+            isDefault: Boolean(p.Default),
+            isOnline: !p.WorkOffline,
+          }));
+
+          const def = activePrinters.find((p) => p.isDefault) || activePrinters[0];
+          defaultPrinterName = config.preferredPrinter || (def ? def.name : '');
+          resolve(activePrinters);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    } else {
+      exec('lpstat -p -d', (err, stdout) => {
+        const fallback = [
+          { name: 'System Default Printer', driverName: 'CUPS Driver', isDefault: true, isOnline: true }
+        ];
+        activePrinters = fallback;
+        defaultPrinterName = fallback[0].name;
+        resolve(fallback);
+      });
+    }
+  });
+}
+
+function apiRequest(endpoint, method = 'GET', data = null) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(endpoint, config.serverUrl);
+    const isHttps = url.protocol === 'https:';
+    const client = isHttps ? https : http;
+
+    const options = {
+      hostname: url.hostname,
+      port: url.port || (isHttps ? 443 : 80),
+      path: url.pathname + url.search,
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 10000,
+    };
+
+    const req = client.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => (body += chunk));
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          resolve(parsed.data !== undefined ? parsed.data : parsed);
+        } catch (e) {
+          resolve(body);
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+
+    if (data) {
+      req.write(JSON.stringify(data));
+    }
+    req.end();
+  });
+}
+
+async function sendHeartbeat() {
+  try {
+    await detectPrinters();
+    const payload = {
+      shopSlug: config.shopSlug,
+      agentName: config.agentName,
+      hostname: os.hostname(),
+      ipAddress: getLocalIpAddress(),
+      version: '1.0.0',
+      printers: activePrinters,
+    };
+
+    await apiRequest('/api/agent/heartbeat', 'POST', payload);
+  } catch (err) {
+    // Network retry
+  }
+}
+
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
+
+function downloadFile(fileUrl, destinationPath) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(fileUrl, config.serverUrl);
+    const isHttps = url.protocol === 'https:';
+    const client = isHttps ? https : http;
+
+    const file = fs.createWriteStream(destinationPath);
+    client.get(url.toString(), (res) => {
+      if (res.statusCode !== 200) {
+        return reject(new Error('HTTP status ' + res.statusCode));
+      }
+      res.pipe(file);
+      file.on('finish', () => {
+        file.close(resolve);
+      });
+    }).on('error', (err) => {
+      fs.unlink(destinationPath, () => {});
+      reject(err);
+    });
+  });
+}
+
+function sendToPrinter(filePath, printerName, printConfig) {
+  return new Promise((resolve, reject) => {
+    console.log('[PRINT] Spooling to: "' + printerName + '" (Copies: ' + printConfig.copies + ', Mode: ' + printConfig.colorMode + ', Duplex: ' + printConfig.printSide + ')');
+
+    if (process.platform === 'win32') {
+      const targetPrinter = printerName.replace(/"/g, '""');
+      const absolutePdf = path.resolve(filePath).replace(/'/g, "''");
+      const psPrint = 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + absolutePdf + '\\' -Verb PrintTo -ArgumentList \'\\\\"' + targetPrinter + '\\\\\"\' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"';
+
+      exec(psPrint, { windowsHide: true }, (err) => {
+        resolve(true);
+      });
+    } else {
+      const lpCommand = 'lp -d "' + printerName + '" -n ' + (printConfig.copies || 1) + ' "' + filePath + '"';
+      exec(lpCommand, (err) => {
+        if (err) return reject(err);
+        resolve(true);
+      });
+    }
+  });
+}
+
+async function pollPrintJobs() {
+  try {
+    const jobs = await apiRequest('/api/agent/jobs?shopSlug=' + encodeURIComponent(config.shopSlug), 'GET');
+
+    if (Array.isArray(jobs) && jobs.length > 0) {
+      for (const job of jobs) {
+        if (processingJobs.has(job.orderNumber)) continue;
+        processingJobs.add(job.orderNumber);
+
+        console.log('\\n======================================================');
+        console.log('[NEW ORDER] Paid Print Order Received: ' + job.orderNumber);
+        console.log('[DOCUMENT]  ' + job.documentName);
+        console.log('[CONFIG]    ' + job.config.copies + ' Copies | ' + job.config.colorMode + ' | ' + job.config.printSide);
+        console.log('======================================================');
+
+        try {
+          await apiRequest('/api/agent/jobs/status', 'POST', {
+            orderNumber: job.orderNumber,
+            status: 'PRINTING',
+            printerName: defaultPrinterName,
+          });
+
+          const localPdfPath = path.join(TEMP_DIR, job.orderNumber + '_' + job.fileKey);
+          console.log('[DOWNLOAD] Downloading document...');
+          await downloadFile(job.downloadUrl, localPdfPath);
+
+          if (config.autoPrint) {
+            await sendToPrinter(localPdfPath, defaultPrinterName, job.config);
+          }
+
+          await apiRequest('/api/agent/jobs/status', 'POST', {
+            orderNumber: job.orderNumber,
+            status: 'PRINTED',
+            printerName: defaultPrinterName,
+          });
+
+          console.log('[SUCCESS] Order ' + job.orderNumber + ' printed successfully!\\n');
+        } catch (jobErr) {
+          console.error('[ERROR] Order ' + job.orderNumber + ' failed:', jobErr.message);
+          await apiRequest('/api/agent/jobs/status', 'POST', {
+            orderNumber: job.orderNumber,
+            status: 'FAILED',
+            errorMessage: jobErr.message,
+          });
+        } finally {
+          processingJobs.delete(job.orderNumber);
+        }
+      }
+    }
+  } catch (err) {
+    // Retry next interval
+  }
+}
+
+async function start() {
+  console.clear();
+  console.log(
+\`╔════════════════════════════════════════════════════════════╗
+║             PRINTX SHOP DESKTOP PRINTER AGENT              ║
+║         Automated Hardware Spooler for Xerox Stations      ║
+╚════════════════════════════════════════════════════════════╝\`
+  );
+
+  console.log('📍 Connecting to Server : ' + config.serverUrl);
+  console.log('🏪 Shop Slug           : ' + config.shopSlug);
+  console.log('🖥️ Agent Name          : ' + config.agentName);
+
+  await detectPrinters();
+  console.log('\\n🖨️ Detected Hardware Printers (' + activePrinters.length + '):');
+  activePrinters.forEach((p, idx) => {
+    const isDef = p.name === defaultPrinterName ? ' (DEFAULT / ACTIVE)' : '';
+    console.log('   ' + (idx + 1) + '. [' + (p.isOnline ? 'ONLINE' : 'OFFLINE') + '] ' + p.name + isDef);
+  });
+
+  console.log('\\n🚀 Agent is running and listening for customer print jobs...');
+  console.log('   (Keep this window open on your shop computer)\\n');
+
+  await sendHeartbeat();
+  setInterval(sendHeartbeat, config.heartbeatIntervalMs);
+  setInterval(pollPrintJobs, config.pollIntervalMs);
+}
+
+start();
 `;
 
   const readmeTxt = `=======================================================
@@ -374,18 +578,19 @@ while ($true) {
 SHOP NAME : ${shop.name}
 SHOP SLUG : ${shop.slug}
 
-QUICK SETUP (NO SOFTWARE INSTALLATION NEEDED):
+QUICK SETUP:
 ----------------------------------------------
-1. Right-click this ZIP file and choose "Extract All..." to extract files to Desktop.
+1. Right-click this ZIP file and click "Extract All..." to extract files to a folder.
 2. Double-click "start-agent.bat".
-3. That's it! It automatically detects your Canon / HP / Epson printer and connects to the cloud.
+3. That's it! The agent will automatically detect your connected Canon, HP, Epson, Brother, or any Xerox printer.
 
-When a customer scans your QR standee and pays, prints will come out automatically!
+Whenever a customer pays for a print job via QR Standee, it will automatically print directly from your printer!
 =======================================================
 `;
 
   zip.file('start-agent.bat', startBat);
   zip.file('agent.ps1', agentPs1);
+  zip.file('agent.js', agentJs);
   zip.file('config.json', configJson);
   zip.file('README.txt', readmeTxt);
 
