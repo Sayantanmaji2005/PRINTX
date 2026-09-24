@@ -1088,7 +1088,7 @@ export default function SuperAdminDashboard() {
                               </Link>
 
                               <a
-                                href={`${process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://no1printx.netlify.app'}/shop/${shop.slug}`}
+                                href={`${process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://printx-customer.vercel.app'}/shop/${shop.slug}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"

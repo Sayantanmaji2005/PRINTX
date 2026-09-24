@@ -9,7 +9,7 @@ function StandeeContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug') || 'printx-shop';
   const [shop, setShop] = useState<any>(null);
-  const [networkMode, setNetworkMode] = useState<'cloudflare' | 'local' | 'netlify'>('cloudflare');
+  const [networkMode, setNetworkMode] = useState<'vercel' | 'local' | 'cloudflare'>('vercel');
 
   useEffect(() => {
     if (!slug) return;
@@ -20,16 +20,16 @@ function StandeeContent() {
       .catch((err) => console.error(err));
   }, [slug]);
 
-  const publicCloudUrl = 'https://bye-belong-enquiries-shape.trycloudflare.com';
+  const vercelBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://printx-customer.vercel.app';
   const localBaseUrl = 'http://192.168.0.103:3000';
-  const netlifyBaseUrl = 'https://no1printx.netlify.app';
+  const cloudflareBaseUrl = 'https://bye-belong-enquiries-shape.trycloudflare.com';
 
   const activeBaseUrl =
-    networkMode === 'cloudflare'
-      ? publicCloudUrl
+    networkMode === 'vercel'
+      ? vercelBaseUrl
       : networkMode === 'local'
       ? localBaseUrl
-      : netlifyBaseUrl;
+      : cloudflareBaseUrl;
 
   const customerUrl = `${activeBaseUrl}/shop/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(customerUrl)}`;
@@ -50,14 +50,14 @@ function StandeeContent() {
         <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold gap-1">
           <button
             type="button"
-            onClick={() => setNetworkMode('cloudflare')}
+            onClick={() => setNetworkMode('vercel')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              networkMode === 'cloudflare'
+              networkMode === 'vercel'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            🌐 Public Live HTTPS (Active)
+            🚀 Vercel Cloud (Official)
           </button>
           <button
             type="button"
@@ -72,14 +72,14 @@ function StandeeContent() {
           </button>
           <button
             type="button"
-            onClick={() => setNetworkMode('netlify')}
+            onClick={() => setNetworkMode('cloudflare')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              networkMode === 'netlify'
-                ? 'bg-indigo-600 text-white shadow-xs'
+              networkMode === 'cloudflare'
+                ? 'bg-amber-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            ☁️ Netlify
+            🌐 Cloudflare Tunnel
           </button>
         </div>
 
