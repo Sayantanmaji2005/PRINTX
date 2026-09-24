@@ -57,9 +57,29 @@ Write-Host ""
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $configPath = Join-Path $scriptDir "config.json"
 $tempDir = Join-Path $scriptDir "temp_jobs"
+$sumatraExe = Join-Path $scriptDir "SumatraPDF.exe"
 
 if (-not (Test-Path $tempDir)) {
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+}
+
+# Auto-initialize standalone silent print engine if needed
+if (-not (Test-Path $sumatraExe)) {
+    try {
+        Write-Host "[SETUP] Initializing high-speed PDF hardware print engine..." -ForegroundColor Cyan
+        $zipPath = Join-Path $scriptDir "sumatra.zip"
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri "https://www.sumatrapdfreader.org/dl/rel/3.6.1/SumatraPDF-3.6.1-64.zip" -OutFile $zipPath -TimeoutSec 30
+        Expand-Archive -Path $zipPath -DestinationPath $scriptDir -Force
+        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+        $extractedExe = Get-ChildItem (Join-Path $scriptDir "SumatraPDF*.exe") | Select-Object -First 1
+        if ($extractedExe -and $extractedExe.FullName -ne $sumatraExe) {
+            Move-Item $extractedExe.FullName $sumatraExe -Force
+        }
+        Write-Host "[SETUP] Print engine initialized successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[SETUP] Using native Windows print engine fallback." -ForegroundColor Yellow
+    }
 }
 
 # 1. Load Configuration
@@ -229,26 +249,39 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
         }
     }
 
-    # B. PDF PRINTING (.PDF) via Microsoft Edge Engine
-    if ($ext -eq '.pdf') {
-        $edgePaths = @(
-            "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-        )
-        foreach ($edge in $edgePaths) {
-            if (Test-Path $edge) {
+        # B. PDF PRINTING (.PDF) via Standalone Hardware Print Engine (100% Silent & Reliable)
+        if ($ext -eq '.pdf') {
+            if (Test-Path $sumatraExe) {
                 try {
-                    for ($c = 1; $c -le $copies; $c++) {
-                        $edgeArgs = "--headless --disable-gpu --log-level=3 --print-to-printer=\`"" + $printerName + "\`" \`"" + $cleanPath + "\`""
-                        $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
-                        $p.WaitForExit(15000)
-                    }
-                    Write-Host "   [SUCCESS] PDF printed via Microsoft Edge Engine." -ForegroundColor Green
+                    $settings = "copies=" + $copies
+                    if ($mode -eq "COLOR") { $settings += ",color" } else { $settings += ",monochrome" }
+                    if ($side -eq "DOUBLE") { $settings += ",duplex" } else { $settings += ",simplex" }
+
+                    & $sumatraExe -print-to $printerName -print-settings $settings -silent $cleanPath
+                    Write-Host "   [SUCCESS] PDF dispatched directly to hardware printer spooler." -ForegroundColor Green
                     return
-                } catch {}
+                } catch {
+                    Write-Host "   [NOTICE] Hardware engine fallback..." -ForegroundColor Yellow
+                }
+            }
+
+            # Adobe Acrobat Fallback (if installed)
+            $acrobatPaths = @(
+                "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
+                "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
+            )
+            foreach ($acro in $acrobatPaths) {
+                if (Test-Path $acro) {
+                    try {
+                        $p = Start-Process -FilePath $acro -ArgumentList ("/t \`"" + $cleanPath + "\`" \`"" + $printerName + "\`"") -PassThru -WindowStyle Hidden
+                        Start-Sleep -Seconds 4
+                        if ($p -and -not $p.HasExited) { $p.Kill() }
+                        Write-Host "   [SUCCESS] PDF printed via Acrobat engine." -ForegroundColor Green
+                        return
+                    } catch {}
+                }
             }
         }
-    }
 
     # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
     try {
