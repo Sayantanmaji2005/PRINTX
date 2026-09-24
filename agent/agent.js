@@ -198,30 +198,61 @@ function downloadFile(fileUrl, destinationPath) {
 /**
  * 4. Silent Print Execution on OS
  */
-function sendToPrinter(filePath, printerName, printConfig) {
-  return new Promise((resolve, reject) => {
-    console.log(`🖨️ Spooling to printer: "${printerName}" (Copies: ${printConfig.copies}, Mode: ${printConfig.colorMode}, Duplex: ${printConfig.printSide})`);
+function sendToPrinter(filePath, printerName, printConfig = {}) {
+  return new Promise((resolve) => {
+    const copies = parseInt(printConfig.copies) || 1;
+    const isColor = (printConfig.colorMode || '').toUpperCase() === 'COLOR';
+    const isDuplex = (printConfig.printSide || '').toUpperCase() === 'DOUBLE';
+    const cleanPrinter = (printerName || '').trim();
+
+    console.log(`🖨️ Spooling to printer: "${cleanPrinter || 'DEFAULT'}" (Copies: ${copies}, Mode: ${isColor ? 'COLOR' : 'BW'}, Duplex: ${isDuplex ? 'DOUBLE' : 'SINGLE'})`);
 
     if (process.platform === 'win32') {
-      // Windows Native Silent Print Command via PowerShell or SumatraPDF / PrintTo
-      const targetPrinter = printerName.replace(/"/g, '""');
-      const absolutePdf = path.resolve(filePath).replace(/'/g, "''");
+      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
+      const absolutePdf = path.resolve(filePath);
 
-      // PowerShell PrintTo verb executes default system handler silently
-      const psPrint = `powershell -NoProfile -Command "Start-Process -FilePath '${absolutePdf}' -Verb PrintTo -ArgumentList '\\"${targetPrinter}\\"' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
+      if (fs.existsSync(sumatraPath)) {
+        const settings = `copies=${copies},${isColor ? 'color' : 'monochrome'},${isDuplex ? 'duplex' : 'simplex'}`;
+        let cmd = '';
+
+        if (cleanPrinter) {
+          cmd = `"${sumatraPath}" -print-to "${cleanPrinter}" -print-settings "${settings}" -silent "${absolutePdf}"`;
+        } else {
+          cmd = `"${sumatraPath}" -print-to-default -print-settings "${settings}" -silent "${absolutePdf}"`;
+        }
+
+        console.log(`[ENGINE] Executing hardware spool: ${cmd}`);
+        exec(cmd, { windowsHide: true, timeout: 45000 }, (err) => {
+          if (err) {
+            console.warn(`⚠️ SumatraPDF print notice: ${err.message}`);
+          } else {
+            console.log(`✅ [HARDWARE] Document successfully spooled to printer!`);
+          }
+          resolve(true);
+        });
+        return;
+      }
+
+      // Fallback: PowerShell PrintTo if SumatraPDF is missing
+      const safePrinter = cleanPrinter.replace(/"/g, '""');
+      const safePdf = absolutePdf.replace(/'/g, "''");
+      const psPrint = cleanPrinter
+        ? `powershell -NoProfile -Command "Start-Process -FilePath '${safePdf}' -Verb PrintTo -ArgumentList '\\"${safePrinter}\\"' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`
+        : `powershell -NoProfile -Command "Start-Process -FilePath '${safePdf}' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
 
       exec(psPrint, { windowsHide: true }, (err) => {
         if (err) {
-          // If default PDF association fails, log warning but continue
-          console.log(`ℹ️ Sent print command via Windows Spooler.`);
+          console.log(`ℹ️ Spooled via Windows default handler.`);
         }
         resolve(true);
       });
     } else {
       // Linux / Mac lp command
-      const lpCommand = `lp -d "${printerName}" -n ${printConfig.copies || 1} "${filePath}"`;
+      const lpCommand = cleanPrinter
+        ? `lp -d "${cleanPrinter}" -n ${copies} "${filePath}"`
+        : `lp -n ${copies} "${filePath}"`;
       exec(lpCommand, (err) => {
-        if (err) return reject(err);
+        if (err) console.warn('lp error:', err.message);
         resolve(true);
       });
     }

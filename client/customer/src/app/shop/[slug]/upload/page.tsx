@@ -44,6 +44,7 @@ import {
   calculateOrderPrice,
   createOrder,
   simulateOrderPayment,
+  startCustomerSession,
 } from '@/lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://printx-cib8.onrender.com/api';
@@ -116,10 +117,15 @@ export default function DocumentUploadAndPrintFlowPage() {
     if (!slug) return;
     const storedSessionId = sessionStorage.getItem('printx_customer_session_id');
     if (!storedSessionId) {
-      router.replace(`/shop/${slug}`);
-      return;
+      startCustomerSession(slug)
+        .then((sess) => {
+          sessionStorage.setItem('printx_customer_session_id', sess.id);
+          setSessionId(sess.id);
+        })
+        .catch((err) => console.warn('Could not auto-start session:', err));
+    } else {
+      setSessionId(storedSessionId);
     }
-    setSessionId(storedSessionId);
 
     fetchShopBySlug(slug)
       .then((data) => setShop(data))
@@ -401,13 +407,19 @@ export default function DocumentUploadAndPrintFlowPage() {
       setCreatingOrder(true);
       setError(null);
 
+      const safeColorMode = colorMode === 'GRAYSCALE' ? 'BW' : colorMode;
+      const safePaperSize = ['A4', 'A3', 'LETTER', 'LEGAL'].includes((paperSize || '').toUpperCase())
+        ? (paperSize || '').toUpperCase()
+        : 'A4';
+      const safePrintSide = printSide === 'DOUBLE' ? 'DOUBLE' : 'SINGLE';
+
       const newOrder = await createOrder({
         shopId: shop.id,
         customerSessionId: sessionId,
         documentId: processedDoc.id,
-        paperSize,
-        colorMode,
-        printSide,
+        paperSize: safePaperSize,
+        colorMode: safeColorMode,
+        printSide: safePrintSide,
         copies,
         pageRange: pageRangeMode === 'ALL' ? 'all' : customRangeString || 'selected',
         notes: customNotes.trim() ? `${customNotes} | Binding: ${bindingOption} | Paper: ${paperGsm}GSM` : `Binding: ${bindingOption} | Paper: ${paperGsm}GSM`,

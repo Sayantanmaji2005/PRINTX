@@ -464,24 +464,46 @@ function downloadFile(fileUrl, destinationPath) {
   });
 }
 
-function sendToPrinter(filePath, printerName, printConfig) {
-  return new Promise((resolve, reject) => {
-    console.log('[PRINT] Spooling to: "' + printerName + '" (Copies: ' + printConfig.copies + ', Mode: ' + printConfig.colorMode + ', Duplex: ' + printConfig.printSide + ')');
+function sendToPrinter(filePath, printerName, printConfig = {}) {
+  return new Promise((resolve) => {
+    const copies = parseInt(printConfig.copies) || 1;
+    const isColor = (printConfig.colorMode || '').toUpperCase() === 'COLOR';
+    const isDuplex = (printConfig.printSide || '').toUpperCase() === 'DOUBLE';
+    const cleanPrinter = (printerName || '').trim();
+
+    console.log('[PRINT] Spooling to: "' + (cleanPrinter || 'DEFAULT') + '" (Copies: ' + copies + ', Mode: ' + (isColor ? 'COLOR' : 'BW') + ', Duplex: ' + (isDuplex ? 'DOUBLE' : 'SINGLE') + ')');
 
     if (process.platform === 'win32') {
-      const targetPrinter = printerName.replace(/"/g, '""');
-      const absolutePdf = path.resolve(filePath).replace(/'/g, "''");
-      const psPrint = 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + absolutePdf + '\\' -Verb PrintTo -ArgumentList \'\\\\"' + targetPrinter + '\\\\\"\' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"';
+      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
+      const absolutePdf = path.resolve(filePath);
 
-      exec(psPrint, { windowsHide: true }, (err) => {
-        resolve(true);
-      });
+      if (fs.existsSync(sumatraPath)) {
+        const settings = 'copies=' + copies + ',' + (isColor ? 'color' : 'monochrome') + ',' + (isDuplex ? 'duplex' : 'simplex');
+        const cmd = cleanPrinter
+          ? '"' + sumatraPath + '" -print-to "' + cleanPrinter + '" -print-settings "' + settings + '" -silent "' + absolutePdf + '"'
+          : '"' + sumatraPath + '" -print-to-default -print-settings "' + settings + '" -silent "' + absolutePdf + '"';
+
+        console.log('[ENGINE] Executing hardware spool...');
+        exec(cmd, { windowsHide: true, timeout: 45000 }, (err) => {
+          if (err) console.warn('[AGENT] SumatraPDF notice: ' + err.message);
+          else console.log('[AGENT] Document successfully queued in physical printer spooler.');
+          resolve(true);
+        });
+        return;
+      }
+
+      const safePrinter = cleanPrinter.replace(/"/g, '""');
+      const safePdf = absolutePdf.replace(/'/g, "''");
+      const psPrint = cleanPrinter
+        ? 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + safePdf + '\\' -Verb PrintTo -ArgumentList \'\\\\"' + safePrinter + '\\\\\"\' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"'
+        : 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + safePdf + '\\' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"';
+
+      exec(psPrint, { windowsHide: true }, () => resolve(true));
     } else {
-      const lpCommand = 'lp -d "' + printerName + '" -n ' + (printConfig.copies || 1) + ' "' + filePath + '"';
-      exec(lpCommand, (err) => {
-        if (err) return reject(err);
-        resolve(true);
-      });
+      const lpCommand = cleanPrinter
+        ? 'lp -d "' + cleanPrinter + '" -n ' + copies + ' "' + filePath + '"'
+        : 'lp -n ' + copies + ' "' + filePath + '"';
+      exec(lpCommand, () => resolve(true));
     }
   });
 }
