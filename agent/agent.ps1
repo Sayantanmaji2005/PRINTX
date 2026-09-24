@@ -147,23 +147,30 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
                 $printDoc.DefaultPageSettings.Color = $true
             }
             
-            $rawImg = [System.Drawing.Image]::FromFile($cleanPath)
+            $script:printTargetImage = [System.Drawing.Image]::FromFile($cleanPath)
             
             $printDoc.add_PrintPage({
                 param($sender, $e)
-                $bounds = $e.MarginBounds
-                $scale = [Math]::Min($bounds.Width / $rawImg.Width, $bounds.Height / $rawImg.Height)
-                $w = [int]($rawImg.Width * $scale)
-                $h = [int]($rawImg.Height * $scale)
-                $x = $bounds.X + [int](($bounds.Width - $w) / 2)
-                $y = $bounds.Y + [int](($bounds.Height - $h) / 2)
-                $e.Graphics.DrawImage($rawImg, $x, $y, $w, $h)
+                if ($script:printTargetImage) {
+                    $bounds = $e.MarginBounds
+                    $imgW = $script:printTargetImage.Width
+                    $imgH = $script:printTargetImage.Height
+                    $scale = [Math]::Min($bounds.Width / $imgW, $bounds.Height / $imgH)
+                    $w = [int]($imgW * $scale)
+                    $h = [int]($imgH * $scale)
+                    $x = $bounds.X + [int](($bounds.Width - $w) / 2)
+                    $y = $bounds.Y + [int](($bounds.Height - $h) / 2)
+                    $e.Graphics.DrawImage($script:printTargetImage, $x, $y, $w, $h)
+                }
                 $e.HasMorePages = $false
             })
             
             $printDoc.Print()
             $printDoc.Dispose()
-            $rawImg.Dispose()
+            if ($script:printTargetImage) {
+                $script:printTargetImage.Dispose()
+                $script:printTargetImage = $null
+            }
             Write-Host ("   [SUCCESS] Image successfully spooled to " + $printerName + "!") -ForegroundColor Green
             return
         } catch {
