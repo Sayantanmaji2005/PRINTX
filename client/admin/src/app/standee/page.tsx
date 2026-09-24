@@ -9,7 +9,6 @@ function StandeeContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug') || 'printx-shop';
   const [shop, setShop] = useState<any>(null);
-  const [networkMode, setNetworkMode] = useState<'vercel' | 'local' | 'cloudflare'>('vercel');
 
   useEffect(() => {
     if (!slug) return;
@@ -20,18 +19,8 @@ function StandeeContent() {
       .catch((err) => console.error(err));
   }, [slug]);
 
-  const vercelBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://printx-customer.vercel.app';
-  const localBaseUrl = 'http://192.168.0.103:3000';
-  const cloudflareBaseUrl = 'https://bye-belong-enquiries-shape.trycloudflare.com';
-
-  const activeBaseUrl =
-    networkMode === 'vercel'
-      ? vercelBaseUrl
-      : networkMode === 'local'
-      ? localBaseUrl
-      : cloudflareBaseUrl;
-
-  const customerUrl = `${activeBaseUrl}/shop/${slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://printx-customer.vercel.app';
+  const customerUrl = `${baseUrl}/shop/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(customerUrl)}`;
 
   return (
@@ -45,43 +34,6 @@ function StandeeContent() {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
         </Link>
-
-        {/* QR Source Mode Selector */}
-        <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold gap-1">
-          <button
-            type="button"
-            onClick={() => setNetworkMode('vercel')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              networkMode === 'vercel'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            🚀 Vercel Cloud (Official)
-          </button>
-          <button
-            type="button"
-            onClick={() => setNetworkMode('local')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              networkMode === 'local'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            📶 Shop Wi-Fi (LAN)
-          </button>
-          <button
-            type="button"
-            onClick={() => setNetworkMode('cloudflare')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              networkMode === 'cloudflare'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            🌐 Cloudflare Tunnel
-          </button>
-        </div>
 
         <button
           onClick={() => window.print()}
