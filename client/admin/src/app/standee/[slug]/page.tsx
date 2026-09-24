@@ -58,7 +58,7 @@ export default function ShopStandeePage() {
 
         {/* Shop Name */}
         <h1 className="text-2xl font-extrabold text-slate-900 font-['Outfit'] leading-tight">
-          {shop?.name || 'Maji Xerox & Digital'}
+          {shop?.name || 'Xerox Station'}
         </h1>
         {shop?.address && (
           <p className="text-xs text-slate-500 mt-1 max-w-xs">{shop.address}</p>

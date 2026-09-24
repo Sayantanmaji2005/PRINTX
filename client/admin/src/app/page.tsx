@@ -481,7 +481,7 @@ export default function SuperAdminDashboard() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Maji Xerox & Cyber Station"
+                  placeholder="Enter shop name"
                   value={newShop.name}
                   onChange={(e) => setNewShop({ ...newShop, name: e.target.value })}
                   className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -496,7 +496,7 @@ export default function SuperAdminDashboard() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Bikas Maji"
+                    placeholder="Enter owner full name"
                     value={newShop.ownerName}
                     onChange={(e) => setNewShop({ ...newShop, ownerName: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -510,7 +510,7 @@ export default function SuperAdminDashboard() {
                   <input
                     type="tel"
                     required
-                    placeholder="e.g. +91 98765 43210"
+                    placeholder="Enter 10-digit mobile number"
                     value={newShop.ownerPhone}
                     onChange={(e) => setNewShop({ ...newShop, ownerPhone: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -525,7 +525,7 @@ export default function SuperAdminDashboard() {
                   </label>
                   <input
                     type="email"
-                    placeholder="e.g. shop@gmail.com"
+                    placeholder="Enter email address"
                     value={newShop.ownerEmail}
                     onChange={(e) => setNewShop({ ...newShop, ownerEmail: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -538,7 +538,7 @@ export default function SuperAdminDashboard() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. shop@okhdfcbank"
+                    placeholder="Enter UPI ID (e.g. yourname@upi)"
                     value={newShop.upiId}
                     onChange={(e) => setNewShop({ ...newShop, upiId: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -552,7 +552,7 @@ export default function SuperAdminDashboard() {
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="e.g. 14 College Street, Gate 2, Kolkata - 700073"
+                  placeholder="Enter complete shop address"
                   value={newShop.address}
                   onChange={(e) => setNewShop({ ...newShop, address: e.target.value })}
                   className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none"
