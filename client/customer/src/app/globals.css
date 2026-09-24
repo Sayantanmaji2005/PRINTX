@@ -30,3 +30,87 @@ body {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px -10px rgba(12, 143, 233, 0.2);
 }
+
+@media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide entire web application UI during print */
+  header,
+  footer,
+  nav,
+  main > div:not(#printable-receipt-wrapper),
+  .no-print,
+  button,
+  input,
+  select,
+  .action-card,
+  video,
+  canvas {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show ONLY the printable receipt template */
+  #printable-invoice,
+  #printable-invoice * {
+    visibility: visible !important;
+    display: block !important;
+  }
+
+  #printable-invoice {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+    background: white !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    page-break-inside: avoid !important;
+  }
+
+  #printable-invoice table {
+    display: table !important;
+    width: 100% !important;
+  }
+
+  #printable-invoice thead {
+    display: table-header-group !important;
+  }
+
+  #printable-invoice tbody {
+    display: table-row-group !important;
+  }
+
+  #printable-invoice tr {
+    display: table-row !important;
+  }
+
+  #printable-invoice th,
+  #printable-invoice td {
+    display: table-cell !important;
+  }
+
+  #printable-invoice .flex {
+    display: flex !important;
+  }
+
+  #printable-invoice .grid {
+    display: grid !important;
+  }
+}

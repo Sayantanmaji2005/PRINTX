@@ -619,7 +619,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     {processedDoc.originalName}
                   </h2>
                   <span className="text-[10px] text-slate-500 block">
-                    {pagesList.length} Total Pages ΓÇó {(processedDoc.fileSize / 1024).toFixed(1)} KB
+                    {pagesList.length} Total Pages • {(processedDoc.fileSize / 1024).toFixed(1)} KB
                   </span>
                 </div>
               </div>
@@ -834,7 +834,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     </div>
 
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-                      <span>{paperSize} ΓÇó {colorMode}</span>
+                      <span>{paperSize} • {colorMode}</span>
                       <span>Page {activePageIndex + 1}</span>
                     </div>
                   </div>
@@ -847,7 +847,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     onClick={() => setActivePageIndex((p) => Math.max(0, p - 1))}
                     className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold disabled:opacity-40"
                   >
-                    ΓåÉ Previous
+                    ← Previous
                   </button>
 
                   <button
@@ -855,7 +855,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     className="px-3 py-1.5 rounded-xl bg-blue-50 text-brand-700 text-xs font-semibold flex items-center gap-1"
                   >
                     <RotateCw className="w-3.5 h-3.5" />
-                    <span>Rotate 90┬░</span>
+                    <span>Rotate 90°</span>
                   </button>
 
                   <button
@@ -863,7 +863,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                     onClick={() => setActivePageIndex((p) => Math.min(pagesList.length - 1, p + 1))}
                     className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold disabled:opacity-40"
                   >
-                    Next ΓåÆ
+                    Next →
                   </button>
                 </div>
               </div>
@@ -941,11 +941,11 @@ export default function DocumentUploadAndPrintFlowPage() {
                       onChange={(e) => setPaperSize(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
                     >
-                      <option value="A4">A4 (Standard 210 ├ù 297 mm)</option>
-                      <option value="A3">A3 (Poster 297 ├ù 420 mm)</option>
-                      <option value="A5">A5 (Half Sheet 148 ├ù 210 mm)</option>
-                      <option value="LEGAL">Legal (8.5 ├ù 14 in)</option>
-                      <option value="LETTER">Letter (8.5 ├ù 11 in)</option>
+                      <option value="A4">A4 (Standard 210 × 297 mm)</option>
+                      <option value="A3">A3 (Poster 297 × 420 mm)</option>
+                      <option value="A5">A5 (Half Sheet 148 × 210 mm)</option>
+                      <option value="LEGAL">Legal (8.5 × 14 in)</option>
+                      <option value="LETTER">Letter (8.5 × 11 in)</option>
                     </select>
                   </div>
 
@@ -957,10 +957,10 @@ export default function DocumentUploadAndPrintFlowPage() {
                       className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
                     >
                       <option value="75">75 GSM (Standard Xerox)</option>
-                      <option value="80">80 GSM (Executive Bond +Γé╣1)</option>
-                      <option value="100">100 GSM (Heavyweight +Γé╣2)</option>
-                      <option value="glossy">Glossy Photo Paper (+Γé╣10)</option>
-                      <option value="matte">Matte Fine Paper (+Γé╣8)</option>
+                      <option value="80">80 GSM (Executive Bond +₹1)</option>
+                      <option value="100">100 GSM (Heavyweight +₹2)</option>
+                      <option value="glossy">Glossy Photo Paper (+₹10)</option>
+                      <option value="matte">Matte Fine Paper (+₹8)</option>
                     </select>
                   </div>
                 </div>
@@ -1005,10 +1005,10 @@ export default function DocumentUploadAndPrintFlowPage() {
                       className="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
                     >
                       <option value="NONE">No Binding (Loose Sheets)</option>
-                      <option value="STAPLE">Corner Staple (+Γé╣5)</option>
-                      <option value="SPIRAL">Spiral Coil (+Γé╣40)</option>
-                      <option value="COMB">Comb Binding (+Γé╣40)</option>
-                      <option value="HARDCOVER">Golden Hard Cover (+Γé╣250)</option>
+                      <option value="STAPLE">Corner Staple (+₹5)</option>
+                      <option value="SPIRAL">Spiral Coil (+₹40)</option>
+                      <option value="COMB">Comb Binding (+₹40)</option>
+                      <option value="HARDCOVER">Golden Hard Cover (+₹250)</option>
                     </select>
                   </div>
 
@@ -1020,8 +1020,8 @@ export default function DocumentUploadAndPrintFlowPage() {
                       className="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
                     >
                       <option value="NONE">No Lamination</option>
-                      <option value="GLOSS">Glossy Clear (+Γé╣20/sheet)</option>
-                      <option value="MATTE">Matte Velvet (+Γé╣25/sheet)</option>
+                      <option value="GLOSS">Glossy Clear (+₹20/sheet)</option>
+                      <option value="MATTE">Matte Velvet (+₹25/sheet)</option>
                     </select>
                   </div>
                 </div>
@@ -1036,23 +1036,23 @@ export default function DocumentUploadAndPrintFlowPage() {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900 font-['Outfit']">
-                    Γé╣{priceCalculation.grandTotal.toFixed(2)}
+                    ₹{priceCalculation.grandTotal.toFixed(2)}
                   </span>
                   <span className="text-xs text-slate-500">
-                    ({priceCalculation.totalSheets} sheets ΓÇó {copies} {copies === 1 ? 'copy' : 'copies'})
+                    ({priceCalculation.totalSheets} sheets • {copies} {copies === 1 ? 'copy' : 'copies'})
                   </span>
                   {priceCalculation.discount > 0 && (
                     <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Saved Γé╣{priceCalculation.discount.toFixed(2)} ({priceCalculation.discountPercent}% bulk off)
+                      Saved ₹{priceCalculation.discount.toFixed(2)} ({priceCalculation.discountPercent}% bulk off)
                     </span>
                   )}
                 </div>
 
                 <div className="text-[10px] text-slate-500 flex items-center gap-2 flex-wrap">
-                  <span>Print: Γé╣{priceCalculation.printingCost}</span>
-                  {priceCalculation.paperCost > 0 && <span>ΓÇó Paper: Γé╣{priceCalculation.paperCost}</span>}
-                  {priceCalculation.finishingCost > 0 && <span>ΓÇó Finishing: Γé╣{priceCalculation.finishingCost}</span>}
-                  <span>ΓÇó GST Included</span>
+                  <span>Print: ₹{priceCalculation.printingCost}</span>
+                  {priceCalculation.paperCost > 0 && <span>• Paper: ₹{priceCalculation.paperCost}</span>}
+                  {priceCalculation.finishingCost > 0 && <span>• Finishing: ₹{priceCalculation.finishingCost}</span>}
+                  <span>• GST Included</span>
                 </div>
               </div>
 
@@ -1083,7 +1083,7 @@ export default function DocumentUploadAndPrintFlowPage() {
               <div>
                 <span className="text-xs text-slate-500 block">Total Amount to Pay</span>
                 <div className="text-3xl font-black text-slate-900 font-['Outfit'] mt-1">
-                  Γé╣{(order.total || priceCalculation.grandTotal).toFixed(2)}
+                  ₹{(order.total || priceCalculation.grandTotal).toFixed(2)}
                 </div>
               </div>
 
@@ -1170,21 +1170,132 @@ export default function DocumentUploadAndPrintFlowPage() {
                   <div className="pt-2 flex items-center justify-center gap-2">
                     <button
                       onClick={() => window.print()}
-                      className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold flex items-center gap-1.5"
+                      className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Print Receipt</span>
+                      <span>Print Bill / Save Receipt PDF</span>
                     </button>
 
                     <button
                       onClick={() => router.push(`/shop/${slug}`)}
-                      className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                      className="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
                     >
                       Done / Print Another
                     </button>
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= DEDICATED PRINTABLE TAX INVOICE RECEIPT ================= */}
+        {order && (
+          <div id="printable-invoice" className="hidden font-sans">
+            <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4 mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black tracking-tight text-slate-900 font-['Outfit']">PRINT<span className="text-blue-600">X</span></span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-300">TAX INVOICE / CASH RECEIPT</span>
+                </div>
+                <h1 className="text-lg font-bold text-slate-900 mt-1">{shop?.name || 'PRINTX SHOP'}</h1>
+                <p className="text-xs text-slate-600">{shop?.address || 'Dingal 4 No Canel Road'}</p>
+                <p className="text-xs text-slate-600">Phone: {shop?.owner?.phone || '+91 9002761536'} | UPI VPA: {shop?.upiId || '9002761536@axl'}</p>
+              </div>
+              <div className="text-right">
+                <div className="inline-block px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold uppercase tracking-wider">
+                  ✓ PAID (ONLINE UPI)
+                </div>
+                <div className="text-xs text-slate-600 mt-2 font-mono">
+                  <div><strong>Invoice #:</strong> {order.orderNumber}</div>
+                  <div><strong>Date:</strong> {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                  <div><strong>Time:</strong> {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs mb-4">
+              <div>
+                <span className="text-slate-500 font-medium block">Customer Session ID:</span>
+                <span className="font-mono font-bold text-slate-800">{customerSessionId ? customerSessionId.substring(0, 16) : 'Guest Session'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-medium block">Payment Method:</span>
+                <span className="font-bold text-emerald-700">UPI Instant Digital Verification</span>
+              </div>
+            </div>
+
+            <table className="w-full text-xs text-left border-collapse mb-4">
+              <thead>
+                <tr className="border-b-2 border-slate-300 text-slate-600 uppercase text-[10px]">
+                  <th className="py-2 font-bold">Service / Item Details</th>
+                  <th className="py-2 text-center font-bold">Pages</th>
+                  <th className="py-2 text-center font-bold">Qty / Copies</th>
+                  <th className="py-2 text-right font-bold">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-800">
+                <tr>
+                  <td className="py-2.5">
+                    <div className="font-bold text-slate-900">{processedDoc?.originalName || order.document?.originalName || 'Document Print Job'}</div>
+                    <div className="text-[11px] text-slate-500">
+                      {paperSize} ({paperGsm} GSM) • {colorMode === 'COLOR' ? 'Full Color' : 'Black & White'} • {printSide === 'DOUBLE' ? 'Double Sided (Duplex)' : 'Single Sided'}
+                    </div>
+                  </td>
+                  <td className="py-2.5 text-center font-mono">{priceCalculation.selectedPagesCount || 1}</td>
+                  <td className="py-2.5 text-center font-mono">{copies}</td>
+                  <td className="py-2.5 text-right font-mono font-bold">₹{priceCalculation.printingCost.toFixed(2)}</td>
+                </tr>
+                {priceCalculation.paperCost > 0 && (
+                  <tr>
+                    <td className="py-2 text-slate-700">Premium Paper Upgrade ({paperGsm} GSM)</td>
+                    <td className="py-2 text-center font-mono">—</td>
+                    <td className="py-2 text-center font-mono">{priceCalculation.totalSheets} sheets</td>
+                    <td className="py-2 text-right font-mono">₹{priceCalculation.paperCost.toFixed(2)}</td>
+                  </tr>
+                )}
+                {priceCalculation.finishingCost > 0 && (
+                  <tr>
+                    <td className="py-2 text-slate-700">Document Finishing (Binding: {bindingOption} / Lamination: {laminationOption})</td>
+                    <td className="py-2 text-center font-mono">—</td>
+                    <td className="py-2 text-center font-mono">1</td>
+                    <td className="py-2 text-right font-mono">₹{priceCalculation.finishingCost.toFixed(2)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            <div className="border-t-2 border-slate-300 pt-3 space-y-1.5 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal</span>
+                <span className="font-mono">₹{((order.total || priceCalculation.grandTotal) + (priceCalculation.discount || 0)).toFixed(2)}</span>
+              </div>
+              {priceCalculation.discount > 0 && (
+                <div className="flex justify-between text-emerald-600 font-medium">
+                  <span>Bulk Discount ({priceCalculation.discountPercent}% Off)</span>
+                  <span className="font-mono">-₹{priceCalculation.discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-500 text-[11px]">
+                <span>GST (0% Exempt / Composite Scheme)</span>
+                <span className="font-mono">₹0.00</span>
+              </div>
+              <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-300 pt-2 mt-1">
+                <span>Grand Total Paid</span>
+                <span className="font-mono text-blue-700">₹{(order.total || priceCalculation.grandTotal).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-dashed border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
+              <div className="space-y-1 max-w-sm">
+                <p className="font-semibold text-slate-700">Automated Direct Printer Hardware Spool</p>
+                <p>Collect prints at shop counter with Order #{order.orderNumber}.</p>
+                <p className="text-[9px] text-slate-400">Computer generated bill. No physical signature required. Powered by PRINTX.</p>
+              </div>
+              <div className="text-center p-2 rounded-lg border border-emerald-400 bg-emerald-50/50">
+                <div className="text-[10px] font-black text-emerald-700 tracking-wider">PRINTX VERIFIED</div>
+                <div className="text-[8px] font-mono text-emerald-600">TRANSACTION SECURED</div>
+              </div>
             </div>
           </div>
         )}
