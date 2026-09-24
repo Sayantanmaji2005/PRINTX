@@ -31,6 +31,7 @@ import {
   Check,
 } from 'lucide-react';
 import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
+import { downloadAgentZip } from '@/lib/agentBundle';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -749,41 +750,38 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            {/* Quick Config Download & Copy */}
-            <div className="mt-5 p-4 rounded-2xl bg-slate-900 text-white space-y-3">
+            {/* 1-Click Download Connector Package ZIP */}
+            <div className="mt-5 p-4 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 text-white space-y-3 shadow-lg border border-indigo-500/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5 font-['Outfit']">
+                    <Download className="w-4 h-4 text-indigo-400" />
+                    <span>Download Ready-To-Run Agent Package</span>
+                  </div>
+                  <div className="text-[11px] text-indigo-200/80 mt-0.5">
+                    Includes pre-configured <code className="text-indigo-300">start-agent.bat</code> and <code className="text-indigo-300">config.json</code> for {selectedPrinterShop.name}.
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => downloadAgentZip(selectedPrinterShop)}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Agent (.ZIP)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Config Preview */}
+            <div className="mt-4 p-4 rounded-2xl bg-slate-900 text-white space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Terminal className="w-4 h-4 text-blue-400" />
                   <span className="text-xs font-bold font-mono text-slate-200">
-                    config.json (Pre-configured for this shop)
+                    config.json Settings
                   </span>
                 </div>
-                <button
-                  onClick={() => {
-                    const cfg = {
-                      serverUrl: 'https://printx-cib8.onrender.com',
-                      shopSlug: selectedPrinterShop.slug,
-                      agentName: `${selectedPrinterShop.name} Counter PC`,
-                      pollIntervalMs: 3000,
-                      heartbeatIntervalMs: 10000,
-                      autoPrint: true,
-                      preferredPrinter: '',
-                    };
-                    const blob = new Blob([JSON.stringify(cfg, null, 2)], {
-                      type: 'application/json',
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'config.json';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                  className="px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download config.json</span>
-                </button>
               </div>
 
               <pre className="p-3 rounded-xl bg-black/50 text-[11px] font-mono text-blue-300 overflow-x-auto border border-white/10">
