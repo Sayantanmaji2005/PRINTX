@@ -23,6 +23,7 @@ color 0B
 cls
 cd /d "%~dp0"
 
+:loop
 echo ======================================================================
 echo             PRINTX AUTOMATED PRINTER CONNECTOR AGENT
 echo                  Shop: ${shop.name}
@@ -31,11 +32,11 @@ echo ======================================================================
 echo.
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent.ps1"
-if %errorlevel% neq 0 (
-    echo.
-    echo Press any key to retry or exit...
-    pause
-)
+
+echo.
+echo [AGENT NOTICE] Agent process stopped. Restarting in 3 seconds...
+timeout /t 3 /nobreak >nul
+goto loop
 `;
 
   const agentPs1 = `# =====================================================================
@@ -57,7 +58,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $configPath = Join-Path $scriptDir "config.json"
 $tempDir = Join-Path $scriptDir "temp_jobs"
 
-if (!(Test-Path $tempDir)) {
+if (-not (Test-Path $tempDir)) {
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 }
 
@@ -82,9 +83,9 @@ if (Test-Path $configPath) {
     }
 }
 
-Write-Host ("Connecting to Server : " + $serverUrl) -ForegroundColor Green
-Write-Host ("Shop Slug           : " + $shopSlug) -ForegroundColor Green
-Write-Host ("Agent Name          : " + $agentName) -ForegroundColor Green
+Write-Host "Connecting to Server : $serverUrl" -ForegroundColor Green
+Write-Host "Shop Slug           : $shopSlug" -ForegroundColor Green
+Write-Host "Agent Name          : $agentName" -ForegroundColor Green
 Write-Host ""
 
 # Enable TLS 1.2
@@ -115,7 +116,7 @@ function Get-ShopPrinters {
 }
 
 $activePrinters = Get-ShopPrinters
-Write-Host ("Detected Hardware Printers (" + $activePrinters.Count + "):") -ForegroundColor Yellow
+Write-Host "Detected Hardware Printers ($($activePrinters.Count)):" -ForegroundColor Yellow
 $defaultPrinter = ""
 $idx = 1
 foreach ($p in $activePrinters) {
@@ -124,7 +125,7 @@ foreach ($p in $activePrinters) {
     if ($p.isDefault -and [string]::IsNullOrEmpty($defaultPrinter)) {
         $defaultPrinter = $p.name
     }
-    Write-Host ("   " + $idx + ". [" + $tag + "] " + $p.name + $def) -ForegroundColor White
+    Write-Host "   $idx. [$tag] $($p.name)$def" -ForegroundColor White
     $idx++
 }
 
@@ -154,7 +155,7 @@ function Send-Heartbeat {
             printers = $currentPrinters
         } | ConvertTo-Json -Depth 4
 
-        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/heartbeat") -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
+        Invoke-RestMethod -Uri "$serverUrl/api/agent/heartbeat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction SilentlyContinue | Out-Null
     } catch {
         # Silent retry
     }
@@ -168,7 +169,7 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
     $cleanPath = (Resolve-Path $filePath).Path
     
-    Write-Host ("🖨️ Spooling to printer: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ", Type: " + $ext + ")") -ForegroundColor Cyan
+    Write-Host "Spooling to printer: $printerName (Copies: $copies, Mode: $mode, Duplex: $side, Type: $ext)" -ForegroundColor Cyan
 
     # A. IMAGE PRINTING (.JPG, .JPEG, .PNG, .BMP, .WEBP) via Native .NET GDI Spooler
     if ($ext -in @('.jpg', '.jpeg', '.png', '.bmp', '.webp')) {
@@ -207,54 +208,50 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
                 $img.Dispose()
                 $doc.Dispose()
             }
-            Write-Host "   ✅ Image successfully sent directly to printer spooler (.NET Engine)." -ForegroundColor Green
+            Write-Host "   Image successfully sent directly to printer spooler." -ForegroundColor Green
             return
         } catch {
-            Write-Host ("   ⚠️ .NET GDI fallback: " + $_.Exception.Message) -ForegroundColor Yellow
             try {
-                $p = Start-Process -FilePath "mspaint.exe" -ArgumentList ('/pt "' + $cleanPath + '" "' + $printerName + '"') -PassThru -WindowStyle Hidden
+                $p = Start-Process -FilePath "mspaint.exe" -ArgumentList "/pt \`"$cleanPath\`" \`"$printerName\`"" -PassThru -WindowStyle Hidden
                 Start-Sleep -Seconds 4
-                if ($p -and !$p.HasExited) { $p.Kill() }
-                Write-Host "   ✅ Printed via MS Paint PrintTo Spooler." -ForegroundColor Green
+                if ($p -and -not $p.HasExited) { $p.Kill() }
+                Write-Host "   Printed via MS Paint PrintTo Spooler." -ForegroundColor Green
                 return
             } catch {}
         }
     }
 
-    # B. PDF PRINTING (.PDF) via Microsoft Edge Engine or Native Shell
+    # B. PDF PRINTING (.PDF) via Microsoft Edge Engine
     if ($ext -eq '.pdf') {
-        $p86 = $env:ProgramFilesX86
-        if (-not $p86) { $p86 = "C:\Program Files (x86)" }
         $edgePaths = @(
-            ($p86 + "\Microsoft\Edge\Application\msedge.exe"),
-            ("C:\Program Files\Microsoft\Edge\Application\msedge.exe"),
-            "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+            "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
         )
         foreach ($edge in $edgePaths) {
             if (Test-Path $edge) {
                 try {
                     for ($c = 1; $c -le $copies; $c++) {
-                        $edgeArgs = '--headless --disable-gpu --print-to-printer="' + $printerName + '" "' + $cleanPath + '"'
+                        $edgeArgs = "--headless --disable-gpu --print-to-printer=\`"$printerName\`" \`"$cleanPath\`""
                         $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
                         $p.WaitForExit(15000)
                     }
-                    Write-Host "   ✅ PDF successfully printed via Microsoft Edge Print Engine." -ForegroundColor Green
+                    Write-Host "   PDF successfully printed via Microsoft Edge Print Engine." -ForegroundColor Green
                     return
                 } catch {
-                    Write-Host ("   ⚠️ Edge print error: " + $_.Exception.Message) -ForegroundColor Yellow
+                    Write-Host "   Edge print notice: \$(\$_.Exception.Message)" -ForegroundColor Yellow
                 }
             }
         }
     }
 
-    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK (No Kill)
+    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
     try {
         $cleanPrinter = $printerName.Replace('"', '""')
-        $p = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList ('"' + $cleanPrinter + '"') -PassThru -WindowStyle Hidden
+        $p = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList "\`"$cleanPrinter\`"" -PassThru -WindowStyle Hidden
         Start-Sleep -Seconds 8
-        Write-Host "   ✅ Document spooled via Windows Shell PrintTo handler." -ForegroundColor Green
+        Write-Host "   Document spooled via Windows Shell PrintTo handler." -ForegroundColor Green
     } catch {
-        Write-Host ("   ⚠️ Print handler notification: " + $_.Exception.Message) -ForegroundColor Yellow
+        Write-Host "   Print handler notice: \$(\$_.Exception.Message)" -ForegroundColor Yellow
     }
 }
 
@@ -263,7 +260,7 @@ Send-Heartbeat
 $lastHeartbeat = [DateTime]::UtcNow
 $processedJobs = @{}
 
-# 5. Main Job Polling Loop
+# 5. Main Job Polling Loop (With Global Crash Protection)
 while ($true) {
     try {
         if (([DateTime]::UtcNow - $lastHeartbeat).TotalSeconds -ge $heartbeatIntervalSec) {
@@ -272,7 +269,7 @@ while ($true) {
         }
 
         $encodedSlug = [System.Uri]::EscapeDataString($shopSlug)
-        $jobsResponse = Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs?shopSlug=" + $encodedSlug) -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
+        $jobsResponse = Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs?shopSlug=$encodedSlug" -Method Get -TimeoutSec 8 -ErrorAction SilentlyContinue
 
         $jobs = if ($jobsResponse.data) { $jobsResponse.data } else { $jobsResponse }
 
@@ -285,9 +282,9 @@ while ($true) {
 
                     Write-Host ""
                     Write-Host "======================================================" -ForegroundColor Magenta
-                    Write-Host ("🔔 NEW PAID PRINT ORDER RECEIVED: " + $job.orderNumber) -ForegroundColor Yellow
-                    Write-Host ("📄 Document: " + $job.documentName) -ForegroundColor White
-                    Write-Host ("⚙️ Config: " + $job.config.copies + " Copies | " + $job.config.colorMode + " | " + $job.config.printSide) -ForegroundColor Gray
+                    Write-Host "NEW PAID PRINT ORDER RECEIVED: $($job.orderNumber)" -ForegroundColor Yellow
+                    Write-Host "Document: $($job.documentName)" -ForegroundColor White
+                    Write-Host "Config: $($job.config.copies) Copies | $($job.config.colorMode) | $($job.config.printSide)" -ForegroundColor Gray
                     Write-Host "======================================================" -ForegroundColor Magenta
 
                     try {
@@ -296,12 +293,12 @@ while ($true) {
                             status = "PRINTING"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $statusBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        $localFile = Join-Path $tempDir ($job.orderNumber + "_" + $job.fileKey)
-                        Write-Host "📥 Downloading customer document from cloud..." -ForegroundColor Cyan
+                        $localFile = Join-Path $tempDir "$($job.orderNumber)_$($job.fileKey)"
+                        Write-Host "Downloading customer document from cloud..." -ForegroundColor Cyan
                         
-                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { $serverUrl + $job.downloadUrl }
+                        $downloadUri = if ($job.downloadUrl.StartsWith("http")) { $job.downloadUrl } else { "$serverUrl$($job.downloadUrl)" }
                         Invoke-WebRequest -Uri $downloadUri -OutFile $localFile -TimeoutSec 30
 
                         if ($autoPrint) {
@@ -313,18 +310,18 @@ while ($true) {
                             status = "PRINTED"
                             printerName = $defaultPrinter
                         } | ConvertTo-Json
-                        Invoke-RestMethod -Uri ($serverUrl + "/api/agent/jobs/status") -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
+                        Invoke-RestMethod -Uri "$serverUrl/api/agent/jobs/status" -Method Post -Body $doneBody -ContentType "application/json" -TimeoutSec 5 -ErrorAction SilentlyContinue | Out-Null
 
-                        Write-Host ("✅ [ORDER " + $job.orderNumber + "] PRINT COMPLETED SUCCESSFULLY!") -ForegroundColor Green
+                        Write-Host "ORDER $($job.orderNumber) PRINT COMPLETED SUCCESSFULLY!" -ForegroundColor Green
                         Write-Host ""
                     } catch {
-                        Write-Host ("Print error occurred for order " + $job.orderNumber) -ForegroundColor Red
+                        Write-Host "Print processing notice for order: $($job.orderNumber)" -ForegroundColor Yellow
                     }
                 }
             }
         }
     } catch {
-        # Continue loop
+        # Keep loop running continuously even if network drops
     }
 
     Start-Sleep -Seconds $pollIntervalSec

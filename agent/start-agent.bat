@@ -4,17 +4,16 @@ color 0B
 cls
 cd /d "%~dp0"
 
+:loop
 echo ======================================================================
 echo             PRINTX AUTOMATED PRINTER CONNECTOR AGENT
-echo               Zero Setup Required - Pure Native Windows
+echo               Zero Setup - Pure Native Windows
 echo ======================================================================
 echo.
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent.ps1"
-if %errorlevel% neq 0 (
-    echo.
-    echo Press any key to retry or exit...
-    pause
-)
 
-
+echo.
+echo [AGENT NOTICE] Agent process stopped. Restarting in 3 seconds...
+timeout /t 3 /nobreak >nul
+goto loop
