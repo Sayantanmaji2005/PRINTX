@@ -64,8 +64,7 @@ type AdminTab =
   | 'PRICING'
   | 'INVENTORY'
   | 'CUSTOMERS'
-  | 'REPORTS'
-  | 'SETTINGS';
+  | 'REPORTS';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -240,23 +239,6 @@ export default function SuperAdminDashboard() {
     });
     return Array.from(map.values());
   }, [data?.recentOrders]);
-
-  // ==========================================
-  // 6. BUSINESS SETTINGS STATE
-  // ==========================================
-  const [shopSettings, setShopSettings] = useState({
-    name: 'PRINTX SHOP',
-    slug: 'printx-shop',
-    tagline: 'Print anything. Pay digitally. Collect instantly.',
-    address: 'Dingal 4 No Canel Road',
-    phone: '9002761536',
-    email: 'contact@printx.in',
-    upiId: '9002761536@axl',
-    openingHours: '08:30 AM - 10:00 PM',
-    status: 'OPEN', // OPEN, BUSY, MAINTENANCE, CLOSED
-    autoPrintOnlineOrders: true,
-    notifyOnWhatsApp: true,
-  });
 
   const loadData = async (silent = false) => {
     try {
@@ -595,7 +577,6 @@ export default function SuperAdminDashboard() {
               { id: 'INVENTORY', label: 'Inventory & Supplies', icon: Package, badge: inventory.filter(i => i.status !== 'NORMAL').length },
               { id: 'CUSTOMERS', label: 'Customer CRM', icon: Users },
               { id: 'REPORTS', label: 'Business Reports', icon: BarChart3 },
-              { id: 'SETTINGS', label: 'Shop Settings', icon: Settings },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -2389,165 +2370,6 @@ export default function SuperAdminDashboard() {
                       No order transactions yet. Real service metrics will appear here.
                     </div>
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 9: SHOP SETTINGS & STAFF MANAGEMENT                                   */}
-        {/* ========================================================================= */}
-        {activeTab === 'SETTINGS' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit']">
-                  Shop Profile & Role Settings
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Manage public storefront status, business hours, staff roles, and direct payment UPI handle.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-500">Live Status:</span>
-                <select
-                  value={shopSettings.status}
-                  onChange={(e) => setShopSettings({ ...shopSettings, status: e.target.value })}
-                  className={`px-3 py-1 text-xs font-bold rounded-xl border ${
-                    shopSettings.status === 'OPEN'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                      : shopSettings.status === 'BUSY'
-                      ? 'bg-amber-50 text-amber-700 border-amber-300'
-                      : 'bg-red-50 text-red-700 border-red-300'
-                  }`}
-                >
-                  <option value="OPEN">● OPEN FOR PRINTING</option>
-                  <option value="BUSY">● BUSY (SLIGHT DELAY)</option>
-                  <option value="CLOSED">● SHOP CLOSED</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Shop Profile Details */}
-              <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
-                <h3 className="font-bold text-slate-900 text-sm font-['Outfit']">
-                  Storefront Information
-                </h3>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-                      Shop Business Name
-                    </label>
-                    <input
-                      type="text"
-                      value={shopSettings.name}
-                      onChange={(e) => setShopSettings({ ...shopSettings, name: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-                      Physical Address
-                    </label>
-                    <input
-                      type="text"
-                      value={shopSettings.address}
-                      onChange={(e) => setShopSettings({ ...shopSettings, address: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-                        Phone / WhatsApp
-                      </label>
-                      <input
-                        type="text"
-                        value={shopSettings.phone}
-                        onChange={(e) => setShopSettings({ ...shopSettings, phone: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-                        Shop UPI VPA
-                      </label>
-                      <input
-                        type="text"
-                        value={shopSettings.upiId}
-                        onChange={(e) => setShopSettings({ ...shopSettings, upiId: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-blue-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-                      Daily Operating Hours
-                    </label>
-                    <input
-                      type="text"
-                      value={shopSettings.openingHours}
-                      onChange={(e) => setShopSettings({ ...shopSettings, openingHours: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SaaS Platform Business Architecture & Revenue Model */}
-              <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
-                <h3 className="font-bold text-slate-900 text-sm font-['Outfit']">
-                  PRINTX SaaS Business & Revenue Architecture
-                </h3>
-
-                <div className="space-y-2.5 text-xs">
-                  <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-start gap-3">
-                    <Shield className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-blue-950 block">Platform Owner & SuperAdmin (Sayantan Maji)</strong>
-                      <span className="text-[11px] text-blue-800 leading-relaxed block mt-0.5">
-                        You control the SaaS software platform, onboard partner Xerox shops, issue encrypted counter QR standees, and collect monthly recurring subscription revenue.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
-                    <Zap className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-emerald-950 block">100% Direct Customer UPI Payment to Shopkeeper</strong>
-                      <span className="text-[11px] text-emerald-800 leading-relaxed block mt-0.5">
-                        Customer payments for printouts, Xerox, photos, and scans go directly into the individual shop owner's registered UPI VPA. Platform does not touch their print cash.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-start gap-3">
-                    <DollarSign className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-purple-950 block">Platform Revenue Model: ₹299 / Month / Shop</strong>
-                      <span className="text-[11px] text-purple-800 leading-relaxed block mt-0.5">
-                        Your revenue comes from charging each Xerox shop <strong>₹299/month</strong> to use the PRINTX software, counter QR standees, and auto-print hardware agents.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-start gap-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-amber-950 block">Encrypted QR Standee Gate & Auto-Lock</strong>
-                      <span className="text-[11px] text-amber-800 leading-relaxed block mt-0.5">
-                        When a shop recharges (₹299/mo), their encrypted QR standee and customer web shop are live. If the recharge expires or is suspended, their standee is immediately locked.
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
