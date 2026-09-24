@@ -238,87 +238,80 @@ export class AdminService {
       throw new ConflictException(`Shop with ID ${shopId} not found`);
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Get all orders for this shop
-      const orders = await tx.order.findMany({
-        where: { shopId },
-        select: { id: true },
-      });
-      const orderIds = orders.map((o) => o.id);
-
-      if (orderIds.length > 0) {
-        // Delete print jobs
-        await tx.printJob.deleteMany({ where: { orderId: { in: orderIds } } });
-        // Delete print configs
-        await tx.printConfiguration.deleteMany({ where: { orderId: { in: orderIds } } });
-        // Delete order items
-        await tx.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
-        // Delete refunds
-        await tx.refund.deleteMany({ where: { orderId: { in: orderIds } } });
-        // Delete invoices
-        await tx.invoice.deleteMany({ where: { orderId: { in: orderIds } } });
-        // Delete payments and events
-        const payments = await tx.payment.findMany({
-          where: { orderId: { in: orderIds } },
-          select: { id: true },
-        });
-        const paymentIds = payments.map((p) => p.id);
-        if (paymentIds.length > 0) {
-          await tx.paymentEvent.deleteMany({ where: { paymentId: { in: paymentIds } } });
-          await tx.payment.deleteMany({ where: { id: { in: paymentIds } } });
-        }
-        // Delete orders
-        await tx.order.deleteMany({ where: { id: { in: orderIds } } });
-      }
-
-      // 2. Get customer sessions and documents
-      const customerSessions = await tx.customerSession.findMany({
-        where: { shopId },
-        select: { id: true },
-      });
-      const sessionIds = customerSessions.map((s) => s.id);
-
-      if (sessionIds.length > 0) {
-        const documents = await tx.document.findMany({
-          where: { customerSessionId: { in: sessionIds } },
-          select: { id: true },
-        });
-        const docIds = documents.map((d) => d.id);
-        if (docIds.length > 0) {
-          await tx.documentPage.deleteMany({ where: { documentId: { in: docIds } } });
-          await tx.document.deleteMany({ where: { id: { in: docIds } } });
-        }
-        await tx.customerSession.deleteMany({ where: { id: { in: sessionIds } } });
-      }
-
-      // 3. Delete Print Agents & Heartbeats
-      const agents = await tx.printAgent.findMany({
-        where: { shopId },
-        select: { id: true },
-      });
-      const agentIds = agents.map((a) => a.id);
-      if (agentIds.length > 0) {
-        await tx.printAgentHeartbeat.deleteMany({ where: { agentId: { in: agentIds } } });
-        await tx.printAgent.deleteMany({ where: { id: { in: agentIds } } });
-      }
-
-      // 4. Delete Printers & Scanners
-      await tx.printer.deleteMany({ where: { shopId } });
-      await tx.scanner.deleteMany({ where: { shopId } });
-
-      // 5. Delete Pricing Rules
-      await tx.pricingRule.deleteMany({ where: { shopId } });
-
-      // 6. Delete QR Codes
-      await tx.shopQrCode.deleteMany({ where: { shopId } });
-
-      // 7. Delete Shop Members, Notifications, Audit Logs
-      await tx.shopMember.deleteMany({ where: { shopId } });
-      await tx.notification.deleteMany({ where: { shopId } });
-      await tx.auditLog.deleteMany({ where: { shopId } });
-
-      // 8. Delete Shop
-      return tx.shop.delete({ where: { id: shopId } });
+    // 1. Get all orders for this shop
+    const orders = await this.prisma.order.findMany({
+      where: { shopId },
+      select: { id: true },
     });
+    const orderIds = orders.map((o) => o.id);
+
+    if (orderIds.length > 0) {
+      await this.prisma.printJob.deleteMany({ where: { orderId: { in: orderIds } } });
+      await this.prisma.printConfiguration.deleteMany({ where: { orderId: { in: orderIds } } });
+      await this.prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
+      await this.prisma.refund.deleteMany({ where: { orderId: { in: orderIds } } });
+      await this.prisma.invoice.deleteMany({ where: { orderId: { in: orderIds } } });
+
+      const payments = await this.prisma.payment.findMany({
+        where: { orderId: { in: orderIds } },
+        select: { id: true },
+      });
+      const paymentIds = payments.map((p) => p.id);
+      if (paymentIds.length > 0) {
+        await this.prisma.paymentEvent.deleteMany({ where: { paymentId: { in: paymentIds } } });
+        await this.prisma.payment.deleteMany({ where: { id: { in: paymentIds } } });
+      }
+
+      await this.prisma.order.deleteMany({ where: { id: { in: orderIds } } });
+    }
+
+    // 2. Get customer sessions and documents
+    const customerSessions = await this.prisma.customerSession.findMany({
+      where: { shopId },
+      select: { id: true },
+    });
+    const sessionIds = customerSessions.map((s) => s.id);
+
+    if (sessionIds.length > 0) {
+      const documents = await this.prisma.document.findMany({
+        where: { customerSessionId: { in: sessionIds } },
+        select: { id: true },
+      });
+      const docIds = documents.map((d) => d.id);
+      if (docIds.length > 0) {
+        await this.prisma.documentPage.deleteMany({ where: { documentId: { in: docIds } } });
+        await this.prisma.document.deleteMany({ where: { id: { in: docIds } } });
+      }
+      await this.prisma.customerSession.deleteMany({ where: { id: { in: sessionIds } } });
+    }
+
+    // 3. Delete Print Agents & Heartbeats
+    const agents = await this.prisma.printAgent.findMany({
+      where: { shopId },
+      select: { id: true },
+    });
+    const agentIds = agents.map((a) => a.id);
+    if (agentIds.length > 0) {
+      await this.prisma.printAgentHeartbeat.deleteMany({ where: { agentId: { in: agentIds } } });
+      await this.prisma.printAgent.deleteMany({ where: { id: { in: agentIds } } });
+    }
+
+    // 4. Delete Hardware Printers & Scanners
+    await this.prisma.printer.deleteMany({ where: { shopId } });
+    await this.prisma.scanner.deleteMany({ where: { shopId } });
+
+    // 5. Delete Pricing Rules
+    await this.prisma.pricingRule.deleteMany({ where: { shopId } });
+
+    // 6. Delete QR Codes
+    await this.prisma.shopQrCode.deleteMany({ where: { shopId } });
+
+    // 7. Delete Shop Members, Notifications, Audit Logs
+    await this.prisma.shopMember.deleteMany({ where: { shopId } });
+    await this.prisma.notification.deleteMany({ where: { shopId } });
+    await this.prisma.auditLog.deleteMany({ where: { shopId } });
+
+    // 8. Delete Shop
+    return this.prisma.shop.delete({ where: { id: shopId } });
   }
 }
