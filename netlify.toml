@@ -1,7 +1,9 @@
 [build]
-  base = "client/customer"
-  command = "npm run build"
-  publish = "out"
+  command = "npm run build --workspace=client/customer"
+  publish = "client/customer/out"
+
+[build.environment]
+  NODE_VERSION = "20.14.0"
 
 [[redirects]]
   from = "/*"
