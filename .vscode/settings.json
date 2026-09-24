@@ -1,0 +1,10 @@
+{
+  "java.autobuild.enabled": false,
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.project.explorer.showNonJavaResources": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.associations": {
+    "*.json": "json"
+  }
+}
