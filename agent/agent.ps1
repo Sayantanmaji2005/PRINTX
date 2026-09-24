@@ -184,10 +184,11 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
 
     # B. PDF PRINTING (.PDF) via Microsoft Edge Engine or Native Shell
     if ($ext -eq '.pdf') {
-        # Check for Microsoft Edge headless printing (Built into 100% Windows 10/11)
         $edgePaths = @(
             "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
-            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe"
+            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe",
+            "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
         )
         foreach ($edge in $edgePaths) {
             if (Test-Path $edge) {
@@ -195,22 +196,22 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
                     for ($c = 1; $c -le $copies; $c++) {
                         $edgeArgs = '--headless --disable-gpu --print-to-printer="' + $printerName + '" "' + $cleanPath + '"'
                         $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
-                        Start-Sleep -Seconds 4
-                        if ($p -and !$p.HasExited) { $p.Kill() }
+                        $p.WaitForExit(15000)
                     }
                     Write-Host "   ✅ PDF successfully printed via Microsoft Edge Print Engine." -ForegroundColor Green
                     return
-                } catch {}
+                } catch {
+                    Write-Host ("   ⚠️ Edge print error: " + $_.Exception.Message) -ForegroundColor Yellow
+                }
             }
         }
     }
 
-    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
+    # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK (No Kill)
     try {
         $cleanPrinter = $printerName.Replace('"', '""')
         $p = Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList ('"' + $cleanPrinter + '"') -PassThru -WindowStyle Hidden
-        Start-Sleep -Seconds 5
-        if ($p -and !$p.HasExited) { $p.Kill() }
+        Start-Sleep -Seconds 8
         Write-Host "   ✅ Document spooled via Windows Shell PrintTo handler." -ForegroundColor Green
     } catch {
         Write-Host ("   ⚠️ Print handler notification: " + $_.Exception.Message) -ForegroundColor Yellow
