@@ -124,90 +124,17 @@ export default function SuperAdminDashboard() {
   const [selectedPrinterShop, setSelectedPrinterShop] = useState<any>(null);
 
   // ==========================================
-  // 1. PRINT QUEUE STATE
+  // 1. PRINT QUEUE STATE (Live Connected)
   // ==========================================
-  const [printQueue, setPrintQueue] = useState<any[]>([
-    {
-      id: 'PX-260924-00482',
-      customer: 'Sayantan Maji',
-      phone: '9002761536',
-      document: 'Annual_Project_Thesis_Final.pdf',
-      pages: 48,
-      copies: 2,
-      color: 'B&W',
-      paper: 'A4 75 GSM',
-      sides: 'Double-sided',
-      printer: 'Canon PIXMA G3010 (USB)',
-      priority: 'URGENT',
-      status: 'PRINTING',
-      progress: 65,
-      createdAt: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
-    },
-    {
-      id: 'PX-260924-00481',
-      customer: 'Rohan Sharma',
-      phone: '9830129845',
-      document: 'Passport_Photo_Sheet_8x.pdf',
-      pages: 1,
-      copies: 4,
-      color: 'COLOR',
-      paper: 'Glossy 200 GSM',
-      sides: 'Single-sided',
-      printer: 'Canon PIXMA G3010 (USB)',
-      priority: 'NORMAL',
-      status: 'QUEUED',
-      progress: 0,
-      createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
-    },
-    {
-      id: 'PX-260924-00480',
-      customer: 'Priya Sen',
-      phone: '9748231920',
-      document: 'Legal_Property_Deed_Scan.pdf',
-      pages: 14,
-      copies: 1,
-      color: 'B&W',
-      paper: 'Legal 80 GSM',
-      sides: 'Single-sided',
-      printer: 'HP LaserJet Enterprise M506',
-      priority: 'NORMAL',
-      status: 'QUALITY_CHECK',
-      progress: 100,
-      createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
-    },
-    {
-      id: 'PX-260924-00479',
-      customer: 'Aniket Banerjee',
-      phone: '9433182901',
-      document: 'Engineering_Drawing_Plan_A3.pdf',
-      pages: 6,
-      copies: 3,
-      color: 'COLOR',
-      paper: 'A3 Matte 100 GSM',
-      sides: 'Single-sided',
-      printer: 'Epson EcoTank L805 Series',
-      priority: 'NORMAL',
-      status: 'READY',
-      progress: 100,
-      createdAt: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
-    },
-    {
-      id: 'PX-260924-00478',
-      customer: 'Debjit Roy',
-      phone: '9836102934',
-      document: 'Resume_Professional_Template.pdf',
-      pages: 2,
-      copies: 5,
-      color: 'COLOR',
-      paper: 'Bond 85 GSM',
-      sides: 'Single-sided',
-      printer: 'Canon PIXMA G3010 (USB)',
-      priority: 'NORMAL',
-      status: 'COLLECTED',
-      progress: 100,
-      createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    },
-  ]);
+  const [printQueue, setPrintQueue] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('printx_live_queue');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return [];
+  });
 
   // ==========================================
   // 2. PRINTER HARDWARE FLEET STATE
@@ -217,40 +144,14 @@ export default function SuperAdminDashboard() {
       id: 'PRN-01',
       name: 'Canon PIXMA G3010',
       type: 'USB InkTank Multi-Function',
-      status: 'PRINTING',
-      paperLevel: 82,
-      tonerLevel: 68,
+      status: 'ONLINE',
+      paperLevel: 100,
+      tonerLevel: 100,
       paperSizes: ['A4', 'A5', 'Photo 4x6', 'Legal'],
       capabilities: ['Color', 'B&W', 'Single', 'Borderless'],
-      currentJob: 'PX-260924-00482 (Annual_Project_Thesis_Final.pdf)',
-      pagesPrintedToday: 214,
-      totalLifetimePages: 14820,
-    },
-    {
-      id: 'PRN-02',
-      name: 'HP LaserJet Enterprise M506',
-      type: 'Network High-Speed Monochrome',
-      status: 'ONLINE',
-      paperLevel: 94,
-      tonerLevel: 85,
-      paperSizes: ['A4', 'A5', 'Legal', 'Letter'],
-      capabilities: ['B&W', 'Duplex', 'High-Speed 45ppm'],
       currentJob: 'Idle — Ready for queue',
-      pagesPrintedToday: 418,
-      totalLifetimePages: 92450,
-    },
-    {
-      id: 'PRN-03',
-      name: 'Epson EcoTank L805 Series',
-      type: 'Wi-Fi 6-Color Photo & A3 Specialist',
-      status: 'ONLINE',
-      paperLevel: 60,
-      tonerLevel: 74,
-      paperSizes: ['A3', 'A4', 'Glossy', 'ID Card Tray'],
-      capabilities: ['6-Color Photo', 'PVC ID Card', 'A3 Size'],
-      currentJob: 'Idle — Ready for queue',
-      pagesPrintedToday: 68,
-      totalLifetimePages: 8430,
+      pagesPrintedToday: 0,
+      totalLifetimePages: 0,
     },
   ]);
 
@@ -293,159 +194,52 @@ export default function SuperAdminDashboard() {
   const [priceSavedNotice, setPriceSavedNotice] = useState(false);
 
   // ==========================================
-  // 4. INVENTORY SUPPLIES STATE
+  // 4. INVENTORY SUPPLIES STATE (Clean Store)
   // ==========================================
-  const [inventory, setInventory] = useState<any[]>([
-    {
-      id: 'INV-01',
-      name: 'JK Copier A4 75 GSM Paper',
-      category: 'Paper',
-      stock: 14,
-      unit: 'Reams (500 sheets/ream)',
-      threshold: 5,
-      purchasePrice: 220,
-      supplier: 'JK Paper Mills Ltd',
-      status: 'NORMAL',
-    },
-    {
-      id: 'INV-02',
-      name: 'Century Star A4 80 GSM Paper',
-      category: 'Paper',
-      stock: 4,
-      unit: 'Reams',
-      threshold: 5,
-      purchasePrice: 260,
-      supplier: 'Stationery Wholesale Hub',
-      status: 'LOW',
-    },
-    {
-      id: 'INV-03',
-      name: 'B2B A3 75 GSM Drafting Paper',
-      category: 'Paper',
-      stock: 6,
-      unit: 'Reams',
-      threshold: 3,
-      purchasePrice: 480,
-      supplier: 'Stationery Wholesale Hub',
-      status: 'NORMAL',
-    },
-    {
-      id: 'INV-04',
-      name: 'Kodak Glossy Photo Paper 200 GSM',
-      category: 'Specialty Paper',
-      stock: 8,
-      unit: 'Packs (50 sheets)',
-      threshold: 3,
-      purchasePrice: 310,
-      supplier: 'Photo World Kolkata',
-      status: 'NORMAL',
-    },
-    {
-      id: 'INV-05',
-      name: 'A4 Lamination Pouches (125 Micron)',
-      category: 'Lamination',
-      stock: 2,
-      unit: 'Packs (100 pouches)',
-      threshold: 4,
-      purchasePrice: 280,
-      supplier: 'National Binder Co',
-      status: 'CRITICAL',
-    },
-    {
-      id: 'INV-06',
-      name: 'Spiral Binding Coils (8mm & 12mm)',
-      category: 'Binding',
-      stock: 140,
-      unit: 'Coils',
-      threshold: 50,
-      purchasePrice: 3.5,
-      supplier: 'National Binder Co',
-      status: 'NORMAL',
-    },
-    {
-      id: 'INV-07',
-      name: 'Black Ink Bottle GI-790 (Canon)',
-      category: 'Ink / Toner',
-      stock: 3,
-      unit: 'Bottles (135ml)',
-      threshold: 2,
-      purchasePrice: 490,
-      supplier: 'Canon Authorized Distributor',
-      status: 'NORMAL',
-    },
-    {
-      id: 'INV-08',
-      name: 'HP 87A Black LaserJet Toner Cartridge',
-      category: 'Ink / Toner',
-      stock: 1,
-      unit: 'Cartridge (9,000 pages)',
-      threshold: 1,
-      purchasePrice: 3800,
-      supplier: 'HP Hardware Direct',
-      status: 'LOW',
-    },
-  ]);
+  const [inventory, setInventory] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('printx_inventory');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return [];
+  });
 
   // ==========================================
-  // 5. CUSTOMER CRM STATE
+  // 5. CUSTOMER CRM (Dynamically derived from real orders)
   // ==========================================
-  const [customers, setCustomers] = useState<any[]>([
-    {
-      id: 'CUST-01',
-      name: 'Sayantan Maji',
-      phone: '9002761536',
-      email: 'sayantan@example.com',
-      totalOrders: 18,
-      totalSpend: 1840.0,
-      lastOrder: 'Today, 02:40 PM',
-      favoriteService: 'Document B&W Duplex',
-      tier: 'VIP Gold',
-    },
-    {
-      id: 'CUST-02',
-      name: 'Rohan Sharma',
-      phone: '9830129845',
-      email: 'rohan.sharma@gmail.com',
-      totalOrders: 9,
-      totalSpend: 750.0,
-      lastOrder: 'Today, 01:15 PM',
-      favoriteService: 'Passport Photo Studio',
-      tier: 'Regular',
-    },
-    {
-      id: 'CUST-03',
-      name: 'Priya Sen',
-      phone: '9748231920',
-      email: 'priya.sen@outlook.com',
-      totalOrders: 14,
-      totalSpend: 1420.0,
-      lastOrder: 'Yesterday',
-      favoriteService: 'Legal Scanning & Lamination',
-      tier: 'Silver',
-    },
-    {
-      id: 'CUST-04',
-      name: 'Aniket Banerjee',
-      phone: '9433182901',
-      email: 'aniket.b@engineering.edu',
-      totalOrders: 27,
-      totalSpend: 3120.0,
-      lastOrder: '2 days ago',
-      favoriteService: 'A3 Color CAD Plans',
-      tier: 'VIP Gold',
-    },
-    {
-      id: 'CUST-05',
-      name: 'Debjit Roy',
-      phone: '9836102934',
-      email: 'debjit.roy@tcs.com',
-      totalOrders: 5,
-      totalSpend: 380.0,
-      lastOrder: '3 days ago',
-      favoriteService: 'Resume Printing',
-      tier: 'Regular',
-    },
-  ]);
+  const customers = useMemo(() => {
+    const orders = data?.recentOrders || [];
+    if (orders.length === 0) return [];
+    const map = new Map<string, any>();
+    orders.forEach((ord: any) => {
+      const key = ord.customerPhone || ord.customerName || ord.id;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: `CUST-${key.slice(-4)}`,
+          name: ord.customerName || 'Walk-in Customer',
+          phone: ord.customerPhone || 'N/A',
+          email: ord.customerEmail || '—',
+          totalOrders: 1,
+          totalSpend: Number(ord.total || 0),
+          lastOrder: new Date(ord.createdAt).toLocaleDateString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          favoriteService: ord.configuration?.serviceType || 'Standard Print',
+          tier: Number(ord.total || 0) > 500 ? 'VIP Gold' : 'Regular',
+        });
+      } else {
+        const c = map.get(key);
+        c.totalOrders += 1;
+        c.totalSpend += Number(ord.total || 0);
+      }
+    });
+    return Array.from(map.values());
+  }, [data?.recentOrders]);
 
   // ==========================================
   // 6. BUSINESS SETTINGS STATE
@@ -956,10 +750,10 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalShops || 1}
+                  {data?.metrics?.totalShops || data?.totalShops || (data?.recentShops?.length || 1)}
                 </div>
                 <span className="text-[11px] text-emerald-600 font-medium mt-1 block">
-                  {data?.metrics?.activeShops || 1} Active Stations
+                  {data?.metrics?.activeShops || data?.activeShops || (data?.recentShops?.length || 1)} Active Stations
                 </span>
               </div>
 
@@ -971,7 +765,7 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalCustomerSessions || 48}
+                  {data?.metrics?.totalCustomerSessions || data?.totalCustomerSessions || customers.length || 0}
                 </div>
                 <span className="text-[11px] text-indigo-600 font-medium mt-1 block">QR Guest Scans</span>
               </div>
@@ -984,7 +778,7 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.metrics?.totalPagesPrinted || 700}
+                  {data?.metrics?.totalPagesPrinted || (data?.recentOrders || []).reduce((acc: number, o: any) => acc + ((o.document?.pageCount || 1) * (o.configuration?.copies || 1)), 0)}
                 </div>
                 <span className="text-[11px] text-amber-600 font-medium mt-1 block">Automated sheets</span>
               </div>
@@ -997,7 +791,7 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  ₹{(data?.metrics?.totalRevenue || 7510).toLocaleString('en-IN')}
+                  ₹{(data?.metrics?.totalRevenue !== undefined ? data?.metrics?.totalRevenue : (data?.revenueAggregation?._sum?.total || 0)).toLocaleString('en-IN')}
                 </div>
                 <span className="text-[11px] text-emerald-600 font-medium mt-1 block">UPI Settlements</span>
               </div>
@@ -1010,7 +804,7 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
-                  {data?.metrics?.activePrinters || 3}
+                  {data?.metrics?.activePrinters || printers.filter(p => p.status === 'ONLINE' || p.status === 'PRINTING').length || 1}
                 </div>
                 <span className="text-[11px] text-slate-500 mt-1 block">Ready hardware</span>
               </div>
@@ -1347,7 +1141,18 @@ export default function SuperAdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {printQueue.map((item, idx) => (
+                    {printQueue.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                          <Printer className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                          <div className="font-semibold text-slate-700 text-sm">No Active Print Jobs in Queue</div>
+                          <div className="text-xs text-slate-400 mt-1">
+                            Incoming customer print orders will automatically appear here in real time.
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      printQueue.map((item, idx) => (
                       <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
                         <td className="py-4 px-3">
                           <div className="font-bold text-slate-900 font-mono">{item.id}</div>
@@ -1484,7 +1289,7 @@ export default function SuperAdminDashboard() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>
@@ -2186,71 +1991,83 @@ export default function SuperAdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {inventory.map((item) => (
-                      <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
-                        <td className="py-4 px-3">
-                          <div className="font-bold text-slate-900 text-xs">{item.name}</div>
-                          <div className="text-[10px] text-slate-400">{item.unit}</div>
-                        </td>
-
-                        <td className="py-4 px-3">
-                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium">
-                            {item.category}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-3">
-                          <div className="font-bold text-slate-900 text-sm">
-                            {item.stock} <span className="text-[10px] text-slate-500 font-normal">units</span>
-                          </div>
-                          <div className="text-[10px] text-slate-400">Alert at: {item.threshold}</div>
-                        </td>
-
-                        <td className="py-4 px-3">
-                          <span className="font-mono font-bold text-slate-800">
-                            ₹{item.purchasePrice}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-3 text-slate-600 text-xs">
-                          {item.supplier}
-                        </td>
-
-                        <td className="py-4 px-3 text-center">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              item.status === 'NORMAL'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : item.status === 'LOW'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handleAdjustStock(item.id, -1)}
-                              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs cursor-pointer"
-                              title="Used 1 unit"
-                            >
-                              -
-                            </button>
-                            <span className="w-6 text-center font-bold text-slate-800">{item.stock}</span>
-                            <button
-                              onClick={() => handleAdjustStock(item.id, 1)}
-                              className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs cursor-pointer"
-                              title="Restocked +1 unit"
-                            >
-                              +
-                            </button>
+                    {inventory.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <Package className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                          <div className="font-semibold text-slate-700 text-sm">No Supply Inventory Items Added</div>
+                          <div className="text-xs text-slate-400 mt-1">
+                            Paper reams, cartridges, and binding stock will appear here when tracked.
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      inventory.map((item) => (
+                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="py-4 px-3">
+                            <div className="font-bold text-slate-900 text-xs">{item.name}</div>
+                            <div className="text-[10px] text-slate-400">{item.unit}</div>
+                          </td>
+
+                          <td className="py-4 px-3">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium">
+                              {item.category}
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-3">
+                            <div className="font-bold text-slate-900 text-sm">
+                              {item.stock} <span className="text-[10px] text-slate-500 font-normal">units</span>
+                            </div>
+                            <div className="text-[10px] text-slate-400">Alert at: {item.threshold}</div>
+                          </td>
+
+                          <td className="py-4 px-3">
+                            <span className="font-mono font-bold text-slate-800">
+                              ₹{item.purchasePrice}
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-3 text-slate-600 text-xs">
+                            {item.supplier}
+                          </td>
+
+                          <td className="py-4 px-3 text-center">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                item.status === 'NORMAL'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : item.status === 'LOW'
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleAdjustStock(item.id, -1)}
+                                className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs cursor-pointer"
+                                title="Used 1 unit"
+                              >
+                                -
+                              </button>
+                              <span className="w-6 text-center font-bold text-slate-800">{item.stock}</span>
+                              <button
+                                onClick={() => handleAdjustStock(item.id, 1)}
+                                className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs cursor-pointer"
+                                title="Restocked +1 unit"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2281,82 +2098,92 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {customers.map((cust) => (
-                <div
-                  key={cust.id}
-                  className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                          {cust.name.slice(0, 2).toUpperCase()}
+            {customers.length === 0 ? (
+              <div className="p-12 text-center text-slate-400 bg-white rounded-3xl border border-blue-100 shadow-sm">
+                <Users className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                <div className="font-semibold text-slate-700 text-sm">No Customer CRM Records Yet</div>
+                <div className="text-xs text-slate-400 mt-1">
+                  Customer profiles and lifetime spending will be tracked automatically as customers place print orders.
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {customers.map((cust) => (
+                  <div
+                    key={cust.id}
+                    className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                            {cust.name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900 text-sm">{cust.name}</h3>
+                            <span className="text-[10px] text-slate-400 font-mono">{cust.phone}</span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            cust.tier.includes('Gold')
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-blue-50 text-blue-700 border border-blue-200'
+                          }`}
+                        >
+                          {cust.tier}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 my-3 p-3 rounded-2xl bg-slate-50 text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Total Orders</span>
+                          <strong className="text-slate-800 text-sm">{cust.totalOrders} prints</strong>
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900 text-sm">{cust.name}</h3>
-                          <span className="text-[10px] text-slate-400 font-mono">{cust.phone}</span>
+                          <span className="text-[10px] text-slate-400 block">Lifetime Spend</span>
+                          <strong className="text-emerald-600 text-sm">₹{cust.totalSpend.toFixed(2)}</strong>
                         </div>
                       </div>
 
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                          cust.tier.includes('Gold')
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-blue-50 text-blue-700 border border-blue-200'
-                        }`}
+                      <div className="text-[11px] text-slate-600 space-y-1">
+                        <div>
+                          <span className="text-slate-400">Favorite: </span>
+                          <span className="font-medium text-slate-800">{cust.favoriteService}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Last visit: </span>
+                          <span className="font-medium text-slate-800">{cust.lastOrder}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <a
+                        href={`https://wa.me/91${cust.phone}?text=Hello%20${encodeURIComponent(
+                          cust.name
+                        )},%20your%20print%20order%20from%20PRINTX%20is%20ready!`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        {cust.tier}
-                      </span>
-                    </div>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </a>
 
-                    <div className="grid grid-cols-2 gap-2 my-3 p-3 rounded-2xl bg-slate-50 text-xs">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block">Total Orders</span>
-                        <strong className="text-slate-800 text-sm">{cust.totalOrders} prints</strong>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block">Lifetime Spend</span>
-                        <strong className="text-emerald-600 text-sm">₹{cust.totalSpend.toFixed(2)}</strong>
-                      </div>
-                    </div>
-
-                    <div className="text-[11px] text-slate-600 space-y-1">
-                      <div>
-                        <span className="text-slate-400">Favorite: </span>
-                        <span className="font-medium text-slate-800">{cust.favoriteService}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Last visit: </span>
-                        <span className="font-medium text-slate-800">{cust.lastOrder}</span>
-                      </div>
+                      <a
+                        href={`tel:${cust.phone}`}
+                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+                        title="Call Customer"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                      </a>
                     </div>
                   </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <a
-                      href={`https://wa.me/91${cust.phone}?text=Hello%20${encodeURIComponent(
-                        cust.name
-                      )},%20your%20print%20order%20from%20PRINTX%20is%20ready!`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
-                    </a>
-
-                    <a
-                      href={`tel:${cust.phone}`}
-                      className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
-                      title="Call Customer"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -2389,27 +2216,37 @@ export default function SuperAdminDashboard() {
             {/* Financial Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Gross Monthly Revenue</span>
-                <div className="text-2xl font-extrabold text-slate-900 mt-1">₹34,850.00</div>
-                <span className="text-[11px] text-emerald-600 font-medium">↑ 18.4% vs last month</span>
+                <span className="text-xs font-semibold text-slate-500">Gross Platform Revenue</span>
+                <div className="text-2xl font-extrabold text-slate-900 mt-1">
+                  ₹{(data?.metrics?.totalRevenue !== undefined ? data?.metrics?.totalRevenue : (data?.revenueAggregation?._sum?.total || 0)).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[11px] text-emerald-600 font-medium">100% Instant UPI Settled</span>
               </div>
 
               <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm">
                 <span className="text-xs font-semibold text-slate-500">Total Paper Consumption</span>
-                <div className="text-2xl font-extrabold text-slate-900 mt-1">4,280 sheets</div>
-                <span className="text-[11px] text-blue-600 font-medium">8.5 Reams dispatched</span>
+                <div className="text-2xl font-extrabold text-slate-900 mt-1">
+                  {(data?.metrics?.totalPagesPrinted || (data?.recentOrders || []).reduce((acc: number, o: any) => acc + ((o.document?.pageCount || 1) * (o.configuration?.copies || 1)), 0))} sheets
+                </div>
+                <span className="text-[11px] text-blue-600 font-medium">
+                  {(((data?.metrics?.totalPagesPrinted || 0) / 500)).toFixed(1)} Reams utilized
+                </span>
               </div>
 
               <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm">
                 <span className="text-xs font-semibold text-slate-500">Average Order Value (AOV)</span>
-                <div className="text-2xl font-extrabold text-slate-900 mt-1">₹68.50</div>
-                <span className="text-[11px] text-purple-600 font-medium">UPI instant collected</span>
+                <div className="text-2xl font-extrabold text-slate-900 mt-1">
+                  ₹{(data?.recentOrders?.length ? ((data?.metrics?.totalRevenue || data?.revenueAggregation?._sum?.total || 0) / data?.recentOrders?.length).toFixed(2) : '0.00')}
+                </div>
+                <span className="text-[11px] text-purple-600 font-medium">Per customer checkout</span>
               </div>
 
               <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm">
-                <span className="text-xs font-semibold text-slate-500">Net Operating Margin</span>
-                <div className="text-2xl font-extrabold text-emerald-600 mt-1">68.2%</div>
-                <span className="text-[11px] text-slate-500">After paper & toner costs</span>
+                <span className="text-xs font-semibold text-slate-500">Total Live Orders</span>
+                <div className="text-2xl font-extrabold text-emerald-600 mt-1">
+                  {data?.totalOrders || data?.recentOrders?.length || 0}
+                </div>
+                <span className="text-[11px] text-slate-500">Completed & In-flight</span>
               </div>
             </div>
 
@@ -2423,21 +2260,35 @@ export default function SuperAdminDashboard() {
                 <div className="space-y-3">
                   <div>
                     <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                      <span>Black & White Xerox & Documents</span>
-                      <span className="font-mono text-slate-800">76% (3,250 pages)</span>
+                      <span>Black & White Documents</span>
+                      <span className="font-mono text-slate-800">
+                        {(data?.recentOrders || []).filter((o: any) => o.configuration?.colorMode !== 'COLOR').length} Orders
+                      </span>
                     </div>
                     <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-slate-800 rounded-full" style={{ width: '76%' }} />
+                      <div
+                        className="h-full bg-slate-800 rounded-full transition-all"
+                        style={{
+                          width: `${(data?.recentOrders?.length ? ((data?.recentOrders.filter((o: any) => o.configuration?.colorMode !== 'COLOR').length / data?.recentOrders.length) * 100) : 0)}%`,
+                        }}
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                      <span>Full Color Document & Photo Prints</span>
-                      <span className="font-mono text-purple-700">24% (1,030 pages)</span>
+                      <span>Full Color Prints & Photos</span>
+                      <span className="font-mono text-purple-700">
+                        {(data?.recentOrders || []).filter((o: any) => o.configuration?.colorMode === 'COLOR').length} Orders
+                      </span>
                     </div>
                     <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{ width: '24%' }} />
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all"
+                        style={{
+                          width: `${(data?.recentOrders?.length ? ((data?.recentOrders.filter((o: any) => o.configuration?.colorMode === 'COLOR').length / data?.recentOrders.length) * 100) : 0)}%`,
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -2445,30 +2296,24 @@ export default function SuperAdminDashboard() {
 
               <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
                 <h3 className="font-bold text-slate-900 text-sm font-['Outfit']">
-                  Revenue Share by Service Category
+                  Orders by Service Type
                 </h3>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-                    <span className="font-medium text-slate-700">1. Document & Xerox Printing</span>
-                    <span className="font-bold text-slate-900">₹18,450 (53%)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-                    <span className="font-medium text-slate-700">2. Spiral & Hardcover Binding</span>
-                    <span className="font-bold text-slate-900">₹6,800 (20%)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-                    <span className="font-medium text-slate-700">3. Passport Photo Studio</span>
-                    <span className="font-bold text-slate-900">₹4,200 (12%)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-                    <span className="font-medium text-slate-700">4. High-Res Lamination</span>
-                    <span className="font-bold text-slate-900">₹3,400 (10%)</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5">
-                    <span className="font-medium text-slate-700">5. Scanning & Others</span>
-                    <span className="font-bold text-slate-900">₹2,000 (5%)</span>
-                  </div>
+                  {data?.recentOrders && data.recentOrders.length > 0 ? (
+                    data.recentOrders.slice(0, 5).map((ord: any) => (
+                      <div key={ord.id} className="flex items-center justify-between py-1.5 border-b border-slate-100">
+                        <span className="font-medium text-slate-700 truncate max-w-[200px]">
+                          {ord.document?.originalName || 'Print Document'}
+                        </span>
+                        <span className="font-bold text-slate-900 font-mono">₹{ord.total}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-slate-400 text-xs">
+                      No order transactions yet. Real service metrics will appear here.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
