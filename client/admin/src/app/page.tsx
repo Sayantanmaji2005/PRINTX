@@ -25,6 +25,10 @@ import {
   CreditCard,
   Zap,
   Trash2,
+  Download,
+  Terminal,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
 
@@ -62,6 +66,10 @@ export default function SuperAdminDashboard() {
   const [shopToDelete, setShopToDelete] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Modal State for Hardware Printer Setup
+  const [selectedPrinterShop, setSelectedPrinterShop] = useState<any>(null);
+  const [copiedScript, setCopiedScript] = useState(false);
 
   const loadData = async (silent = false) => {
     try {
@@ -395,12 +403,21 @@ export default function SuperAdminDashboard() {
 
                       <td className="py-4 px-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedPrinterShop(shop)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold text-xs transition-colors"
+                            title="Hardware Printer Auto-Connect"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Printer Setup</span>
+                          </button>
+
                           <Link
                             href={`/standee/${shop.slug}`}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
                           >
                             <QrCode className="w-3.5 h-3.5" />
-                            <span>Print QR Standee</span>
+                            <span>QR Standee</span>
                           </Link>
 
                           <a
@@ -644,6 +661,154 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Hardware Printer Setup Modal */}
+      {selectedPrinterShop && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-white border border-indigo-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base font-['Outfit'] flex items-center gap-2">
+                    <span>Physical Printer Auto-Bridge</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      {selectedPrinterShop.slug}
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Connect {selectedPrinterShop.name}&apos;s local USB / Wi-Fi printer
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedPrinterShop(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Hardware Status Banner */}
+            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/50 border border-blue-100 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-blue-950">
+                  Zero Driver Hassle — Fully Automated
+                </h4>
+                <p className="text-[11px] text-blue-800/80 mt-0.5 leading-relaxed">
+                  The PrintX Agent auto-detects any USB or Wi-Fi printer connected to the shop PC (Canon, HP, Epson, Brother, TVS) and automatically executes print jobs when customer payment is verified.
+                </p>
+              </div>
+            </div>
+
+            {/* 3-Step Setup Instructions */}
+            <div className="mt-5 space-y-3">
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                3-Step Setup for Shop Computer
+              </h4>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                  1
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-slate-800">Shop PC Connection</div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Ensure the physical printer is connected to the shop computer via USB cable or Wi-Fi.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                  2
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-slate-800">Run Desktop Agent</div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Open the <code className="px-1.5 py-0.5 rounded bg-slate-200 font-mono text-[10px] text-slate-800">PRINTX/agent</code> folder on the shop PC and double-click <code className="px-1.5 py-0.5 rounded bg-slate-200 font-mono text-[10px] text-slate-800">start-agent.bat</code>.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                  3
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-emerald-950">Ready to Print!</div>
+                  <div className="text-[11px] text-emerald-800 mt-0.5">
+                    Customers scan the shop standee QR, upload PDFs, pay on phone, and prints immediately come out of your printer silently.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Config Download & Copy */}
+            <div className="mt-5 p-4 rounded-2xl bg-slate-900 text-white space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs font-bold font-mono text-slate-200">
+                    config.json (Pre-configured for this shop)
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    const cfg = {
+                      serverUrl: 'https://printx-cib8.onrender.com',
+                      shopSlug: selectedPrinterShop.slug,
+                      agentName: `${selectedPrinterShop.name} Counter PC`,
+                      pollIntervalMs: 3000,
+                      heartbeatIntervalMs: 10000,
+                      autoPrint: true,
+                      preferredPrinter: '',
+                    };
+                    const blob = new Blob([JSON.stringify(cfg, null, 2)], {
+                      type: 'application/json',
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'config.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download config.json</span>
+                </button>
+              </div>
+
+              <pre className="p-3 rounded-xl bg-black/50 text-[11px] font-mono text-blue-300 overflow-x-auto border border-white/10">
+{`{
+  "serverUrl": "https://printx-cib8.onrender.com",
+  "shopSlug": "${selectedPrinterShop.slug}",
+  "agentName": "${selectedPrinterShop.name} Counter PC",
+  "autoPrint": true
+}`}
+              </pre>
+            </div>
+
+            <div className="pt-5 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedPrinterShop(null)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
