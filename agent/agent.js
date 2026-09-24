@@ -204,22 +204,58 @@ function sendToPrinter(filePath, printerName, printConfig = {}) {
     const isColor = (printConfig.colorMode || '').toUpperCase() === 'COLOR';
     const isDuplex = (printConfig.printSide || '').toUpperCase() === 'DOUBLE';
     const cleanPrinter = (printerName || '').trim();
+    const ext = path.extname(filePath).toLowerCase();
+    const isImage = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tif', '.tiff', '.webp'].includes(ext);
 
     console.log(`🖨️ Spooling to printer: "${cleanPrinter || 'DEFAULT'}" (Copies: ${copies}, Mode: ${isColor ? 'COLOR' : 'BW'}, Duplex: ${isDuplex ? 'DOUBLE' : 'SINGLE'})`);
 
     if (process.platform === 'win32') {
-      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
-      const absolutePdf = path.resolve(filePath);
+      const absolutePath = path.resolve(filePath);
+      const safePath = absolutePath.replace(/'/g, "''").replace(/"/g, '""');
+      const safePrinter = cleanPrinter.replace(/'/g, "''").replace(/"/g, '""');
 
+      if (isImage) {
+        const psScript = `
+Add-Type -AssemblyName System.Drawing;
+$doc = New-Object System.Drawing.Printing.PrintDocument;
+$doc.PrinterSettings.PrinterName = '${safePrinter}';
+$doc.PrinterSettings.Copies = ${copies};
+$doc.DefaultPageSettings.Color = ${isColor ? '$true' : '$false'};
+$img = [System.Drawing.Image]::FromFile('${safePath}');
+$doc.add_PrintPage({
+  param($s, $e);
+  $b = $e.MarginBounds;
+  $scale = [Math]::Min($b.Width / $img.Width, $b.Height / $img.Height);
+  $w = [int]($img.Width * $scale);
+  $h = [int]($img.Height * $scale);
+  $x = $b.X + [int](($b.Width - $w) / 2);
+  $y = $b.Y + [int](($b.Height - $h) / 2);
+  $e.Graphics.DrawImage($img, $x, $y, $w, $h);
+  $e.HasMorePages = $false;
+});
+$doc.Print();
+$doc.Dispose();
+$img.Dispose();
+`;
+        const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
+        exec(`powershell -NoProfile -EncodedCommand ${encoded}`, { windowsHide: true }, (err) => {
+          if (err) {
+            console.warn(`⚠️ .NET image print fallback, trying mspaint...`);
+            exec(`mspaint.exe /pt "${safePath}" "${safePrinter}"`, { windowsHide: true }, () => resolve(true));
+          } else {
+            console.log(`✅ [HARDWARE] Image document spooled successfully to ${safePrinter}!`);
+            resolve(true);
+          }
+        });
+        return;
+      }
+
+      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
       if (fs.existsSync(sumatraPath)) {
         const settings = `copies=${copies},${isColor ? 'color' : 'monochrome'},${isDuplex ? 'duplex' : 'simplex'}`;
-        let cmd = '';
-
-        if (cleanPrinter) {
-          cmd = `"${sumatraPath}" -print-to "${cleanPrinter}" -print-settings "${settings}" -silent "${absolutePdf}"`;
-        } else {
-          cmd = `"${sumatraPath}" -print-to-default -print-settings "${settings}" -silent "${absolutePdf}"`;
-        }
+        const cmd = cleanPrinter
+          ? `"${sumatraPath}" -print-to "${cleanPrinter}" -print-settings "${settings}" -silent "${absolutePath}"`
+          : `"${sumatraPath}" -print-to-default -print-settings "${settings}" -silent "${absolutePath}"`;
 
         console.log(`[ENGINE] Executing hardware spool: ${cmd}`);
         exec(cmd, { windowsHide: true, timeout: 45000 }, (err) => {
@@ -234,11 +270,9 @@ function sendToPrinter(filePath, printerName, printConfig = {}) {
       }
 
       // Fallback: PowerShell PrintTo if SumatraPDF is missing
-      const safePrinter = cleanPrinter.replace(/"/g, '""');
-      const safePdf = absolutePdf.replace(/'/g, "''");
       const psPrint = cleanPrinter
-        ? `powershell -NoProfile -Command "Start-Process -FilePath '${safePdf}' -Verb PrintTo -ArgumentList '\\"${safePrinter}\\"' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`
-        : `powershell -NoProfile -Command "Start-Process -FilePath '${safePdf}' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
+        ? `powershell -NoProfile -Command "Start-Process -FilePath '${safePath}' -Verb PrintTo -ArgumentList '\\"${safePrinter}\\"' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`
+        : `powershell -NoProfile -Command "Start-Process -FilePath '${safePath}' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
 
       exec(psPrint, { windowsHide: true }, (err) => {
         if (err) {

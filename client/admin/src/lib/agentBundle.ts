@@ -182,10 +182,57 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
     $copies = if ($printConfig.copies) { [int]$printConfig.copies } else { 1 }
     $mode = if ($printConfig.colorMode) { $printConfig.colorMode } else { "BW" }
     $side = if ($printConfig.printSide) { $printConfig.printSide } else { "SINGLE" }
+    $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
     $cleanPath = (Resolve-Path $filePath).Path
     
     Write-Host ("[PRINT] Spooling to: " + $printerName + " (Copies: " + $copies + ", Mode: " + $mode + ", Duplex: " + $side + ")") -ForegroundColor Cyan
 
+    # A. If Image (.jpg, .jpeg, .png, .bmp, .webp, .gif, .tif, .tiff), use Native .NET PrintDocument
+    if ($ext -in @('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tif', '.tiff', '.webp')) {
+        try {
+            Add-Type -AssemblyName System.Drawing
+            $printDoc = New-Object System.Drawing.Printing.PrintDocument
+            $printDoc.PrinterSettings.PrinterName = $printerName
+            $printDoc.PrinterSettings.Copies = $copies
+            if ($mode -eq "BW" -or $mode -eq "MONOCHROME") {
+                $printDoc.DefaultPageSettings.Color = $false
+            } else {
+                $printDoc.DefaultPageSettings.Color = $true
+            }
+            
+            $rawImg = [System.Drawing.Image]::FromFile($cleanPath)
+            
+            $printDoc.add_PrintPage({
+                param($sender, $e)
+                $bounds = $e.MarginBounds
+                $scale = [Math]::Min($bounds.Width / $rawImg.Width, $bounds.Height / $rawImg.Height)
+                $w = [int]($rawImg.Width * $scale)
+                $h = [int]($rawImg.Height * $scale)
+                $x = $bounds.X + [int](($bounds.Width - $w) / 2)
+                $y = $bounds.Y + [int](($bounds.Height - $h) / 2)
+                $e.Graphics.DrawImage($rawImg, $x, $y, $w, $h)
+                $e.HasMorePages = $false
+            })
+            
+            $printDoc.Print()
+            $printDoc.Dispose()
+            $rawImg.Dispose()
+            Write-Host ("   [SUCCESS] Image successfully spooled to " + $printerName + "!") -ForegroundColor Green
+            return
+        } catch {
+            Write-Host ("[NOTICE] Image print fallback: " + $_.Exception.Message) -ForegroundColor DarkYellow
+            try {
+                $paintArgs = '/pt "' + $cleanPath + '" "' + $printerName + '"'
+                Start-Process -FilePath "mspaint.exe" -ArgumentList $paintArgs -Wait -WindowStyle Hidden
+                Write-Host "   [SUCCESS] Image printed via system Paint engine." -ForegroundColor Green
+                return
+            } catch {
+                Write-Host ("[ERROR] Image spool error: " + $_.Exception.Message) -ForegroundColor Red
+            }
+        }
+    }
+
+    # B. If PDF and SumatraPDF exists, use silent high-speed engine
     if (Test-Path $sumatraExe) {
         try {
             $settings = "copies=" + $copies
@@ -194,13 +241,14 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
 
             $argList = '-print-to "' + $printerName + '" -print-settings "' + $settings + '" -silent "' + $cleanPath + '"'
             Start-Process -FilePath $sumatraExe -ArgumentList $argList -Wait -WindowStyle Hidden
-            Write-Host "   [SUCCESS] Print spooled successfully via engine." -ForegroundColor Green
+            Write-Host "   [SUCCESS] PDF print spooled successfully via engine." -ForegroundColor Green
             return
         } catch {
-            # Fall through to standard print
+            Write-Host ("[WARNING] SumatraPDF notice: " + $_.Exception.Message) -ForegroundColor Yellow
         }
     }
 
+    # C. Standard Windows Shell PrintTo fallback
     try {
         $cleanPrinter = '"' + $printerName + '"'
         Start-Process -FilePath $cleanPath -Verb PrintTo -ArgumentList $cleanPrinter -PassThru -WindowStyle Hidden | Out-Null
