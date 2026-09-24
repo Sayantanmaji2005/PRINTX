@@ -239,15 +239,13 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
             if (Test-Path $edge) {
                 try {
                     for ($c = 1; $c -le $copies; $c++) {
-                        $edgeArgs = "--headless --disable-gpu --print-to-printer=\`"$printerName\`" \`"$cleanPath\`""
+                        $edgeArgs = "--headless --disable-gpu --log-level=3 --print-to-printer=\`"" + $printerName + "\`" \`"" + $cleanPath + "\`""
                         $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
                         $p.WaitForExit(15000)
                     }
-                    Write-Host "   PDF successfully printed via Microsoft Edge Print Engine." -ForegroundColor Green
+                    Write-Host "   [SUCCESS] PDF printed via Microsoft Edge Engine." -ForegroundColor Green
                     return
-                } catch {
-                    Write-Host "   Edge print notice: \$(\$_.Exception.Message)" -ForegroundColor Yellow
-                }
+                } catch {}
             }
         }
     }

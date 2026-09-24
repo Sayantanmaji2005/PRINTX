@@ -189,26 +189,26 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
         }
     }
 
-    # B. PDF PRINTING (.PDF) via Microsoft Edge Engine
-    if ($ext -eq '.pdf') {
-        $edgePaths = @(
-            "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-        )
-        foreach ($edge in $edgePaths) {
-            if (Test-Path $edge) {
-                try {
-                    for ($c = 1; $c -le $copies; $c++) {
-                        $edgeArgs = "--headless --disable-gpu --print-to-printer=`"" + $printerName + "`" `"" + $cleanPath + "`""
-                        $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
-                        $p.WaitForExit(15000)
-                    }
-                    Write-Host "   [SUCCESS] PDF printed via Microsoft Edge Engine." -ForegroundColor Green
-                    return
-                } catch {}
+        # B. PDF PRINTING (.PDF) via Microsoft Edge Engine
+        if ($ext -eq '.pdf') {
+            $edgePaths = @(
+                "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+            )
+            foreach ($edge in $edgePaths) {
+                if (Test-Path $edge) {
+                    try {
+                        for ($c = 1; $c -le $copies; $c++) {
+                            $edgeArgs = "--headless --disable-gpu --log-level=3 --print-to-printer=`"" + $printerName + "`" `"" + $cleanPath + "`""
+                            $p = Start-Process -FilePath $edge -ArgumentList $edgeArgs -PassThru -WindowStyle Hidden
+                            $p.WaitForExit(15000)
+                        }
+                        Write-Host "   [SUCCESS] PDF printed via Microsoft Edge Engine." -ForegroundColor Green
+                        return
+                    } catch {}
+                }
             }
         }
-    }
 
     # C. GENERIC WINDOWS SHELL PRINTTO FALLBACK
     try {
