@@ -571,24 +571,6 @@ export default function SuperAdminDashboard() {
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <a
-              href="https://printx-customer.vercel.app/shop/printx-shop"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-              <span>Customer Portal</span>
-            </a>
-
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="hidden md:inline">Live Printer: Canon G3010</span>
-              <span className="md:hidden">Live</span>
-            </div>
-          </div>
         </header>
 
         {/* Main OS Workstation Body */}
