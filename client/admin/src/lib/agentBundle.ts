@@ -83,9 +83,9 @@ if (Test-Path $configPath) {
     }
 }
 
-Write-Host "Connecting to Server : $serverUrl" -ForegroundColor Green
-Write-Host "Shop Slug           : $shopSlug" -ForegroundColor Green
-Write-Host "Agent Name          : $agentName" -ForegroundColor Green
+Write-Host ("[SERVER] Connecting to : " + $serverUrl) -ForegroundColor Green
+Write-Host ("[SHOP]   Shop Slug     : " + $shopSlug) -ForegroundColor Green
+Write-Host ("[AGENT]  Agent Name    : " + $agentName) -ForegroundColor Green
 Write-Host ""
 
 # Enable TLS 1.2
@@ -116,7 +116,7 @@ function Get-ShopPrinters {
 }
 
 $activePrinters = Get-ShopPrinters
-Write-Host "Detected Hardware Printers ($($activePrinters.Count)):" -ForegroundColor Yellow
+Write-Host ("[HARDWARE] Detected Printers (" + $activePrinters.Count + "):") -ForegroundColor Yellow
 $defaultPrinter = ""
 $idx = 1
 foreach ($p in $activePrinters) {
@@ -125,7 +125,8 @@ foreach ($p in $activePrinters) {
     if ($p.isDefault -and [string]::IsNullOrEmpty($defaultPrinter)) {
         $defaultPrinter = $p.name
     }
-    Write-Host "   $idx. [$tag] $($p.name)$def" -ForegroundColor White
+    $color = if ($p.isOnline) { [ConsoleColor]::White } else { [ConsoleColor]::DarkYellow }
+    Write-Host ("   " + $idx + ". [" + $tag + "] " + $p.name + $def) -ForegroundColor $color
     $idx++
 }
 
@@ -137,9 +138,16 @@ if (-not [string]::IsNullOrEmpty($preferredPrinter)) {
     $defaultPrinter = $preferredPrinter
 }
 
+$targetObj = $activePrinters | Where-Object { $_.name -eq $defaultPrinter } | Select-Object -First 1
+if ($targetObj -and -not $targetObj.isOnline) {
+    Write-Host ""
+    Write-Host ("[WARNING] '" + $defaultPrinter + "' is marked OFFLINE in Windows!") -ForegroundColor Yellow
+    Write-Host "          Please ensure printer is switched ON & USB is firmly plugged in." -ForegroundColor Yellow
+}
+
 Write-Host ""
-Write-Host "Agent is connected & listening for customer print jobs..." -ForegroundColor Green
-Write-Host "   (Keep this window open on shop computer during working hours)" -ForegroundColor Gray
+Write-Host "[STATUS] Agent is connected and listening for print jobs..." -ForegroundColor Green
+Write-Host "         (Keep this window open during shop working hours)" -ForegroundColor Gray
 Write-Host ""
 
 # 3. Heartbeat Function
