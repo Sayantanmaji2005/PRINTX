@@ -172,8 +172,8 @@ export default function ShopCustomerPage() {
 
             {/* 2. Google Drive */}
             <button
-              onClick={() => alert('Google Drive OAuth import will connect in next phase!')}
-              className="action-card p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-sm hover:shadow-md"
+              onClick={() => router.push(`/shop/${slug}/upload?source=drive`)}
+              className="action-card p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all"
             >
               <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
                 <FolderDown className="w-5 h-5" />
@@ -186,8 +186,8 @@ export default function ShopCustomerPage() {
 
             {/* 3. Scan Document with Camera */}
             <button
-              onClick={() => alert('Camera scanner with PDF generation ready for Phase 8!')}
-              className="action-card p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-sm hover:shadow-md"
+              onClick={() => router.push(`/shop/${slug}/upload?mode=camera`)}
+              className="action-card p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all"
             >
               <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
                 <Camera className="w-5 h-5" />

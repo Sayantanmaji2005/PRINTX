@@ -80,13 +80,22 @@ async function main() {
   let qrCode = await prisma.shopQrCode.findUnique({
     where: { code: 'QR-MAJI-XEROX-01' },
   });
+  const customerBaseUrl = process.env.CUSTOMER_WEB_URL || 'https://no1printx.netlify.app';
+  const majiCustomerUrl = `${customerBaseUrl.replace(/\/+$/, '')}/shop/${shop.slug}`;
   if (!qrCode) {
     await prisma.shopQrCode.create({
       data: {
         shopId: shop.id,
         code: 'QR-MAJI-XEROX-01',
-        qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=http://localhost:3000/shop/${shop.slug}`,
+        qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(majiCustomerUrl)}`,
         isActive: true,
+      },
+    });
+  } else {
+    await prisma.shopQrCode.update({
+      where: { code: 'QR-MAJI-XEROX-01' },
+      data: {
+        qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(majiCustomerUrl)}`,
       },
     });
   }

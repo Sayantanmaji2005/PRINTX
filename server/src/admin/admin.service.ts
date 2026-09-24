@@ -185,7 +185,8 @@ export class AdminService {
 
       // Encrypted QR token
       const qrToken = `QR-PX-${slug.toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-      const customerUrl = `http://localhost:3000/shop/${shop.slug}`;
+      const customerBaseUrl = process.env.CUSTOMER_WEB_URL || 'https://no1printx.netlify.app';
+      const customerUrl = `${customerBaseUrl.replace(/\/+$/, '')}/shop/${shop.slug}`;
 
       await tx.shopQrCode.create({
         data: {

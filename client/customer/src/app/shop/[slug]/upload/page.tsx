@@ -23,6 +23,8 @@ import {
   ShieldCheck,
   Check,
   Zap,
+  Camera,
+  FolderDown,
 } from 'lucide-react';
 import {
   fetchShopBySlug,
@@ -31,7 +33,7 @@ import {
   simulateOrderPayment,
 } from '@/lib/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://printx-cib8.onrender.com/api';
 
 export default function DocumentUploadAndPrintFlowPage() {
   const params = useParams();
@@ -53,6 +55,8 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [sourceDrive, setSourceDrive] = useState(false);
 
   // Step 2: Print Configuration
   const [paperSize, setPaperSize] = useState('A4');
@@ -97,6 +101,18 @@ export default function DocumentUploadAndPrintFlowPage() {
     fetchShopBySlug(slug)
       .then((data) => setShop(data))
       .catch((err) => setError(err.message));
+
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (search.includes('source=drive')) {
+        setSourceDrive(true);
+      }
+      if (search.includes('mode=camera')) {
+        setTimeout(() => {
+          cameraInputRef.current?.click();
+        }, 400);
+      }
+    }
   }, [slug, router]);
 
   // Recalculate price whenever print options change
@@ -314,6 +330,7 @@ export default function DocumentUploadAndPrintFlowPage() {
 
               {/* Upload Dropzone */}
               {!processedDoc && !uploading && (
+                <>
                 <div
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -333,6 +350,14 @@ export default function DocumentUploadAndPrintFlowPage() {
                     onChange={(e) => e.target.files?.[0] && handleFileSelected(e.target.files[0])}
                     className="hidden"
                   />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelected(e.target.files[0])}
+                    className="hidden"
+                  />
 
                   <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-brand-600 mb-4 group-hover:scale-110 transition-transform shadow-xs">
                     <UploadCloud className="w-8 h-8" />
@@ -349,6 +374,37 @@ export default function DocumentUploadAndPrintFlowPage() {
                     <span>Browse Phone / PC Storage</span>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="py-3 px-3 rounded-2xl bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 text-slate-800 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4 text-emerald-600" />
+                    <span>Scan with Camera</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="py-3 px-3 rounded-2xl bg-white border border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 text-slate-800 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <UploadCloud className="w-4 h-4 text-brand-600" />
+                    <span>Upload PDF / Files</span>
+                  </button>
+                </div>
+
+                {sourceDrive && (
+                  <div className="mt-3 p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-left text-xs text-indigo-900 flex items-start gap-2.5">
+                    <FolderDown className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="block font-bold">Printing from Google Drive</strong>
+                      <span>Tap &quot;Upload PDF / Files&quot; above, then tap &quot;Browse&quot; or choose &quot;Google Drive&quot; in your phone&apos;s file manager.</span>
+                    </div>
+                  </div>
+                )}
+                </>
               )}
 
               {/* Uploading Progress */}

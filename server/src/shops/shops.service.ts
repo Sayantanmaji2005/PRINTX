@@ -71,11 +71,13 @@ export class ShopsService {
 
       // Generate default QR Code
       const qrCode = `QR-${slug.toUpperCase()}-01`;
+      const customerBaseUrl = process.env.CUSTOMER_WEB_URL || 'https://no1printx.netlify.app';
+      const customerUrl = `${customerBaseUrl.replace(/\/+$/, '')}/shop/${shop.slug}`;
       await tx.shopQrCode.create({
         data: {
           shopId: shop.id,
           code: qrCode,
-          qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=http://localhost:3000/shop/${shop.slug}`,
+          qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(customerUrl)}`,
           isActive: true,
         },
       });

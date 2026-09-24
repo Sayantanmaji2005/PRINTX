@@ -268,7 +268,20 @@ export class OrdersService {
       throw new NotFoundException(`Order ${orderNumber} not found`);
     }
 
-    return order;
+    const upiId = order.shop.upiId || 'printx@upi';
+    const upiIntentUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(order.shop.name)}&am=${order.total}&tn=Order_${order.orderNumber}&cu=INR`;
+    const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(upiIntentUrl)}`;
+
+    return {
+      ...order,
+      upi: {
+        upiId,
+        payeeName: order.shop.name,
+        amount: order.total,
+        intentUrl: upiIntentUrl,
+        qrCodeUrl: upiQrUrl,
+      },
+    };
   }
 
   async markOrderPaid(orderNumber: string, transactionId?: string) {
@@ -364,6 +377,19 @@ export class OrdersService {
       },
     });
 
-    return updatedOrder;
+    const upiId = order.shop.upiId || 'printx@upi';
+    const upiIntentUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(order.shop.name)}&am=${order.total}&tn=Order_${order.orderNumber}&cu=INR`;
+    const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(upiIntentUrl)}`;
+
+    return {
+      ...updatedOrder,
+      upi: {
+        upiId,
+        payeeName: order.shop.name,
+        amount: order.total,
+        intentUrl: upiIntentUrl,
+        qrCodeUrl: upiQrUrl,
+      },
+    };
   }
 }
