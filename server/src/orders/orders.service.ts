@@ -289,26 +289,32 @@ export class OrdersService {
     }
 
     const txId = transactionId || `TXN-UPI-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const idempotencyKey = `IDEM-${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const paymentIdemKey = `PAY-IDEM-${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const jobJobId = `PJ-${order.orderNumber}-${Date.now().toString().slice(-4)}`;
+    const printJobIdemKey = `PJ-IDEM-${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
     // 1. Record Payment if not already recorded
-    const existingPayment = await this.prisma.payment.findFirst({
-      where: { orderId: order.id, status: PaymentStatus.SUCCESS },
-    });
-
-    if (!existingPayment) {
-      await this.prisma.payment.create({
-        data: {
-          orderId: order.id,
-          amount: order.total,
-          currency: 'INR',
-          status: PaymentStatus.SUCCESS,
-          provider: PaymentProvider.PHONEPE,
-          providerPaymentId: txId,
-          idempotencyKey: idempotencyKey,
-          verifiedAt: new Date(),
-        },
+    try {
+      const existingPayment = await this.prisma.payment.findFirst({
+        where: { orderId: order.id, status: PaymentStatus.SUCCESS },
       });
+
+      if (!existingPayment) {
+        await this.prisma.payment.create({
+          data: {
+            orderId: order.id,
+            amount: order.total,
+            currency: 'INR',
+            status: PaymentStatus.SUCCESS,
+            provider: PaymentProvider.PHONEPE,
+            providerPaymentId: txId,
+            idempotencyKey: paymentIdemKey,
+            verifiedAt: new Date(),
+          },
+        });
+      }
+    } catch (payErr: any) {
+      // Ignore duplicate payment creation error
     }
 
     // 2. Find ready printer for shop
@@ -317,25 +323,30 @@ export class OrdersService {
     });
 
     // 3. Create Print Job in Queue (Ready for Desktop Agent) if not existing
-    const existingJob = await this.prisma.printJob.findFirst({
-      where: { orderId: order.id },
-    });
+    try {
+      const existingJob = await this.prisma.printJob.findFirst({
+        where: { orderId: order.id },
+      });
 
-    if (!existingJob) {
-      await this.prisma.printJob.create({
-        data: {
-          jobId: `PJ-${order.orderNumber}-${Date.now().toString().slice(-4)}`,
-          orderId: order.id,
-          printerId: printer ? printer.id : undefined,
-          status: PrintJobStatus.QUEUED,
-          startedAt: new Date(),
-        },
-      });
-    } else {
-      await this.prisma.printJob.update({
-        where: { id: existingJob.id },
-        data: { status: PrintJobStatus.QUEUED },
-      });
+      if (!existingJob) {
+        await this.prisma.printJob.create({
+          data: {
+            jobId: jobJobId,
+            orderId: order.id,
+            printerId: printer ? printer.id : undefined,
+            status: PrintJobStatus.QUEUED,
+            idempotencyKey: printJobIdemKey,
+            startedAt: new Date(),
+          },
+        });
+      } else {
+        await this.prisma.printJob.update({
+          where: { id: existingJob.id },
+          data: { status: PrintJobStatus.QUEUED },
+        });
+      }
+    } catch (jobErr: any) {
+      // Ignore duplicate job creation error
     }
 
     // 4. Update Order status to PAID & QUEUED
