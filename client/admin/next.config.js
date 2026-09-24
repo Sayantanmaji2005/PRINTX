@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    unoptimized: true,
     domains: ['api.qrserver.com', 'localhost'],
     remotePatterns: [
       {
@@ -19,3 +20,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
