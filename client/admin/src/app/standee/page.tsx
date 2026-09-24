@@ -9,7 +9,7 @@ function StandeeContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug') || 'printx-shop';
   const [shop, setShop] = useState<any>(null);
-  const [useLocalWifi, setUseLocalWifi] = useState(false);
+  const [networkMode, setNetworkMode] = useState<'cloudflare' | 'local' | 'netlify'>('cloudflare');
 
   useEffect(() => {
     if (!slug) return;
@@ -20,9 +20,17 @@ function StandeeContent() {
       .catch((err) => console.error(err));
   }, [slug]);
 
-  const cloudBaseUrl = process.env.NEXT_PUBLIC_CUSTOMER_URL || 'https://no1printx.netlify.app';
+  const publicCloudUrl = 'https://bye-belong-enquiries-shape.trycloudflare.com';
   const localBaseUrl = 'http://192.168.0.103:3000';
-  const activeBaseUrl = useLocalWifi ? localBaseUrl : cloudBaseUrl;
+  const netlifyBaseUrl = 'https://no1printx.netlify.app';
+
+  const activeBaseUrl =
+    networkMode === 'cloudflare'
+      ? publicCloudUrl
+      : networkMode === 'local'
+      ? localBaseUrl
+      : netlifyBaseUrl;
+
   const customerUrl = `${activeBaseUrl}/shop/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(customerUrl)}`;
 
@@ -39,28 +47,39 @@ function StandeeContent() {
         </Link>
 
         {/* QR Source Mode Selector */}
-        <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold">
+        <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold gap-1">
           <button
             type="button"
-            onClick={() => setUseLocalWifi(false)}
+            onClick={() => setNetworkMode('cloudflare')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              !useLocalWifi
+              networkMode === 'cloudflare'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Cloud (Netlify)
+            🌐 Public Live HTTPS (Active)
           </button>
           <button
             type="button"
-            onClick={() => setUseLocalWifi(true)}
+            onClick={() => setNetworkMode('local')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              useLocalWifi
+              networkMode === 'local'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Shop Wi-Fi (Local LAN)
+            📶 Shop Wi-Fi (LAN)
+          </button>
+          <button
+            type="button"
+            onClick={() => setNetworkMode('netlify')}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              networkMode === 'netlify'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            ☁️ Netlify
           </button>
         </div>
 
