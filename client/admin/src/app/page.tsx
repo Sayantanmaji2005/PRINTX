@@ -712,7 +712,7 @@ export default function SuperAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50/70 text-slate-900 font-sans">
+    <div className="h-screen w-screen flex overflow-hidden bg-slate-50/70 text-slate-900 font-sans">
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
@@ -721,7 +721,7 @@ export default function SuperAdminDashboard() {
         />
       )}
 
-      {/* Left Sidebar */}
+      {/* Left Sidebar - 100% Fixed & Stable */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200/80 shadow-2xl lg:shadow-none flex flex-col justify-between transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:h-screen lg:shrink-0 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
@@ -729,7 +729,7 @@ export default function SuperAdminDashboard() {
       >
         {/* Top Branding */}
         <div className="flex flex-col flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 sticky top-0 bg-white z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
                 <Printer className="w-5 h-5" />
@@ -848,7 +848,7 @@ export default function SuperAdminDashboard() {
       </aside>
 
       {/* Main Right Workspace Container */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         {/* Top Header for Workspace */}
         <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
