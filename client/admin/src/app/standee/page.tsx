@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Printer, Smartphone, Zap, ShieldCheck, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Printer, Smartphone, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ShopStandeePage() {
-  const params = useParams();
-  const slug = params?.slug as string;
+function StandeeContent() {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get('slug') || 'printx-shop';
   const [shop, setShop] = useState<any>(null);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function ShopStandeePage() {
 
         <button
           onClick={() => window.print()}
-          className="px-5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all"
+          className="px-5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
         >
           <Printer className="w-4 h-4" />
           <span>Print Counter Standee (A4)</span>
@@ -101,5 +101,13 @@ export default function ShopStandeePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ShopStandeePage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-xs text-slate-400">Loading Standee...</div>}>
+      <StandeeContent />
+    </Suspense>
   );
 }
