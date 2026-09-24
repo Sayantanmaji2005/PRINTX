@@ -284,15 +284,20 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (order.paymentStatus === PaymentStatus.SUCCESS) {
+    if (order.paymentStatus === PaymentStatus.SUCCESS && order.status === OrderStatus.PAID) {
       return order;
     }
 
-    const txId = transactionId || `TXN-UPI-${Date.now()}`;
+    const txId = transactionId || `TXN-UPI-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const idempotencyKey = `IDEM-${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Record Payment
-      await tx.payment.create({
+    // 1. Record Payment if not already recorded
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: { orderId: order.id, status: PaymentStatus.SUCCESS },
+    });
+
+    if (!existingPayment) {
+      await this.prisma.payment.create({
         data: {
           orderId: order.id,
           amount: order.total,
@@ -300,42 +305,54 @@ export class OrdersService {
           status: PaymentStatus.SUCCESS,
           provider: PaymentProvider.PHONEPE,
           providerPaymentId: txId,
+          idempotencyKey: idempotencyKey,
           verifiedAt: new Date(),
         },
       });
+    }
 
-      // 2. Find ready printer for shop
-      const printer = await tx.printer.findFirst({
-        where: { shopId: order.shopId, status: PrinterStatus.READY },
-      });
+    // 2. Find ready printer for shop
+    const printer = await this.prisma.printer.findFirst({
+      where: { shopId: order.shopId, status: PrinterStatus.READY },
+    });
 
-      // 3. Create Print Job in Queue (Ready for Desktop Agent)
-      await tx.printJob.create({
+    // 3. Create Print Job in Queue (Ready for Desktop Agent) if not existing
+    const existingJob = await this.prisma.printJob.findFirst({
+      where: { orderId: order.id },
+    });
+
+    if (!existingJob) {
+      await this.prisma.printJob.create({
         data: {
-          jobId: `PJ-${order.orderNumber}-1`,
+          jobId: `PJ-${order.orderNumber}-${Date.now().toString().slice(-4)}`,
           orderId: order.id,
           printerId: printer ? printer.id : undefined,
           status: PrintJobStatus.QUEUED,
           startedAt: new Date(),
         },
       });
-
-      // 4. Update Order status to PAID & QUEUED
-      const updatedOrder = await tx.order.update({
-        where: { id: order.id },
-        data: {
-          status: OrderStatus.PAID,
-          paymentStatus: PaymentStatus.SUCCESS,
-          printStatus: PrintJobStatus.QUEUED,
-        },
-        include: {
-          configuration: true,
-          payments: true,
-          printJobs: true,
-        },
+    } else {
+      await this.prisma.printJob.update({
+        where: { id: existingJob.id },
+        data: { status: PrintJobStatus.QUEUED },
       });
+    }
 
-      return updatedOrder;
+    // 4. Update Order status to PAID & QUEUED
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: OrderStatus.PAID,
+        paymentStatus: PaymentStatus.SUCCESS,
+        printStatus: PrintJobStatus.QUEUED,
+      },
+      include: {
+        configuration: true,
+        payments: true,
+        printJobs: true,
+      },
     });
+
+    return updatedOrder;
   }
 }
