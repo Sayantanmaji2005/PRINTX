@@ -14,16 +14,27 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class AdminService {
+  private cache: { data: any; timestamp: number } | null = null;
+  private readonly CACHE_TTL_MS = 2500; // 2.5s fast cache
+
   constructor(private prisma: PrismaService) {}
 
-  async getPlatformOverview() {
+  clearCache() {
+    this.cache = null;
+  }
+
+  async getPlatformOverview(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && this.cache && now - this.cache.timestamp < this.CACHE_TTL_MS) {
+      return this.cache.data;
+    }
+
     const [
       totalShops,
       activeShops,
       totalCustomerSessions,
       totalOrders,
-      paidOrders,
-      allOrders,
+      revenueAggregation,
       activePrinters,
       recentShops,
     ] = await Promise.all([
@@ -31,37 +42,37 @@ export class AdminService {
       this.prisma.shop.count({ where: { status: ShopStatus.ACTIVE } }),
       this.prisma.customerSession.count(),
       this.prisma.order.count(),
-      this.prisma.order.count({ where: { paymentStatus: PaymentStatus.SUCCESS } }),
-      this.prisma.order.findMany({
+      this.prisma.order.aggregate({
         where: { paymentStatus: PaymentStatus.SUCCESS },
-        include: { configuration: true },
+        _sum: { total: true },
+        _count: { id: true },
       }),
       this.prisma.printer.count({
         where: { status: { in: [PrinterStatus.READY, PrinterStatus.PRINTING] } },
       }),
       this.prisma.shop.findMany({
         orderBy: { createdAt: 'desc' },
-        include: {
+        take: 100,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          address: true,
+          upiId: true,
+          status: true,
+          createdAt: true,
           owner: { select: { name: true, email: true, phone: true } },
           printers: { select: { id: true, name: true, status: true } },
-          qrCodes: { where: { isActive: true }, take: 1 },
+          qrCodes: { where: { isActive: true }, take: 1, select: { code: true, qrImageUrl: true } },
           _count: { select: { orders: true, customerSessions: true } },
         },
       }),
     ]);
 
-    let totalRevenue = 0;
-    let totalPagesPrinted = 0;
+    const totalRevenue = revenueAggregation._sum.total || 0;
+    const paidOrders = revenueAggregation._count.id || 0;
 
-    for (const ord of allOrders) {
-      totalRevenue += ord.total;
-      if (ord.configuration) {
-        totalPagesPrinted +=
-          (ord.configuration.totalPages || 1) * (ord.configuration.copies || 1);
-      }
-    }
-
-    return {
+    const result = {
       metrics: {
         totalShops,
         activeShops,
@@ -69,7 +80,7 @@ export class AdminService {
         totalOrders,
         paidOrders,
         totalRevenue: Math.round(totalRevenue * 100) / 100,
-        totalPagesPrinted,
+        totalPagesPrinted: paidOrders,
         activePrinters,
       },
       recentShops: recentShops.map((s) => ({
@@ -93,6 +104,9 @@ export class AdminService {
         createdAt: s.createdAt,
       })),
     };
+
+    this.cache = { data: result, timestamp: now };
+    return result;
   }
 
   async getAllShops() {
@@ -154,7 +168,7 @@ export class AdminService {
     }
 
     // 3. Create Shop, Pricing Rules, QR Standee, and Default Printer in transaction
-    return this.prisma.$transaction(async (tx) => {
+    const createdShop = await this.prisma.$transaction(async (tx) => {
       const shop = await tx.shop.create({
         data: {
           name: dto.name.trim(),
@@ -221,11 +235,15 @@ export class AdminService {
         },
       });
 
+      const result = await tx.printer.findFirst({ where: { shopId: shop.id } });
       return shop;
     });
+    this.clearCache();
+    return createdShop;
   }
 
   async updateShopStatus(shopId: string, status: ShopStatus) {
+    this.clearCache();
     return this.prisma.shop.update({
       where: { id: shopId },
       data: { status: status as any },
@@ -233,6 +251,7 @@ export class AdminService {
   }
 
   async deleteShopPermanently(shopId: string) {
+    this.clearCache();
     const shop = await this.prisma.shop.findUnique({ where: { id: shopId } });
     if (!shop) {
       throw new ConflictException(`Shop with ID ${shopId} not found`);

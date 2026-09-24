@@ -30,8 +30,18 @@ import { getAuthToken, clearAuthSession, apiRequest } from '@/lib/api';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('printx_admin_cached_overview');
+        return cached ? JSON.parse(cached) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
@@ -53,14 +63,19 @@ export default function SuperAdminDashboard() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent && !data) setLoading(true);
       const res = await apiRequest('/admin/overview');
       setData(res);
-    } catch (err) {
-      console.error('Failed to load super admin data:', err);
-      router.replace('/login');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('printx_admin_cached_overview', JSON.stringify(res));
+      }
+    } catch (err: any) {
+      if (err.message?.includes('Unauthorized') || err.message?.includes('jwt')) {
+        clearAuthSession();
+        router.replace('/login');
+      }
     } finally {
       setLoading(false);
     }
@@ -72,7 +87,14 @@ export default function SuperAdminDashboard() {
       router.replace('/login');
       return;
     }
-    loadData();
+    loadData(false);
+
+    // Live background auto-sync every 4 seconds
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 4000);
+
+    return () => clearInterval(interval);
   }, [router]);
 
   const handleLogout = () => {
