@@ -36,7 +36,6 @@ import {
   Sliders,
   ChevronDown,
   ChevronUp,
-  Download,
   Share2,
 } from 'lucide-react';
 import {
@@ -71,6 +70,7 @@ export default function DocumentUploadAndPrintFlowPage() {
 
   // Step 1: Upload state
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processedDoc, setProcessedDoc] = useState<any>(null);
@@ -112,6 +112,15 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [order, setOrder] = useState<any>(null);
   const [simulatingPayment, setSimulatingPayment] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+
+  // Clean up object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     if (!slug) return;
@@ -258,7 +267,7 @@ export default function DocumentUploadAndPrintFlowPage() {
   const priceCalculation = useMemo(() => {
     const selectedPagesCount = pagesList.filter((p) => p.selected).length;
     if (selectedPagesCount === 0) {
-      return { totalPages: 0, totalSheets: 0, printingCost: 0, paperCost: 0, finishingCost: 0, discount: 0, grandTotal: 0 };
+      return { totalPages: 0, totalSheets: 0, pricePerSheet: 0, printingCost: 0, paperCost: 0, finishingCost: 0, discount: 0, discountPercent: 0, grandTotal: 0 };
     }
 
     // Number of physical sheets needed based on N-Up and Duplex
@@ -266,16 +275,34 @@ export default function DocumentUploadAndPrintFlowPage() {
     const totalSheetsPerCopy = printSide === 'DOUBLE' ? Math.ceil(effectivePages / 2) : effectivePages;
     const totalSheets = totalSheetsPerCopy * copies;
 
-    // Base rates
-    let baseRatePerPage = 1.0;
+    // Base rates matching verified rates
+    let pricePerSheet = 2.0;
     if (colorMode === 'COLOR') {
-      baseRatePerPage = printSide === 'DOUBLE' ? 8.0 : 5.0;
+      pricePerSheet = printSide === 'DOUBLE' ? 15.0 : 8.0;
     } else {
-      baseRatePerPage = printSide === 'DOUBLE' ? 1.5 : 2.0;
+      pricePerSheet = printSide === 'DOUBLE' ? 3.0 : 2.0;
     }
-    if (paperSize === 'A3') baseRatePerPage *= 2.0;
+    if (paperSize === 'A3') {
+      pricePerSheet = colorMode === 'COLOR'
+        ? (printSide === 'DOUBLE' ? 20.0 : 10.0)
+        : (printSide === 'DOUBLE' ? 5.0 : 3.0);
+    }
 
-    let printingCost = selectedPagesCount * baseRatePerPage * copies;
+    // Dynamic Shop Pricing Rule matching if available
+    if (shop?.pricingRules && Array.isArray(shop.pricingRules)) {
+      const match = shop.pricingRules.find(
+        (r: any) =>
+          r.paperSize === paperSize &&
+          r.colorMode === colorMode &&
+          r.printSide === printSide &&
+          r.isActive
+      );
+      if (match && typeof match.pricePerUnit === 'number') {
+        pricePerSheet = match.pricePerUnit;
+      }
+    }
+
+    const printingCost = totalSheets * pricePerSheet;
 
     // Paper GSM Surcharges per sheet
     let paperGsmSurchargePerSheet = 0;
@@ -310,6 +337,7 @@ export default function DocumentUploadAndPrintFlowPage() {
     return {
       selectedPagesCount,
       totalSheets,
+      pricePerSheet,
       printingCost: Math.round(printingCost * 100) / 100,
       paperCost: Math.round(paperCost * 100) / 100,
       finishingCost: Math.round(finishingCost * 100) / 100,
@@ -317,7 +345,7 @@ export default function DocumentUploadAndPrintFlowPage() {
       discountPercent: discountPercent * 100,
       grandTotal,
     };
-  }, [pagesList, pagesPerSheet, printSide, copies, colorMode, paperSize, paperGsm, bindingOption, laminationOption]);
+  }, [pagesList, pagesPerSheet, printSide, copies, colorMode, paperSize, paperGsm, bindingOption, laminationOption, shop]);
 
   // Step 1: File selection & upload
   const handleDrag = (e: React.DragEvent) => {
@@ -340,6 +368,11 @@ export default function DocumentUploadAndPrintFlowPage() {
     setError(null);
     setProcessedDoc(null);
     setFile(selectedFile);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
     uploadAndAnalyze(selectedFile);
   };
 
@@ -388,6 +421,10 @@ export default function DocumentUploadAndPrintFlowPage() {
   };
 
   const handleReset = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
     setFile(null);
     setProcessedDoc(null);
     setError(null);
@@ -423,6 +460,7 @@ export default function DocumentUploadAndPrintFlowPage() {
         copies,
         pageRange: pageRangeMode === 'ALL' ? 'all' : customRangeString || 'selected',
         notes: customNotes.trim() ? `${customNotes} | Binding: ${bindingOption} | Paper: ${paperGsm}GSM` : `Binding: ${bindingOption} | Paper: ${paperGsm}GSM`,
+        clientTotal: priceCalculation.grandTotal,
       });
 
       setOrder(newOrder);
@@ -451,6 +489,19 @@ export default function DocumentUploadAndPrintFlowPage() {
   };
 
   const activePage = pagesList[activePageIndex];
+
+  const isImage = Boolean(
+    file?.type?.startsWith('image/') ||
+    processedDoc?.mimeType?.startsWith('image') ||
+    (processedDoc?.originalName && /\.(jpe?g|png|webp|gif|bmp)$/i.test(processedDoc.originalName)) ||
+    (file?.name && /\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name))
+  );
+
+  const isPdf = Boolean(
+    file?.type === 'application/pdf' ||
+    (processedDoc?.originalName && /\.pdf$/i.test(processedDoc.originalName)) ||
+    (file?.name && /\.pdf$/i.test(file.name))
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/70 via-slate-50 to-white text-slate-900 relative overflow-hidden">
@@ -704,10 +755,23 @@ export default function DocumentUploadAndPrintFlowPage() {
 
                         {/* Page Preview Mini Badge */}
                         <div
-                          className="w-9 h-12 rounded-lg bg-white border border-slate-300 flex items-center justify-center text-[10px] font-mono font-bold text-slate-700 shadow-2xs"
+                          className="w-10 h-13 rounded-lg bg-white border border-slate-300 overflow-hidden flex items-center justify-center text-[10px] font-mono font-bold text-slate-700 shadow-2xs shrink-0"
                           style={{ transform: `rotate(${page.rotation}deg)` }}
                         >
-                          {page.isBlank ? 'BLANK' : `P.${page.originalPageNumber}`}
+                          {isImage && previewUrl && !page.isBlank ? (
+                            <img
+                              src={previewUrl}
+                              alt={`Thumb ${idx + 1}`}
+                              className={`w-full h-full object-cover ${colorMode === 'BW' ? 'grayscale contrast-125' : ''}`}
+                            />
+                          ) : isPdf && previewUrl && !page.isBlank ? (
+                            <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center p-0.5">
+                              <FileText className="w-4 h-4 text-brand-600" />
+                              <span className="text-[8px] font-bold text-slate-600">P.{page.originalPageNumber}</span>
+                            </div>
+                          ) : (
+                            <span>{page.isBlank ? 'BLANK' : `P.${page.originalPageNumber}`}</span>
+                          )}
                         </div>
 
                         <div>
@@ -790,52 +854,52 @@ export default function DocumentUploadAndPrintFlowPage() {
                 </div>
 
                 {/* Document View Canvas Area */}
-                <div className="flex-1 my-4 flex items-center justify-center p-4 bg-slate-100 rounded-2xl overflow-hidden relative">
+                <div className="flex-1 my-4 flex items-center justify-center p-3 sm:p-4 bg-slate-900/5 rounded-2xl overflow-hidden relative min-h-[380px] max-h-[460px]">
                   <div
-                    className={`bg-white rounded-lg shadow-xl border border-slate-300 transition-all p-6 flex flex-col justify-between relative ${
+                    className={`bg-white rounded-xl shadow-2xl border border-slate-300 transition-all flex flex-col justify-between relative overflow-hidden ${
                       colorMode === 'BW' ? 'grayscale contrast-125' : ''
                     }`}
                     style={{
-                      width: orientation === 'LANDSCAPE' ? '360px' : '260px',
-                      height: orientation === 'LANDSCAPE' ? '260px' : '360px',
+                      width: orientation === 'LANDSCAPE' ? '92%' : '75%',
+                      maxWidth: orientation === 'LANDSCAPE' ? '460px' : '320px',
+                      height: orientation === 'LANDSCAPE' ? '280px' : '380px',
                       transform: `scale(${zoomLevel / 100}) rotate(${activePage?.rotation || 0}deg)`,
                       transformOrigin: 'center center',
                     }}
                   >
-                    {/* Simulated Document Layout Page Content */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                        <div className="w-16 h-3 bg-slate-200 rounded" />
-                        <span className="text-[9px] font-mono text-slate-400 font-bold">
-                          PRINTX AUTO-SPOOL #{activePage?.originalPageNumber}
-                        </span>
-                      </div>
+                    {/* Header bar on sheet */}
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100/90 border-b border-slate-200 text-[10px] text-slate-600 font-mono shrink-0">
+                      <span className="truncate max-w-[140px] font-bold text-slate-800">{processedDoc?.originalName || file?.name || 'Document'}</span>
+                      <span className="font-semibold text-slate-500">Page {activePageIndex + 1} of {pagesList.length}</span>
+                    </div>
 
-                      {/* N-Up Layout Grid Demonstration */}
-                      {pagesPerSheet === 1 ? (
-                        <div className="space-y-2 pt-2">
-                          <div className="w-3/4 h-3 bg-slate-300 rounded font-bold" />
-                          <div className="w-full h-2 bg-slate-200 rounded" />
-                          <div className="w-full h-2 bg-slate-200 rounded" />
-                          <div className="w-4/5 h-2 bg-slate-200 rounded" />
-                          <div className="w-full h-16 bg-slate-50 border border-dashed border-slate-200 rounded-lg flex items-center justify-center text-[10px] text-slate-400">
-                            Document Content Simulation
-                          </div>
-                        </div>
+                    {/* Actual Real Document Content */}
+                    <div className="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center bg-white p-1">
+                      {isImage && previewUrl && !activePage?.isBlank ? (
+                        <img
+                          src={previewUrl}
+                          alt={`Page ${activePageIndex + 1}`}
+                          className="max-w-full max-h-full object-contain select-none"
+                        />
+                      ) : isPdf && previewUrl && !activePage?.isBlank ? (
+                        <iframe
+                          src={`${previewUrl}#page=${activePage?.originalPageNumber || (activePageIndex + 1)}&view=Fit&toolbar=0&navpanes=0`}
+                          title={`Page ${activePageIndex + 1} Preview`}
+                          className="w-full h-full border-0 rounded bg-white"
+                        />
                       ) : (
-                        <div className={`grid gap-1.5 pt-2 ${pagesPerSheet === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
-                          {Array.from({ length: pagesPerSheet }).map((_, idx) => (
-                            <div key={idx} className="p-2 bg-slate-50 border border-slate-200 rounded text-[9px] text-center text-slate-500 font-mono">
-                              Page #{idx + 1}
-                            </div>
-                          ))}
+                        <div className="flex flex-col items-center justify-center text-center p-4 text-slate-500">
+                          <FileText className="w-12 h-12 text-brand-600 mb-2 animate-pulse" />
+                          <span className="text-xs font-bold text-slate-800">{processedDoc?.originalName || file?.name || 'Document Page'}</span>
+                          <span className="text-[10px] text-slate-400 mt-1">Page {activePageIndex + 1} • {paperSize} {colorMode}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-                      <span>{paperSize} • {colorMode}</span>
-                      <span>Page {activePageIndex + 1}</span>
+                    {/* Footer bar on sheet */}
+                    <div className="px-3 py-1 bg-slate-100/90 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-500 font-mono shrink-0">
+                      <span>{paperSize} • {colorMode === 'COLOR' ? 'Full Color' : 'B&W'} • {printSide === 'DOUBLE' ? 'Duplex' : 'Single'}</span>
+                      <span className="text-brand-600 font-bold">PRINTX Real Preview</span>
                     </div>
                   </div>
                 </div>
@@ -1167,135 +1231,16 @@ export default function DocumentUploadAndPrintFlowPage() {
                     </div>
                   </div>
 
-                  <div className="pt-2 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => window.print()}
-                      className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Print Bill / Save Receipt PDF</span>
-                    </button>
-
+                  <div className="pt-2 flex items-center justify-center">
                     <button
                       onClick={() => router.push(`/shop/${slug}`)}
-                      className="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all"
                     >
                       Done / Print Another
                     </button>
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* ================= DEDICATED PRINTABLE TAX INVOICE RECEIPT ================= */}
-        {order && (
-          <div id="printable-invoice" className="hidden font-sans">
-            <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4 mb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black tracking-tight text-slate-900 font-['Outfit']">PRINT<span className="text-blue-600">X</span></span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-300">TAX INVOICE / CASH RECEIPT</span>
-                </div>
-                <h1 className="text-lg font-bold text-slate-900 mt-1">{shop?.name || 'PRINTX SHOP'}</h1>
-                <p className="text-xs text-slate-600">{shop?.address || 'Dingal 4 No Canel Road'}</p>
-                <p className="text-xs text-slate-600">Phone: {shop?.owner?.phone || '+91 9002761536'} | UPI VPA: {shop?.upiId || '9002761536@axl'}</p>
-              </div>
-              <div className="text-right">
-                <div className="inline-block px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold uppercase tracking-wider">
-                  ✓ PAID (ONLINE UPI)
-                </div>
-                <div className="text-xs text-slate-600 mt-2 font-mono">
-                  <div><strong>Invoice #:</strong> {order.orderNumber}</div>
-                  <div><strong>Date:</strong> {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                  <div><strong>Time:</strong> {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs mb-4">
-              <div>
-                <span className="text-slate-500 font-medium block">Customer Session ID:</span>
-                <span className="font-mono font-bold text-slate-800">{sessionId ? sessionId.substring(0, 16) : 'Guest Session'}</span>
-              </div>
-              <div>
-                <span className="text-slate-500 font-medium block">Payment Method:</span>
-                <span className="font-bold text-emerald-700">UPI Instant Digital Verification</span>
-              </div>
-            </div>
-
-            <table className="w-full text-xs text-left border-collapse mb-4">
-              <thead>
-                <tr className="border-b-2 border-slate-300 text-slate-600 uppercase text-[10px]">
-                  <th className="py-2 font-bold">Service / Item Details</th>
-                  <th className="py-2 text-center font-bold">Pages</th>
-                  <th className="py-2 text-center font-bold">Qty / Copies</th>
-                  <th className="py-2 text-right font-bold">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-800">
-                <tr>
-                  <td className="py-2.5">
-                    <div className="font-bold text-slate-900">{processedDoc?.originalName || order.document?.originalName || 'Document Print Job'}</div>
-                    <div className="text-[11px] text-slate-500">
-                      {paperSize} ({paperGsm} GSM) • {colorMode === 'COLOR' ? 'Full Color' : 'Black & White'} • {printSide === 'DOUBLE' ? 'Double Sided (Duplex)' : 'Single Sided'}
-                    </div>
-                  </td>
-                  <td className="py-2.5 text-center font-mono">{priceCalculation.selectedPagesCount || 1}</td>
-                  <td className="py-2.5 text-center font-mono">{copies}</td>
-                  <td className="py-2.5 text-right font-mono font-bold">₹{priceCalculation.printingCost.toFixed(2)}</td>
-                </tr>
-                {priceCalculation.paperCost > 0 && (
-                  <tr>
-                    <td className="py-2 text-slate-700">Premium Paper Upgrade ({paperGsm} GSM)</td>
-                    <td className="py-2 text-center font-mono">—</td>
-                    <td className="py-2 text-center font-mono">{priceCalculation.totalSheets} sheets</td>
-                    <td className="py-2 text-right font-mono">₹{priceCalculation.paperCost.toFixed(2)}</td>
-                  </tr>
-                )}
-                {priceCalculation.finishingCost > 0 && (
-                  <tr>
-                    <td className="py-2 text-slate-700">Document Finishing (Binding: {bindingOption} / Lamination: {laminationOption})</td>
-                    <td className="py-2 text-center font-mono">—</td>
-                    <td className="py-2 text-center font-mono">1</td>
-                    <td className="py-2 text-right font-mono">₹{priceCalculation.finishingCost.toFixed(2)}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-
-            <div className="border-t-2 border-slate-300 pt-3 space-y-1.5 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Subtotal</span>
-                <span className="font-mono">₹{((order.total || priceCalculation.grandTotal) + (priceCalculation.discount || 0)).toFixed(2)}</span>
-              </div>
-              {priceCalculation.discount > 0 && (
-                <div className="flex justify-between text-emerald-600 font-medium">
-                  <span>Bulk Discount ({priceCalculation.discountPercent}% Off)</span>
-                  <span className="font-mono">-₹{priceCalculation.discount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-slate-500 text-[11px]">
-                <span>GST (0% Exempt / Composite Scheme)</span>
-                <span className="font-mono">₹0.00</span>
-              </div>
-              <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-300 pt-2 mt-1">
-                <span>Grand Total Paid</span>
-                <span className="font-mono text-blue-700">₹{(order.total || priceCalculation.grandTotal).toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-dashed border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
-              <div className="space-y-1 max-w-sm">
-                <p className="font-semibold text-slate-700">Automated Direct Printer Hardware Spool</p>
-                <p>Collect prints at shop counter with Order #{order.orderNumber}.</p>
-                <p className="text-[9px] text-slate-400">Computer generated bill. No physical signature required. Powered by PRINTX.</p>
-              </div>
-              <div className="text-center p-2 rounded-lg border border-emerald-400 bg-emerald-50/50">
-                <div className="text-[10px] font-black text-emerald-700 tracking-wider">PRINTX VERIFIED</div>
-                <div className="text-[8px] font-mono text-emerald-600">TRANSACTION SECURED</div>
-              </div>
             </div>
           </div>
         )}

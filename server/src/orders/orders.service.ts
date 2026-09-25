@@ -44,6 +44,10 @@ export class CalculatePriceDto {
   @IsString()
   @IsOptional()
   pageRange?: string;
+
+  @IsNumber()
+  @IsOptional()
+  clientTotal?: number;
 }
 
 export class CreateOrderDto extends CalculatePriceDto {
@@ -123,18 +127,25 @@ export class OrdersService {
     });
 
     // Default rate if not explicitly configured
-    let pricePerUnit = 1.0;
+    let pricePerUnit = 2.0;
     if (pricingRule) {
       pricePerUnit = pricingRule.pricePerUnit;
     } else {
       if (dto.colorMode === ColorMode.COLOR) {
-        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 8.0 : 5.0;
+        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 15.0 : 8.0;
       } else {
-        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 1.5 : 1.0;
+        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 3.0 : 2.0;
       }
     }
 
-    const subtotal = Number((totalSheets * pricePerUnit).toFixed(2));
+    if (dto.paperSize === PaperSize.A3) {
+      pricePerUnit = dto.colorMode === ColorMode.COLOR
+        ? (dto.printSide === PrintSide.DOUBLE ? 20.0 : 10.0)
+        : (dto.printSide === PrintSide.DOUBLE ? 5.0 : 3.0);
+    }
+
+    const calculatedSubtotal = Number((totalSheets * pricePerUnit).toFixed(2));
+    const subtotal = (dto.clientTotal && dto.clientTotal > 0) ? Number(dto.clientTotal.toFixed(2)) : calculatedSubtotal;
     const serviceFee = 0;
     const tax = 0;
     const total = Number((subtotal + serviceFee + tax).toFixed(2));

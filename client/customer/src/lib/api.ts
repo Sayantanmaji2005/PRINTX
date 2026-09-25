@@ -74,6 +74,7 @@ export async function createOrder(data: {
   copies: number;
   pageRange?: string;
   notes?: string;
+  clientTotal?: number;
 }) {
   const res = await fetch(`${API_BASE_URL}/orders`, {
     method: 'POST',

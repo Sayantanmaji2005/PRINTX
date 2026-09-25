@@ -24,7 +24,6 @@ import {
   FileCheck,
   Palette,
   Copy,
-  Receipt,
   Search,
   Check,
   ChevronRight,
@@ -32,10 +31,9 @@ import {
   Maximize2,
   Minimize2,
   RefreshCw,
-  Download,
   Share2,
 } from 'lucide-react';
-import { fetchShopBySlug, startCustomerSession, getOrder } from '@/lib/api';
+import { fetchShopBySlug, startCustomerSession } from '@/lib/api';
 
 export default function ShopCustomerPage() {
   const params = useParams();
@@ -83,12 +81,6 @@ export default function ShopCustomerPage() {
   // 7. Bulk Xerox Calculator State
   const [bulkPages, setBulkPages] = useState(120);
   const [bulkMode, setBulkMode] = useState<'BW_SINGLE' | 'BW_DOUBLE' | 'COLOR_SINGLE'>('BW_DOUBLE');
-
-  // 8. Order Tracking & Receipt State
-  const [trackOrderNumber, setTrackOrderNumber] = useState('');
-  const [trackedOrder, setTrackedOrder] = useState<any>(null);
-  const [trackingLoading, setTrackingLoading] = useState(false);
-  const [trackingError, setTrackingError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -255,22 +247,6 @@ export default function ShopCustomerPage() {
     setScannerPages((prev) => [...prev, dataUrl]);
   };
 
-  const handleTrackOrderSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackOrderNumber.trim()) return;
-    try {
-      setTrackingLoading(true);
-      setTrackingError(null);
-      const data = await getOrder(trackOrderNumber.trim());
-      setTrackedOrder(data);
-    } catch (err: any) {
-      setTrackingError(err.message || 'Order not found');
-      setTrackedOrder(null);
-    } finally {
-      setTrackingLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/70 via-slate-50 to-white text-slate-800">
@@ -349,12 +325,6 @@ export default function ShopCustomerPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveModal('track')}
-              className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors shadow-2xs"
-            >
-              Track Order
-            </button>
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Printer
@@ -557,20 +527,6 @@ export default function ShopCustomerPage() {
               <div>
                 <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Bulk Photocopy</span>
                 <span className="text-[10px] text-cyan-600 font-medium mt-0.5 block">50+ Page Discounts</span>
-              </div>
-            </button>
-
-            {/* 12. Track Order & Digital Bill */}
-            <button
-              onClick={() => setActiveModal('track')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-slate-500 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 group-hover:scale-110 transition-transform">
-                <Receipt className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Track & Receipts</span>
-                <span className="text-[10px] text-slate-500 mt-0.5 block">Live Status & Bill</span>
               </div>
             </button>
           </div>
@@ -1255,207 +1211,6 @@ export default function ShopCustomerPage() {
                   Upload & Print
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= MODAL: 8. TRACK ORDER & DIGITAL RECEIPT ================= */}
-      {activeModal === 'track' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
-                  <Receipt className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Track Order & Receipt</h3>
-                  <p className="text-[11px] text-slate-500">Live timeline & digital billing voucher</p>
-                </div>
-              </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleTrackOrderSubmit} className="mt-4 space-y-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">Enter PRINTX Order ID</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. PX-20260924-5053"
-                    value={trackOrderNumber}
-                    onChange={(e) => setTrackOrderNumber(e.target.value)}
-                    className="flex-1 px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-brand-500"
-                  />
-                  <button
-                    type="submit"
-                    disabled={trackingLoading}
-                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all disabled:opacity-50"
-                  >
-                    {trackingLoading ? 'Searching...' : 'Track'}
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            {trackingError && (
-              <div className="mt-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs">
-                {trackingError}
-              </div>
-            )}
-
-            {/* Tracked Order Details */}
-            {trackedOrder && (
-              <div className="mt-4 space-y-4 pt-3 border-t border-slate-100">
-                {/* 7-Step Timeline */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono font-bold text-slate-900">{trackedOrder.orderNumber}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      {trackedOrder.paymentStatus}
-                    </span>
-                  </div>
-
-                  {/* Visual Steps */}
-                  <div className="space-y-2 pt-2 text-[11px]">
-                    {[
-                      { title: 'Order Received & Encrypted', done: true },
-                      { title: 'UPI Payment Confirmed', done: trackedOrder.paymentStatus === 'SUCCESS' },
-                      { title: 'Added to Printer Hardware Queue', done: trackedOrder.status !== 'CREATED' },
-                      { title: 'Printing on Machine', done: trackedOrder.printStatus === 'PRINTING' || trackedOrder.printStatus === 'PRINTED' },
-                      { title: 'Automated Print Completed', done: trackedOrder.printStatus === 'PRINTED' },
-                      { title: 'Ready at Counter for Pickup', done: trackedOrder.status === 'COMPLETED' || trackedOrder.printStatus === 'PRINTED' },
-                    ].map((step, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <div
-                          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
-                            step.done ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
-                          }`}
-                        >
-                          <Check className="w-2.5 h-2.5" />
-                        </div>
-                        <span className={step.done ? 'font-medium text-slate-900' : 'text-slate-400'}>{step.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Digital Receipt Card */}
-                <div className="p-4 rounded-2xl bg-white border border-slate-200 text-xs space-y-2">
-                  <div className="font-bold text-slate-900 flex justify-between">
-                    <span>Document:</span>
-                    <span className="truncate max-w-[180px]">{trackedOrder.document?.originalName || 'Document.pdf'}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-500">
-                    <span>Station:</span>
-                    <span>{trackedOrder.shop?.name || shop.name}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-500">
-                    <span>Amount Paid:</span>
-                    <strong className="text-slate-900">₹{(trackedOrder.total || 0).toFixed(2)}</strong>
-                  </div>
-                  <button
-                    onClick={() => window.print()}
-                    className="w-full mt-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Print Bill / Save Receipt PDF</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ================= DEDICATED PRINTABLE TAX INVOICE RECEIPT ================= */}
-      {trackedOrder && (
-        <div id="printable-invoice" className="hidden font-sans">
-          <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-black tracking-tight text-slate-900 font-['Outfit']">PRINT<span className="text-blue-600">X</span></span>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-300">TAX INVOICE / CASH RECEIPT</span>
-              </div>
-              <h1 className="text-lg font-bold text-slate-900 mt-1">{shop?.name || 'PRINTX SHOP'}</h1>
-              <p className="text-xs text-slate-600">{shop?.address || 'Dingal 4 No Canel Road'}</p>
-              <p className="text-xs text-slate-600">Phone: {shop?.owner?.phone || '+91 9002761536'} | UPI VPA: {shop?.upiId || '9002761536@axl'}</p>
-            </div>
-            <div className="text-right">
-              <div className="inline-block px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold uppercase tracking-wider">
-                ✓ PAID (ONLINE UPI)
-              </div>
-              <div className="text-xs text-slate-600 mt-2 font-mono">
-                <div><strong>Invoice #:</strong> {trackedOrder.orderNumber}</div>
-                <div><strong>Date:</strong> {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                <div><strong>Time:</strong> {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs mb-4">
-            <div>
-              <span className="text-slate-500 font-medium block">Order Status:</span>
-              <span className="font-bold text-emerald-700">{trackedOrder.status} / {trackedOrder.printStatus || 'SPOOLED'}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 font-medium block">Payment Mode:</span>
-              <span className="font-bold text-emerald-700">UPI Instant Digital Payment</span>
-            </div>
-          </div>
-
-          <table className="w-full text-xs text-left border-collapse mb-4">
-            <thead>
-              <tr className="border-b-2 border-slate-300 text-slate-600 uppercase text-[10px]">
-                <th className="py-2 font-bold">Service / Item Details</th>
-                <th className="py-2 text-center font-bold">Pages</th>
-                <th className="py-2 text-center font-bold">Copies</th>
-                <th className="py-2 text-right font-bold">Total Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-800">
-              <tr>
-                <td className="py-2.5">
-                  <div className="font-bold text-slate-900">{trackedOrder.document?.originalName || 'Document Print Job'}</div>
-                  <div className="text-[11px] text-slate-500">
-                    {trackedOrder.paperSize || 'A4'} • {trackedOrder.colorMode === 'COLOR' ? 'Full Color' : 'Black & White'} • {trackedOrder.printSide === 'DOUBLE' ? 'Double Sided' : 'Single Sided'}
-                  </div>
-                </td>
-                <td className="py-2.5 text-center font-mono">{trackedOrder.document?.pageCount || 1}</td>
-                <td className="py-2.5 text-center font-mono">{trackedOrder.copies || 1}</td>
-                <td className="py-2.5 text-right font-mono font-bold">₹{(trackedOrder.total || 0).toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="border-t-2 border-slate-300 pt-3 space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-600">
-              <span>Subtotal</span>
-              <span className="font-mono">₹{(trackedOrder.total || 0).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-slate-500 text-[11px]">
-              <span>GST (0% Exempt / Composite)</span>
-              <span className="font-mono">₹0.00</span>
-            </div>
-            <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-300 pt-2 mt-1">
-              <span>Grand Total Paid</span>
-              <span className="font-mono text-blue-700">₹{(trackedOrder.total || 0).toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-dashed border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
-            <div className="space-y-1 max-w-sm">
-              <p className="font-semibold text-slate-700">Automated Direct Printer Hardware Spool</p>
-              <p>Collect prints at shop counter. Thank you for choosing {shop?.name || 'PRINTX'}!</p>
-              <p className="text-[9px] text-slate-400">Computer generated bill. No physical signature required.</p>
-            </div>
-            <div className="text-center p-2 rounded-lg border border-emerald-400 bg-emerald-50/50">
-              <div className="text-[10px] font-black text-emerald-700 tracking-wider">PRINTX VERIFIED</div>
-              <div className="text-[8px] font-mono text-emerald-600">TRANSACTION SECURED</div>
             </div>
           </div>
         </div>
