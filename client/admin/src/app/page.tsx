@@ -58,6 +58,7 @@ import { downloadAgentZip } from '@/lib/agentBundle';
 
 type AdminTab =
   | 'OVERVIEW'
+  | 'SHOPS'
   | 'ORDERS'
   | 'PRINTERS'
   | 'PRICING'
@@ -67,6 +68,15 @@ export default function SuperAdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('OVERVIEW');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Update live clock every second for countdowns
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Overview / Telemetry State
   const [data, setData] = useState<any>(() => {
@@ -273,6 +283,49 @@ export default function SuperAdminDashboard() {
     }
   };
 
+  // Subscription remaining time calculation & formatting
+  const getShopSubscription = (shop: any) => {
+    let expiryTime: number = 0;
+    if (typeof window !== 'undefined') {
+      try {
+        const expMap = JSON.parse(localStorage.getItem('printx_shop_subscriptions') || '{}');
+        if (expMap[shop.id]) {
+          expiryTime = expMap[shop.id];
+        }
+      } catch {}
+    }
+    if (!expiryTime) {
+      const base = shop.createdAt ? new Date(shop.createdAt).getTime() : Date.now();
+      expiryTime = base + 30 * 24 * 60 * 60 * 1000;
+    }
+    const ms = expiryTime - currentTime;
+    const isTimeExpired = ms <= 0;
+    const isLocked = isTimeExpired || shop.status === 'SUSPENDED' || shop.status === 'INACTIVE';
+    const totalDuration = 30 * 24 * 60 * 60 * 1000;
+    const safeMs = Math.max(0, ms);
+    const percent = Math.min(100, Math.max(0, (safeMs / totalDuration) * 100));
+
+    const seconds = Math.floor((safeMs / 1000) % 60);
+    const minutes = Math.floor((safeMs / (1000 * 60)) % 60);
+    const hours = Math.floor((safeMs / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(safeMs / (1000 * 60 * 60 * 24));
+
+    return {
+      ms,
+      safeMs,
+      days,
+      hours,
+      minutes,
+      seconds,
+      percent,
+      isTimeExpired,
+      isLocked,
+      formattedTime: isTimeExpired
+        ? 'Plan Expired (0d 0h 0m 0s)'
+        : `${days}d ${hours}h ${minutes}m ${seconds}s`,
+    };
+  };
+
   const handleRechargeShop = async (shopId: string) => {
     try {
       await apiRequest(`/admin/shops/${shopId}/status`, {
@@ -280,7 +333,8 @@ export default function SuperAdminDashboard() {
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
       const expMap = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('printx_shop_subscriptions') || '{}') : {};
-      expMap[shopId] = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      const currentExpiry = expMap[shopId] && expMap[shopId] > Date.now() ? expMap[shopId] : Date.now();
+      expMap[shopId] = currentExpiry + 30 * 24 * 60 * 60 * 1000;
       if (typeof window !== 'undefined') {
         localStorage.setItem('printx_shop_subscriptions', JSON.stringify(expMap));
       }
@@ -471,6 +525,7 @@ export default function SuperAdminDashboard() {
             </div>
             {[
               { id: 'OVERVIEW', label: 'Overview & Telemetry', icon: Activity },
+              { id: 'SHOPS', label: 'Partner Shops', icon: Store, badge: data?.recentShops?.length || data?.totalShops },
               { id: 'ORDERS', label: 'Orders & Receipts', icon: FileText, badge: data?.recentOrders?.length },
               { id: 'PRINTERS', label: 'Printer Fleet', icon: Zap },
               { id: 'PRICING', label: 'Rates & Price Engine', icon: Tag },
@@ -568,6 +623,7 @@ export default function SuperAdminDashboard() {
               <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                 {[
                   { id: 'OVERVIEW', label: 'Overview & Telemetry' },
+                  { id: 'SHOPS', label: 'Partner Shops & Plan Countdowns' },
                   { id: 'ORDERS', label: 'Orders & Receipts' },
                   { id: 'PRINTERS', label: 'Printer Fleet' },
                   { id: 'PRICING', label: 'Rates & Price Engine' },
@@ -634,9 +690,12 @@ export default function SuperAdminDashboard() {
 
             {/* 5-Metric Clean Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
+              <div
+                onClick={() => setActiveTab('SHOPS')}
+                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+              >
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Total Partner Shops</span>
+                  <span className="text-xs font-semibold group-hover:text-brand-600 transition-colors">Partner Shops</span>
                   <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                     <Store className="w-4 h-4" />
                   </div>
@@ -644,14 +703,18 @@ export default function SuperAdminDashboard() {
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
                   {data?.recentShops?.length ?? data?.totalShops ?? 0}
                 </div>
-                <span className="text-[11px] text-blue-600 font-medium mt-1 block">
-                  Connected Xerox Stations
+                <span className="text-[11px] text-blue-600 font-medium mt-1 flex items-center gap-1">
+                  <span>View All Stations</span>
+                  <span>→</span>
                 </span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
+              <div
+                onClick={() => setActiveTab('SHOPS')}
+                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+              >
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Active Subscriptions</span>
+                  <span className="text-xs font-semibold group-hover:text-emerald-600 transition-colors">Active Subscriptions</span>
                   <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
@@ -675,9 +738,12 @@ export default function SuperAdminDashboard() {
                 <span className="text-[11px] text-indigo-600 font-medium mt-1 block">₹299/shop Recurring</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
+              <div
+                onClick={() => setActiveTab('ORDERS')}
+                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+              >
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Customer Print Orders</span>
+                  <span className="text-xs font-semibold group-hover:text-amber-600 transition-colors">Customer Print Orders</span>
                   <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
                     <FileText className="w-4 h-4" />
                   </div>
@@ -705,10 +771,23 @@ export default function SuperAdminDashboard() {
             {/* Quick Actions Navigation */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
-                onClick={() => setActiveTab('ORDERS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
+                onClick={() => setActiveTab('SHOPS')}
+                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
               >
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                  <Store className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Partner Shops & Plans</div>
+                  <div className="text-[10px] text-slate-500">Live countdowns & locks</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('ORDERS')}
+                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
+              >
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   <FileText className="w-4 h-4" />
                 </div>
                 <div>
@@ -719,7 +798,7 @@ export default function SuperAdminDashboard() {
 
               <button
                 onClick={() => setActiveTab('PRINTERS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
+                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
               >
                 <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   <Zap className="w-4 h-4" />
@@ -732,7 +811,7 @@ export default function SuperAdminDashboard() {
 
               <button
                 onClick={() => setActiveTab('PRICING')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
+                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
               >
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   <Tag className="w-4 h-4" />
@@ -742,261 +821,97 @@ export default function SuperAdminDashboard() {
                   <div className="text-[10px] text-slate-500">Edit page prices</div>
                 </div>
               </button>
-
-              <button
-                onClick={() => setActiveTab('REPORTS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer"
-              >
-                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <BarChart3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Financial Reports</div>
-                  <div className="text-[10px] text-slate-500">Daily revenue & charts</div>
-                </div>
-              </button>
             </div>
 
-            {/* Xerox Shops Master Directory */}
+            {/* Quick Xerox Network Summary Widget */}
             <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-slate-900 font-['Outfit']">
-                      All Registered Xerox Shops
-                    </h2>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-brand-700 border border-blue-200">
-                      {filteredShops.length} Total
-                    </span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-brand-600">
+                    <Store className="w-4 h-4" />
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Live list of all onboarded shops. Each shop gets a dedicated QR standee & automated cloud printing.
-                  </p>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base font-['Outfit']">
+                      Connected Xerox Stations Snapshot
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Overview of live counters and real-time subscription status
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      placeholder="Search shop, owner, phone, city..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-52 sm:w-64"
-                    />
-                  </div>
-
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all cursor-pointer"
-                  >
-                    <option value="ALL">All Status</option>
-                    <option value="ACTIVE">Active (Recharged)</option>
-                    <option value="SUSPENDED">Suspended (Locked)</option>
-                  </select>
-
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Shop</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => setActiveTab('SHOPS')}
+                  className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors"
+                >
+                  <span>Manage All Shops & Countdowns</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
               </div>
 
-              {/* Multi-Shop Directory Table */}
-              {loading && (!data?.recentShops || data.recentShops.length === 0) ? (
-                <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin text-brand-600" />
-                  <span>Fetching all shops from database...</span>
-                </div>
-              ) : filteredShops && filteredShops.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
-                        <th className="pb-3 px-3">Xerox Shop & Slug</th>
-                        <th className="pb-3 px-3">Owner & Contact</th>
-                        <th className="pb-3 px-3">Direct Shop UPI ID</th>
-                        <th className="pb-3 px-3 text-center">Connected Fleet</th>
-                        <th className="pb-3 px-3 text-center">₹299/mo Status</th>
-                        <th className="pb-3 px-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredShops.map((shop: any) => {
-                        const ownerName = shop.owner?.name || shop.ownerName || 'Owner';
-                        const ownerPhone = shop.owner?.phone || shop.ownerPhone || shop.owner?.email || 'N/A';
-                        const address = shop.address || shop.city || 'No address specified';
-                        const printersCount = shop.printers?.length || 0;
-                        const ordersCount = shop._count?.orders ?? 0;
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(data?.recentShops || []).map((shop: any) => {
+                  const sub = getShopSubscription(shop);
+                  return (
+                    <div
+                      key={shop.id}
+                      className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-blue-300 hover:bg-white transition-all flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="font-bold text-slate-900 text-sm">{shop.name}</h4>
+                            <span className="text-[11px] text-brand-600 font-mono">/{shop.slug}</span>
+                          </div>
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              !sub.isLocked
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-red-50 text-red-700 border border-red-200'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${!sub.isLocked ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            {!sub.isLocked ? 'Active' : 'Locked'}
+                          </span>
+                        </div>
 
-                        return (
-                          <tr key={shop.id} className="hover:bg-blue-50/40 transition-colors group">
-                            <td className="py-4 px-3">
-                              <div className="font-bold text-slate-900 text-sm">{shop.name}</div>
-                              <div className="text-[11px] text-brand-600 font-mono mt-0.5">
-                                /{shop.slug}
-                              </div>
-                              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                                <span className="truncate max-w-xs">{address}</span>
-                              </div>
-                            </td>
+                        <div className="p-2.5 rounded-xl bg-white border border-slate-200/70 my-2 space-y-1">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-slate-500 font-medium">₹299/mo Plan:</span>
+                            <span className={`font-mono font-bold ${!sub.isLocked ? 'text-emerald-700' : 'text-red-600'}`}>
+                              {sub.formattedTime}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                sub.percent > 40
+                                  ? 'bg-emerald-500'
+                                  : sub.percent > 15
+                                  ? 'bg-amber-500'
+                                  : 'bg-red-500'
+                              }`}
+                              style={{ width: `${sub.percent}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                            <td className="py-4 px-3">
-                              <div className="text-slate-800 font-semibold">{ownerName}</div>
-                              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                                <Phone className="w-3 h-3 text-slate-400 shrink-0" />
-                                <span>{ownerPhone}</span>
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-3">
-                              {shop.upiId ? (
-                                <div className="flex flex-col items-start gap-0.5">
-                                  <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
-                                    {shop.upiId}
-                                  </span>
-                                  <span className="text-[10px] text-emerald-600 font-medium">100% Direct to Shop</span>
-                                </div>
-                              ) : (
-                                <span className="text-[11px] text-slate-400 italic">No UPI Set</span>
-                              )}
-                            </td>
-
-                            <td className="py-4 px-3 text-center">
-                              <div className="flex flex-col items-center gap-0.5">
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                  {printersCount} {printersCount === 1 ? 'Printer' : 'Printers'}
-                                </span>
-                                <span className="text-[10px] text-slate-400">
-                                  {ordersCount} Orders
-                                </span>
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-3 text-center">
-                              <div className="flex flex-col items-center gap-1">
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                    shop.status === 'ACTIVE'
-                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                      : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                                  }`}
-                                >
-                                  <span
-                                    className={`w-1.5 h-1.5 rounded-full ${
-                                      shop.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'
-                                    }`}
-                                  />
-                                  {shop.status === 'ACTIVE' ? 'ACTIVE' : 'LOCKED'}
-                                </span>
-                                <span className="text-[10px] text-slate-400">₹299/mo Plan</span>
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-3 text-right">
-                              <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                {/* 1-Click Recharge 30 Days Button */}
-                                <button
-                                  onClick={() => handleRechargeShop(shop.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-                                  title="Recharge ₹299 (Add 30 Days Live Access)"
-                                >
-                                  <Zap className="w-3.5 h-3.5" />
-                                  <span>Recharge</span>
-                                </button>
-
-                                {/* Toggle Lock / Suspend Button */}
-                                <button
-                                  onClick={() => handleToggleShopStatus(shop.id, shop.status)}
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
-                                    shop.status === 'ACTIVE'
-                                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
-                                      : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
-                                  }`}
-                                  title={shop.status === 'ACTIVE' ? 'Suspend & Lock QR' : 'Reactivate Shop'}
-                                >
-                                  {shop.status === 'ACTIVE' ? (
-                                    <>
-                                      <Pause className="w-3.5 h-3.5" />
-                                      <span>Lock</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Play className="w-3.5 h-3.5" />
-                                      <span>Unlock</span>
-                                    </>
-                                  )}
-                                </button>
-
-                                {/* Standee QR Link */}
-                                <Link
-                                  href={`/standee?slug=${shop.slug}`}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
-                                  title="View Counter Standee QR"
-                                >
-                                  <QrCode className="w-3.5 h-3.5" />
-                                  <span>Standee</span>
-                                </Link>
-
-                                {/* Customer Kiosk Portal */}
-                                <a
-                                  href={`https://printx-customer.vercel.app/shop/${shop.slug}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 transition-colors"
-                                  title="Open Customer Kiosk Portal"
-                                >
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
-
-                                {/* Hardware Agent Setup */}
-                                <button
-                                  onClick={() => setSelectedPrinterShop(shop)}
-                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
-                                  title="Configure Hardware Agent"
-                                >
-                                  <Printer className="w-3.5 h-3.5" />
-                                </button>
-
-                                {/* Delete Shop */}
-                                <button
-                                  onClick={() => setShopToDelete(shop)}
-                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
-                                  title="Delete Shop"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="p-12 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
-                    <Store className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-800">No Xerox Shops Found</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                    {searchQuery ? `No shops match the search "${searchQuery}". Try a different keyword.` : 'You have not onboarded any Xerox shops yet. Click below to add your first station.'}
-                  </p>
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="mt-4 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Onboard New Shop</span>
-                  </button>
-                </div>
-              )}
+                      <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-medium truncate max-w-[130px]">
+                          {shop.owner?.name || shop.ownerName || 'Owner'}
+                        </span>
+                        <button
+                          onClick={() => setActiveTab('SHOPS')}
+                          className="font-bold text-brand-600 hover:text-brand-700"
+                        >
+                          View Details →
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Live Customer Order Stream */}
@@ -1054,6 +969,300 @@ export default function SuperAdminDashboard() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB: SHOPS & LIVE SUBSCRIPTION COUNTDOWNS                                 */}
+        {/* ========================================================================= */}
+        {activeTab === 'SHOPS' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit']">
+                  Partner Shops & Subscription Telemetry
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Live management of all onboarded Xerox shops. Live ₹299/mo plan countdown timer with automatic anti-fraud lock when expired.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search shop, owner, phone, city..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-52 sm:w-64"
+                  />
+                </div>
+
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all cursor-pointer"
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="ACTIVE">Active (Unlocked)</option>
+                  <option value="SUSPENDED">Suspended / Locked</option>
+                </select>
+
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Onboard New Shop</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Shop Cards Grid with Live Countdowns */}
+            {loading && (!data?.recentShops || data.recentShops.length === 0) ? (
+              <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2 bg-white rounded-3xl border border-blue-100">
+                <RefreshCw className="w-4 h-4 animate-spin text-brand-600" />
+                <span>Fetching all shops and live telemetry...</span>
+              </div>
+            ) : filteredShops && filteredShops.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredShops.map((shop: any) => {
+                  const sub = getShopSubscription(shop);
+                  const ownerName = shop.owner?.name || shop.ownerName || 'Owner';
+                  const ownerPhone = shop.owner?.phone || shop.ownerPhone || shop.owner?.email || 'N/A';
+                  const address = shop.address || shop.city || 'Dingal 4 No Canel Road';
+                  const printersCount = shop.printers?.length || 0;
+                  const ordersCount = shop._count?.orders ?? 0;
+
+                  return (
+                    <div
+                      key={shop.id}
+                      className={`p-6 rounded-3xl bg-white border transition-all flex flex-col justify-between shadow-sm hover:shadow-md ${
+                        !sub.isLocked ? 'border-blue-100 hover:border-brand-500' : 'border-red-200 bg-red-50/20'
+                      }`}
+                    >
+                      <div>
+                        {/* Card Top Title Row */}
+                        <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-extrabold text-slate-900 text-lg font-['Outfit']">
+                                {shop.name}
+                              </h3>
+                              <span className="font-mono text-xs px-2.5 py-0.5 rounded-lg bg-blue-50 text-brand-700 font-bold border border-blue-200">
+                                /{shop.slug}
+                              </span>
+                            </div>
+                            <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span>{address}</span>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+                              !sub.isLocked
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
+                            }`}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${!sub.isLocked ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            {!sub.isLocked ? 'ACTIVE (QR LIVE)' : 'LOCKED (QR BLOCKED)'}
+                          </span>
+                        </div>
+
+                        {/* Owner, Contact & UPI Details */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-4 text-xs">
+                          <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              OWNER & CONTACT
+                            </div>
+                            <div className="font-bold text-slate-800 text-sm">{ownerName}</div>
+                            <div className="flex items-center gap-2 pt-1 text-slate-600">
+                              <Phone className="w-3.5 h-3.5 text-brand-600" />
+                              <span className="font-mono">{ownerPhone}</span>
+                              {ownerPhone !== 'N/A' && (
+                                <a
+                                  href={`https://wa.me/91${ownerPhone.replace(/\D/g, '')}?text=Hello%20${encodeURIComponent(ownerName)},%20regarding%20your%20PRINTX%20Xerox%20counter%20subscription...`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold ml-auto"
+                                >
+                                  WhatsApp →
+                                </a>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              DIRECT SHOP UPI ID
+                            </div>
+                            {shop.upiId ? (
+                              <div className="font-mono font-bold text-emerald-800 text-sm break-all">
+                                {shop.upiId}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">No UPI Configured</span>
+                            )}
+                            <div className="text-[10px] text-emerald-600 font-semibold pt-1">
+                              ⚡ 100% Payouts Direct to Counter
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* LIVE SUBSCRIPTION COUNTDOWN BOX (₹299/MO PLAN) */}
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white shadow-md relative overflow-hidden my-4">
+                          <div className="flex items-center justify-between pb-2 border-b border-white/10 text-xs">
+                            <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                              <Clock className="w-4 h-4 animate-spin" />
+                              <span>LIVE SUBSCRIPTION COUNTDOWN (₹299/mo)</span>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white/10 text-white">
+                              30-Day Cycle
+                            </span>
+                          </div>
+
+                          <div className="my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                              <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                                {sub.formattedTime}
+                              </div>
+                              <div className="text-[11px] text-slate-300 mt-0.5">
+                                {!sub.isLocked
+                                  ? '🟢 Counter QR active & receiving paid print jobs'
+                                  : '🔴 Subscription expired. Customer QR is automatically locked.'}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => handleRechargeShop(shop.id)}
+                              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1.5 transition-all shrink-0 active:scale-95 cursor-pointer"
+                            >
+                              <Zap className="w-4 h-4 fill-white" />
+                              <span>Recharge (+30 Days)</span>
+                            </button>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden p-0.5">
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 ${
+                                sub.percent > 30 ? 'bg-gradient-to-r from-emerald-400 to-teal-300' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${sub.percent}%` }}
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2">
+                            <span>Auto-lock on countdown expiry</span>
+                            <span>{Math.round(sub.percent)}% Remaining</span>
+                          </div>
+                        </div>
+
+                        {/* Connected Fleet Summary */}
+                        <div className="flex items-center justify-between text-xs text-slate-600 p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4">
+                          <span className="font-semibold text-slate-800">
+                            Hardware Fleet: {printersCount} {printersCount === 1 ? 'Printer' : 'Printers'}
+                          </span>
+                          <span className="text-slate-500">
+                            Total Orders Processed: <strong>{ordersCount}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Bar */}
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Standee QR Link */}
+                          <Link
+                            href={`/standee?slug=${shop.slug}`}
+                            className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-xs transition-colors"
+                            title="View Counter Standee QR"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                            <span>QR Standee</span>
+                          </Link>
+
+                          {/* Customer Kiosk Link */}
+                          <a
+                            href={`https://printx-customer.vercel.app/shop/${shop.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors"
+                            title="Open Customer Storefront"
+                          >
+                            <span>Customer Kiosk</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+
+                          {/* Hardware Agent */}
+                          <button
+                            onClick={() => setSelectedPrinterShop(shop)}
+                            className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors cursor-pointer"
+                            title="Download Hardware Agent ZIP"
+                          >
+                            <Printer className="w-3.5 h-3.5 text-brand-600" />
+                            <span>Agent .ZIP</span>
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {/* Manual Toggle Lock */}
+                          <button
+                            onClick={() => handleToggleShopStatus(shop.id, shop.status)}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer flex items-center gap-1 ${
+                              shop.status === 'ACTIVE'
+                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
+                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                            }`}
+                          >
+                            {shop.status === 'ACTIVE' ? (
+                              <>
+                                <Pause className="w-3 h-3" />
+                                <span>Lock QR</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3 h-3" />
+                                <span>Unlock QR</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Delete Shop */}
+                          <button
+                            onClick={() => setShopToDelete(shop)}
+                            className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
+                            title="Delete Shop"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
+                  <Store className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-800">No Xerox Shops Found</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  {searchQuery ? `No shops match the keyword "${searchQuery}".` : 'You have not onboarded any Xerox shops yet. Click below to add your first station.'}
+                </p>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="mt-4 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Onboard New Shop</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
