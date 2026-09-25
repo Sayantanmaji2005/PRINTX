@@ -159,7 +159,7 @@ function Invoke-SilentPrint([string]$filePath, [string]$printerName, $printConfi
             $script:printTargetImage = [System.Drawing.Image]::FromFile($cleanPath)
             
             $printDoc.add_PrintPage({
-                param($sender, $e)
+                param($src, $e)
                 if ($script:printTargetImage) {
                     $bounds = $e.MarginBounds
                     $imgW = $script:printTargetImage.Width

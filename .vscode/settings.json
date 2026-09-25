@@ -6,5 +6,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.associations": {
     "*.json": "json"
-  }
+  },
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore"
 }
