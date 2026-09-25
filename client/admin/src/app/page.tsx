@@ -345,13 +345,19 @@ export default function SuperAdminDashboard() {
     document.body.removeChild(link);
   };
 
-  const filteredShops = data?.recentShops?.filter((shop: any) => {
-    const matchesSearch =
-      shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      shop.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      shop.ownerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (shop.address && shop.address.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredShops = (data?.recentShops || []).filter((shop: any) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) {
+      return filterStatus === 'ALL' || shop.status === filterStatus;
+    }
+    const nameMatch = (shop.name || '').toLowerCase().includes(q);
+    const slugMatch = (shop.slug || '').toLowerCase().includes(q);
+    const ownerNameMatch = (shop.owner?.name || shop.ownerName || '').toLowerCase().includes(q);
+    const ownerPhoneMatch = (shop.owner?.phone || shop.ownerPhone || '').toLowerCase().includes(q);
+    const addressMatch = (shop.address || shop.city || '').toLowerCase().includes(q);
+    const upiMatch = (shop.upiId || '').toLowerCase().includes(q);
 
+    const matchesSearch = nameMatch || slugMatch || ownerNameMatch || ownerPhoneMatch || addressMatch || upiMatch;
     const matchesStatus = filterStatus === 'ALL' || shop.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -508,14 +514,16 @@ export default function SuperAdminDashboard() {
         <div className="p-3 border-t border-slate-100 bg-slate-50/70 space-y-2.5 shrink-0">
           <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
             <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 mb-1">
-              <span>Hardware Link</span>
+              <span>Super Admin Network</span>
               <span className="text-emerald-600 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Ready
+                Live
               </span>
             </div>
-            <div className="text-xs font-bold text-slate-800 truncate">Canon PIXMA G3010</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">USB Local Spooler Active</div>
+            <div className="text-xs font-bold text-slate-800 truncate">
+              {data?.recentShops?.length || data?.totalShops || 0} Xerox Shops Connected
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Central Management Hub</div>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -567,7 +575,7 @@ export default function SuperAdminDashboard() {
                 ].find((t) => t.id === activeTab)?.label}
               </h2>
               <p className="text-[11px] text-slate-500 hidden sm:block">
-                Dingal 4 No Canel Road • Live Realtime Telemetry
+                {data?.recentShops?.length || data?.totalShops || 0} Registered Xerox Stations • Super Admin Master Dashboard
               </p>
             </div>
           </div>
@@ -580,28 +588,28 @@ export default function SuperAdminDashboard() {
         {/* ========================================================================= */}
         {activeTab === 'OVERVIEW' && (
           <div className="space-y-6">
-            {/* Hero Banner for SaaS Platform Owner (Sayantan Maji) */}
+            {/* Super Admin Clean Hero Header Banner */}
             <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 text-white shadow-xl shadow-blue-500/15 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div className="max-w-2xl">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white uppercase tracking-wider backdrop-blur-sm">
-                      PRINTX SaaS Master Controller
+                      Super Admin Master Hub
                     </span>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
-                      Standard Plan: ₹299 / Month / Shop
+                      ₹299 / Month / Station
                     </span>
                     <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-semibold">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      Direct UPI Routing Active
+                      Direct Shop UPI Routing Active
                     </span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold font-['Outfit']">
-                    PRINTX Platform & Xerox Software Hub
+                    PRINTX Multi-Shop Network & Master Dashboard
                   </h1>
                   <p className="text-xs text-blue-100 mt-1.5 leading-relaxed">
-                    Platform Owner: <strong>Sayantan Maji</strong>. Selling automated counter software to Xerox shops. <strong>100% of customer print money transfers directly to the Shop Owner's UPI</strong>. Platform earns <strong>₹299/month</strong> per active shop subscription. Unpaid shops are auto-locked.
+                    Centrally managing <strong>{(data?.recentShops || []).length} Xerox shops</strong>. 100% of customer print money transfers directly to each shop owner's UPI. Platform collects ₹299/mo per active shop subscription.
                   </p>
                 </div>
 
@@ -624,24 +632,24 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            {/* 5-Metric Master Stats Grid (SaaS Platform Model) */}
+            {/* 5-Metric Clean Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Partner Shops</span>
+                  <span className="text-xs font-semibold">Total Partner Shops</span>
                   <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                     <Store className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {data?.recentShops?.length || data?.totalShops || 1}
+                  {data?.recentShops?.length ?? data?.totalShops ?? 0}
                 </div>
                 <span className="text-[11px] text-blue-600 font-medium mt-1 block">
-                  Onboarded Stations
+                  Connected Xerox Stations
                 </span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
                   <span className="text-xs font-semibold">Active Subscriptions</span>
                   <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -649,52 +657,52 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
-                  {(data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 1}
+                  {(data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length}
                 </div>
-                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">₹299/mo Recharged</span>
+                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">Active & Unlocked</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Platform SaaS MRR</span>
+                  <span className="text-xs font-semibold">Monthly SaaS MRR</span>
                   <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
                     <DollarSign className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-indigo-700">
-                  ₹{(((data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 1) * 299).toLocaleString('en-IN')}
+                  ₹{(((data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 0) * 299).toLocaleString('en-IN')}
                 </div>
                 <span className="text-[11px] text-indigo-600 font-medium mt-1 block">₹299/shop Recurring</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
+                <div className="flex items-center justify-between text-slate-500 mb-2">
+                  <span className="text-xs font-semibold">Customer Print Orders</span>
+                  <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                  {data?.totalOrders || data?.recentOrders?.length || 0}
+                </div>
+                <span className="text-[11px] text-amber-600 font-medium mt-1 block">Across All Stations</span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all col-span-2 md:col-span-1">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
                   <span className="text-xs font-semibold">Shopkeeper UPI GMV</span>
                   <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <Zap className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700">
                   ₹{(data?.metrics?.totalRevenue !== undefined ? data?.metrics?.totalRevenue : (data?.revenueAggregation?._sum?.total || 0)).toLocaleString('en-IN')}
                 </div>
                 <span className="text-[11px] text-emerald-600 font-medium mt-1 block">100% Direct to Shop UPI</span>
               </div>
-
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all col-span-2 md:col-span-1">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Live QR Standees</span>
-                  <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-                    <QrCode className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-purple-700">
-                  {data?.recentShops?.length || 1}
-                </div>
-                <span className="text-[11px] text-slate-500 mt-1 block">Encrypted Counters</span>
-              </div>
             </div>
 
-            {/* Quick Actions Shortcuts */}
+            {/* Quick Actions Navigation */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
                 onClick={() => setActiveTab('ORDERS')}
@@ -753,166 +761,242 @@ export default function SuperAdminDashboard() {
             <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 font-['Outfit']">
-                    Xerox Station & Counter QR Standee
-                  </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-900 font-['Outfit']">
+                      All Registered Xerox Shops
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-brand-700 border border-blue-200">
+                      {filteredShops.length} Total
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Customers scan this counter QR standee with any smartphone camera to upload documents and print.
+                    Live list of all onboarded shops. Each shop gets a dedicated QR standee & automated cloud printing.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
-                      placeholder="Search shop, owner, city..."
+                      placeholder="Search shop, owner, phone, city..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-48 sm:w-60"
+                      className="pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-52 sm:w-64"
                     />
                   </div>
+
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all cursor-pointer"
+                  >
+                    <option value="ALL">All Status</option>
+                    <option value="ACTIVE">Active (Recharged)</option>
+                    <option value="SUSPENDED">Suspended (Locked)</option>
+                  </select>
+
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Shop</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Table */}
-              {loading ? (
+              {/* Multi-Shop Directory Table */}
+              {loading && (!data?.recentShops || data.recentShops.length === 0) ? (
                 <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin text-brand-600" />
-                  <span>Loading Xerox network data...</span>
+                  <span>Fetching all shops from database...</span>
                 </div>
               ) : filteredShops && filteredShops.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
-                        <th className="pb-3 px-3">Xerox Station & Counter</th>
-                        <th className="pb-3 px-3">Shop Owner & Contact</th>
-                        <th className="pb-3 px-3">Direct UPI ID (100% to Shop)</th>
-                        <th className="pb-3 px-3 text-center">₹299/mo Plan Status</th>
-                        <th className="pb-3 px-3 text-right">SaaS & Standee Actions</th>
+                        <th className="pb-3 px-3">Xerox Shop & Slug</th>
+                        <th className="pb-3 px-3">Owner & Contact</th>
+                        <th className="pb-3 px-3">Direct Shop UPI ID</th>
+                        <th className="pb-3 px-3 text-center">Connected Fleet</th>
+                        <th className="pb-3 px-3 text-center">₹299/mo Status</th>
+                        <th className="pb-3 px-3 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filteredShops.map((shop: any) => (
-                        <tr key={shop.id} className="hover:bg-blue-50/40 transition-colors group">
-                          <td className="py-4 px-3">
-                            <div className="font-bold text-slate-900 text-sm">{shop.name}</div>
-                            <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <MapPin className="w-3 h-3 text-slate-400" />
-                              <span>{shop.address || 'Dingal 4 No Canel Road'}</span>
-                            </div>
-                          </td>
+                      {filteredShops.map((shop: any) => {
+                        const ownerName = shop.owner?.name || shop.ownerName || 'Owner';
+                        const ownerPhone = shop.owner?.phone || shop.ownerPhone || shop.owner?.email || 'N/A';
+                        const address = shop.address || shop.city || 'No address specified';
+                        const printersCount = shop.printers?.length || 0;
+                        const ordersCount = shop._count?.orders ?? 0;
 
-                          <td className="py-4 px-3">
-                            <div className="text-slate-800 font-semibold">{shop.ownerName || shop.owner?.name || 'Shop Owner'}</div>
-                            <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3 text-slate-400" />
-                              <span>{shop.ownerPhone || shop.owner?.phone || 'N/A'}</span>
-                            </div>
-                          </td>
+                        return (
+                          <tr key={shop.id} className="hover:bg-blue-50/40 transition-colors group">
+                            <td className="py-4 px-3">
+                              <div className="font-bold text-slate-900 text-sm">{shop.name}</div>
+                              <div className="text-[11px] text-brand-600 font-mono mt-0.5">
+                                /{shop.slug}
+                              </div>
+                              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span className="truncate max-w-xs">{address}</span>
+                              </div>
+                            </td>
 
-                          <td className="py-4 px-3">
-                            <div className="flex flex-col items-start gap-0.5">
-                              <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
-                                {shop.upiId || '9002761536@axl'}
-                              </span>
-                              <span className="text-[10px] text-emerald-600 font-medium">100% Print Money Direct</span>
-                            </div>
-                          </td>
+                            <td className="py-4 px-3">
+                              <div className="text-slate-800 font-semibold">{ownerName}</div>
+                              <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span>{ownerPhone}</span>
+                              </div>
+                            </td>
 
-                          <td className="py-4 px-3 text-center">
-                            <div className="flex flex-col items-center gap-1">
-                              <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                  shop.status === 'ACTIVE'
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                                }`}
-                              >
+                            <td className="py-4 px-3">
+                              {shop.upiId ? (
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
+                                    {shop.upiId}
+                                  </span>
+                                  <span className="text-[10px] text-emerald-600 font-medium">100% Direct to Shop</span>
+                                </div>
+                              ) : (
+                                <span className="text-[11px] text-slate-400 italic">No UPI Set</span>
+                              )}
+                            </td>
+
+                            <td className="py-4 px-3 text-center">
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                  {printersCount} {printersCount === 1 ? 'Printer' : 'Printers'}
+                                </span>
+                                <span className="text-[10px] text-slate-400">
+                                  {ordersCount} Orders
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-3 text-center">
+                              <div className="flex flex-col items-center gap-1">
                                 <span
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    shop.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'
+                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                    shop.status === 'ACTIVE'
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
                                   }`}
-                                />
-                                {shop.status === 'ACTIVE' ? 'ACTIVE (Recharged)' : 'SUSPENDED (Locked)'}
-                              </span>
-                              <span className="text-[10px] text-slate-400">₹299/mo Plan</span>
-                            </div>
-                          </td>
+                                >
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      shop.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'
+                                    }`}
+                                  />
+                                  {shop.status === 'ACTIVE' ? 'ACTIVE' : 'LOCKED'}
+                                </span>
+                                <span className="text-[10px] text-slate-400">₹299/mo Plan</span>
+                              </div>
+                            </td>
 
-                          <td className="py-4 px-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                              {/* 1-Click Recharge 30 Days Button */}
-                              <button
-                                onClick={() => handleRechargeShop(shop.id)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-                                title="Recharge ₹299 (Add 30 Days Live Access)"
-                              >
-                                <Zap className="w-3.5 h-3.5" />
-                                <span>Recharge ₹299</span>
-                              </button>
+                            <td className="py-4 px-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                {/* 1-Click Recharge 30 Days Button */}
+                                <button
+                                  onClick={() => handleRechargeShop(shop.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                                  title="Recharge ₹299 (Add 30 Days Live Access)"
+                                >
+                                  <Zap className="w-3.5 h-3.5" />
+                                  <span>Recharge</span>
+                                </button>
 
-                              {/* Toggle Lock / Suspend Button */}
-                              <button
-                                onClick={() => handleToggleShopStatus(shop.id, shop.status)}
-                                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
-                                  shop.status === 'ACTIVE'
-                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
-                                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
-                                }`}
-                                title={shop.status === 'ACTIVE' ? 'Suspend & Lock QR' : 'Reactivate Shop'}
-                              >
-                                {shop.status === 'ACTIVE' ? (
-                                  <>
-                                    <Pause className="w-3.5 h-3.5" />
-                                    <span>Lock QR</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="w-3.5 h-3.5" />
-                                    <span>Unlock QR</span>
-                                  </>
-                                )}
-                              </button>
+                                {/* Toggle Lock / Suspend Button */}
+                                <button
+                                  onClick={() => handleToggleShopStatus(shop.id, shop.status)}
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                                    shop.status === 'ACTIVE'
+                                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
+                                      : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                                  }`}
+                                  title={shop.status === 'ACTIVE' ? 'Suspend & Lock QR' : 'Reactivate Shop'}
+                                >
+                                  {shop.status === 'ACTIVE' ? (
+                                    <>
+                                      <Pause className="w-3.5 h-3.5" />
+                                      <span>Lock</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="w-3.5 h-3.5" />
+                                      <span>Unlock</span>
+                                    </>
+                                  )}
+                                </button>
 
-                              {/* Standee QR Link */}
-                              <Link
-                                href={`/standee?slug=${shop.slug}`}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
-                                title="View Counter Standee QR"
-                              >
-                                <QrCode className="w-3.5 h-3.5" />
-                                <span>Standee</span>
-                              </Link>
+                                {/* Standee QR Link */}
+                                <Link
+                                  href={`/standee?slug=${shop.slug}`}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors"
+                                  title="View Counter Standee QR"
+                                >
+                                  <QrCode className="w-3.5 h-3.5" />
+                                  <span>Standee</span>
+                                </Link>
 
-                              {/* Hardware Agent */}
-                              <button
-                                onClick={() => setSelectedPrinterShop(shop)}
-                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
-                                title="Hardware Printer Bridge (Agent)"
-                              >
-                                <Printer className="w-3.5 h-3.5" />
-                              </button>
+                                {/* Customer Kiosk Portal */}
+                                <a
+                                  href={`https://printx-customer.vercel.app/shop/${shop.slug}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 transition-colors"
+                                  title="Open Customer Kiosk Portal"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
 
-                              {/* Customer Portal */}
-                              <a
-                                href={`https://printx-customer.vercel.app/shop/${shop.slug}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"
-                                title="Open Live Customer Portal"
-                              >
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                                {/* Hardware Agent Setup */}
+                                <button
+                                  onClick={() => setSelectedPrinterShop(shop)}
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                  title="Configure Hardware Agent"
+                                >
+                                  <Printer className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Delete Shop */}
+                                <button
+                                  onClick={() => setShopToDelete(shop)}
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
+                                  title="Delete Shop"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
-              ) : null}
+              ) : (
+                <div className="p-12 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
+                    <Store className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-800">No Xerox Shops Found</h3>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    {searchQuery ? `No shops match the search "${searchQuery}". Try a different keyword.` : 'You have not onboarded any Xerox shops yet. Click below to add your first station.'}
+                  </p>
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="mt-4 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Onboard New Shop</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Live Customer Order Stream */}
@@ -2116,6 +2200,64 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DELETE SHOP CONFIRMATION MODAL                                            */}
+      {/* ========================================================================= */}
+      {shopToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-red-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600 mb-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-base font-['Outfit']">
+                  Delete Xerox Shop
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Are you sure you want to delete this shop?
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1 mb-4">
+              <div><strong>Shop:</strong> {shopToDelete.name}</div>
+              <div><strong>Slug:</strong> /{shopToDelete.slug}</div>
+              <div><strong>Owner:</strong> {shopToDelete.owner?.name || shopToDelete.ownerName || 'N/A'}</div>
+            </div>
+
+            <p className="text-[11px] text-red-500 font-medium mb-4">
+              ⚠️ This action is permanent and will remove this shop, its standee QR code, and associated printer connections.
+            </p>
+
+            {deleteError && (
+              <div className="mb-4 p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShopToDelete(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteShop}
+                disabled={deleting}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleting ? 'Deleting...' : 'Delete Permanently'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
