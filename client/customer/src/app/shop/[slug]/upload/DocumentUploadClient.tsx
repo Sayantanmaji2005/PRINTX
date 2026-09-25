@@ -121,6 +121,15 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [declineReason, setDeclineReason] = useState<string>('Transaction was cancelled in UPI app or timed out by bank.');
   const [hasOpenedUpi, setHasOpenedUpi] = useState(false);
   const [showReturnedBanner, setShowReturnedBanner] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
+  const handleCopyUpi = (upiId: string) => {
+    try {
+      navigator.clipboard?.writeText(upiId);
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2500);
+    } catch (e) {}
+  };
 
   // Play pleasant notification sound effects
   const playSuccessSound = () => {
@@ -1523,10 +1532,13 @@ export default function DocumentUploadAndPrintFlowPage() {
                   <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-left text-xs space-y-1 text-slate-700">
                     <div className="flex items-center gap-1.5 font-bold text-rose-800">
                       <ShieldCheck className="w-4 h-4 text-rose-600" />
-                      <span>No Duplicate Payment Risk</span>
+                      <span>Security & Bank Refund Guarantee</span>
                     </div>
                     <p className="text-[11px] text-slate-600 leading-relaxed">
-                      If money was debited from your account, your bank will auto-reverse it within 24-48 hours. No duplicate order was charged.
+                      {declineReason}
+                    </p>
+                    <p className="text-[10px] text-slate-500 pt-0.5">
+                      💡 <em>Tip: Banks decline self-payments if paying your own UPI ID from the same phone. Please scan the QR code directly or use a different UPI app/account.</em>
                     </p>
                   </div>
 
@@ -1537,9 +1549,10 @@ export default function DocumentUploadAndPrintFlowPage() {
                       onClick={() => {
                         handleRetryPayment();
                         setHasOpenedUpi(true);
+                        setShowReturnedBanner(true);
                         window.location.href = `upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
                           shop?.name || 'PRINTX SHOP'
-                        )}&am=${order.total || priceCalculation.grandTotal}&cu=INR&tn=${order.orderNumber}`;
+                        )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR&tn=${order.orderNumber}`;
                       }}
                       className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white text-xs font-bold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
                     >
@@ -1569,112 +1582,130 @@ export default function DocumentUploadAndPrintFlowPage() {
               ) : (
                 /* ----------------- STATE 3: PENDING UPI QR & VERIFICATION FLOW ----------------- */
                 <>
-                  {/* Returned from UPI App Banner */}
-                  {showReturnedBanner && (
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-indigo-300 text-center space-y-3 shadow-md animate-in fade-in zoom-in-95 duration-200">
-                      <div className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-md">
+                  {/* PHASE B: Returned from UPI App / Waiting for Confirmation */}
+                  {showReturnedBanner ? (
+                    <div className="p-5 rounded-2xl bg-gradient-to-b from-blue-50/90 via-indigo-50/40 to-white border-2 border-indigo-200 text-center space-y-3.5 shadow-md animate-in fade-in zoom-in-95 duration-200">
+                      <div className="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center mx-auto shadow-md shadow-brand-500/25">
                         <CreditCard className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-black text-slate-900 font-['Outfit']">Returned from UPI App</h3>
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          Did you complete payment in your UPI app? Tap below to verify.
+                        <h3 className="text-sm font-black text-slate-900 font-['Outfit']">Complete Payment in UPI App</h3>
+                        <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">
+                          After completing your <strong>₹{(order.total || priceCalculation.grandTotal).toFixed(2)}</strong> transfer, tap below to confirm and trigger printing.
                         </p>
                       </div>
+
                       <button
                         type="button"
                         onClick={handleSimulatePayment}
                         disabled={simulatingPayment || isPaid}
-                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-700 hover:to-brand-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                       >
                         {simulatingPayment ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Verifying with Bank...</span>
+                            <span>Verifying Payment with Bank...</span>
                           </>
                         ) : (
                           <>
                             <ShieldCheck className="w-4 h-4" />
-                            <span>I Have Paid — Verify Payment (₹{(order.total || priceCalculation.grandTotal).toFixed(2)})</span>
+                            <span>I Have Paid via UPI — Start Printing</span>
                           </>
                         )}
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={handleSimulateDecline}
-                        className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline pt-1 block mx-auto cursor-pointer"
-                      >
-                        Payment failed / cancelled in app?
-                      </button>
+                      <div className="pt-2 flex items-center justify-between text-[11px] border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowReturnedBanner(false);
+                            setHasOpenedUpi(false);
+                          }}
+                          className="text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+                        >
+                          ← Change App / View QR
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSimulateDecline}
+                          className="text-rose-600 hover:text-rose-700 font-semibold cursor-pointer"
+                        >
+                          Payment Failed / Cancelled?
+                        </button>
+                      </div>
                     </div>
-                  )}
+                  ) : (
+                    /* PHASE A: Initial Clean State Before User Taps Pay */
+                    <div className="space-y-4">
+                      {/* Dynamic UPI QR Code */}
+                      <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs inline-block">
+                        <img
+                          src={
+                            order.upi?.qrCodeUrl ||
+                            `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                              `upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                                shop?.name || 'PRINTX SHOP'
+                              )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR&tn=${order.orderNumber}`
+                            )}`
+                          }
+                          alt="UPI Payment QR"
+                          className="w-44 h-44 object-contain mx-auto"
+                        />
+                        <div className="text-[10px] text-slate-500 font-medium pt-2 text-center">
+                          Scan with PhonePe, GPay, Paytm or BHIM
+                        </div>
+                      </div>
 
-                  {/* Dynamic UPI QR Code */}
-                  <div className="p-4 bg-white border-2 border-slate-900 rounded-2xl shadow-inner inline-block">
-                    <img
-                      src={
-                        order.upi?.qrCodeUrl ||
-                        `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                          `upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                      {/* 1-Click Copy Shop UPI ID */}
+                      <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 max-w-xs mx-auto">
+                        <span className="text-xs text-slate-500 font-medium">Payee UPI:</span>
+                        <span className="font-mono font-bold text-brand-700 text-xs truncate">
+                          {shop?.upiId || '9002761536@axl'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUpi(shop?.upiId || '9002761536@axl')}
+                          className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-600 font-bold text-[10px] border border-blue-200 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                        >
+                          {copiedUpi ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-600" />
+                              <span className="text-emerald-600">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Primary Single Call to Action: Open UPI App */}
+                      <div className="space-y-2 pt-1">
+                        <a
+                          href={`upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
                             shop?.name || 'PRINTX SHOP'
-                          )}&am=${order.total || priceCalculation.grandTotal}&cu=INR&tn=${order.orderNumber}`
-                        )}`
-                      }
-                      alt="UPI Payment QR"
-                      className="w-48 h-48 object-contain mx-auto"
-                    />
-                  </div>
+                          )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR&tn=${order.orderNumber}`}
+                          onClick={() => {
+                            setHasOpenedUpi(true);
+                            setShowReturnedBanner(true);
+                          }}
+                          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          <span>Pay ₹{(order.total || priceCalculation.grandTotal).toFixed(2)} with Any UPI App</span>
+                        </a>
 
-                  <div className="text-xs text-slate-600">
-                    <span className="block font-semibold">Pay to Xerox Station UPI:</span>
-                    <code className="px-2 py-0.5 rounded-lg bg-blue-50 text-brand-700 font-mono text-[11px] font-bold">
-                      {shop?.upiId || '9002761536@axl'}
-                    </code>
-                  </div>
-
-                  {/* App Links */}
-                  <div className="flex justify-center gap-2 pt-1">
-                    <a
-                      href={`upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
-                        shop?.name || 'PRINTX SHOP'
-                      )}&am=${order.total || priceCalculation.grandTotal}&cu=INR&tn=${order.orderNumber}`}
-                      onClick={() => setHasOpenedUpi(true)}
-                      className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>Open Any UPI App (GPay / PhonePe / Paytm)</span>
-                    </a>
-                  </div>
-
-                  {!showReturnedBanner && (
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <button
-                        type="button"
-                        onClick={handleSimulatePayment}
-                        disabled={simulatingPayment || isPaid}
-                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                      >
-                        {simulatingPayment ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Verifying with Bank...</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck className="w-4 h-4" />
-                            <span>I Have Paid via UPI — Verify Payment</span>
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleSimulateDecline}
-                        className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
-                      >
-                        Payment issue / transaction cancelled?
-                      </button>
+                        {/* Subtle helper text link */}
+                        <button
+                          type="button"
+                          onClick={() => setShowReturnedBanner(true)}
+                          className="text-[11px] text-slate-500 hover:text-brand-600 transition-colors pt-1.5 block mx-auto underline cursor-pointer"
+                        >
+                          Paid from counter standee or another phone? Tap to verify
+                        </button>
+                      </div>
                     </div>
                   )}
                 </>
