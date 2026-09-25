@@ -174,26 +174,60 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* Top Promotional Software Showcase Banner */}
+      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-10 w-full">
+        <div className="relative rounded-3xl overflow-hidden border border-blue-200/80 shadow-2xl shadow-blue-500/10 bg-white group">
+          {/* Main Showcase Image */}
+          <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/9] max-h-[540px] overflow-hidden bg-slate-900">
+            <img
+              src="/promo-banner.jpg"
+              alt="PrintX Smart Software Showcase & Digital Printing Kiosk"
+              className="w-full h-full object-cover object-center group-hover:scale-[1.01] transition-transform duration-700 ease-out"
+            />
+            {/* Ambient overlay subtle gradient for polish */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+
+            {/* Quick Interactive Overlay floating badge */}
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto flex flex-wrap items-center gap-3">
+              <a
+                href="#shops"
+                className="px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-brand-900/40 flex items-center gap-2 transition-all active:scale-95 backdrop-blur-md"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Start Printing Now</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a
+                href="#how-it-works"
+                className="px-4 py-2.5 rounded-2xl bg-white/90 hover:bg-white text-slate-800 font-bold text-xs sm:text-sm shadow-lg backdrop-blur-md transition-all active:scale-95"
+              >
+                Watch 4-Step Demo
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-14 pb-16 md:pt-20 md:pb-24 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-6 shadow-xs animate-bounce-subtle">
+      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-10 pb-14 md:pt-14 md:pb-20 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-5 shadow-xs">
           <Zap className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
           <span>Smart Xerox & Automated Cloud Printing SaaS</span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl leading-[1.12] text-slate-900 font-['Outfit']">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl leading-[1.12] text-slate-900 font-['Outfit']">
           Print anything. <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 bg-clip-text text-transparent">
             Pay digitally. Collect instantly.
           </span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+        <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
           Say goodbye to crowded xerox lines, pen drives, and WhatsApp files. Scan the shop counter QR, upload your PDF, pay securely via UPI, and your prints shoot right out of the printer.
         </p>
 
         {/* Hero Quick Action Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#shops"
             className="px-6 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-lg shadow-brand-500/25 flex items-center gap-2 transition-all active:scale-95 hover:gap-3"
@@ -210,7 +244,7 @@ export default function HomePage() {
         </div>
 
         {/* Quick Trust Highlights */}
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl text-left">
+        <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl text-left">
           <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-100/80 shadow-xs flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <Zap className="w-4 h-4" />
