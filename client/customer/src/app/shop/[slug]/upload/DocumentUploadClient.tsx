@@ -747,7 +747,12 @@ export default function DocumentUploadAndPrintFlowPage() {
             {/* Upload Progress Loader */}
             {uploading && (
               <div className="p-8 rounded-3xl bg-white border border-blue-100 shadow-sm text-center flex flex-col items-center">
-                <div className="w-10 h-10 border-3 border-blue-200 border-t-brand-600 rounded-full animate-spin mb-4" />
+                <div className="relative flex items-center justify-center w-16 h-16 mb-4">
+                  <div className="absolute inset-0 rounded-full border-3 border-blue-200/80 border-t-brand-600 animate-spin" />
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white">
+                    <UploadCloud className="w-5 h-5" />
+                  </div>
+                </div>
 
                 <h2 className="text-base font-bold text-slate-900 font-['Outfit']">Analyzing Document...</h2>
                 <p className="text-xs text-slate-500 mt-1">

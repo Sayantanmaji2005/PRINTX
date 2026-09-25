@@ -250,8 +250,14 @@ export default function ShopCustomerPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 text-slate-800">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="w-10 h-10 border-3 border-blue-200 border-t-brand-600 rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-4 text-center">
+          {/* Printer Icon with rolling spinner ring */}
+          <div className="relative flex items-center justify-center w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-3 border-blue-200/80 border-t-brand-600 animate-spin" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white">
+              <Printer className="w-5 h-5" />
+            </div>
+          </div>
           <div>
             <h2 className="text-base font-bold text-slate-900 font-['Outfit']">
               Connecting to Xerox Station...
