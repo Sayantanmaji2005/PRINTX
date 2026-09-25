@@ -1178,14 +1178,6 @@ export default function SuperAdminDashboard() {
                   Real-time status of shop printers, toner/ink telemetry, paper tray sensors, and PrintX Agent bridge.
                 </p>
               </div>
-
-              <button
-                onClick={() => setSelectedPrinterShop(data?.recentShops?.[0] || { name: 'PRINTX SHOP', slug: 'printx-shop' })}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-blue-500/20 cursor-pointer"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download PrintX Agent (.ZIP)</span>
-              </button>
             </div>
 
             {/* Hardware Cards */}
