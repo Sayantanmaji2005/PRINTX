@@ -7,8 +7,8 @@ import { loginAdmin, setAuthSession } from '@/lib/api';
 
 export default function SuperAdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@printx.io');
-  const [password, setPassword] = useState('Password@123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +57,7 @@ export default function SuperAdminLoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Super Admin Email
@@ -71,7 +71,8 @@ export default function SuperAdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@printx.io"
+                  autoComplete="off"
+                  placeholder="Enter admin email"
                   className="w-full pl-9 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
                 />
               </div>
@@ -90,7 +91,8 @@ export default function SuperAdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  placeholder="••••••••••••"
                   className="w-full pl-9 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
                 />
               </div>
@@ -99,20 +101,12 @@ export default function SuperAdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.99]"
             >
               <span>{loading ? 'Authenticating...' : 'Sign In as Super Admin'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Credentials Info */}
-          <div className="mt-5 pt-4 border-t border-slate-100 text-[11px] text-slate-500 text-center">
-            <span className="font-semibold text-slate-700">Default Super Admin:</span>
-            <div className="mt-1 font-mono text-[11px] text-brand-600 font-bold">
-              admin@printx.io / Password@123
-            </div>
-          </div>
         </div>
       </div>
     </div>
