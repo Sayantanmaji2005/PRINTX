@@ -37,6 +37,10 @@ import {
   ChevronDown,
   ChevronUp,
   Share2,
+  XCircle,
+  AlertOctagon,
+  RotateCcw,
+  PartyPopper,
 } from 'lucide-react';
 import {
   fetchShopBySlug,
@@ -112,6 +116,49 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [order, setOrder] = useState<any>(null);
   const [simulatingPayment, setSimulatingPayment] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined'>('idle');
+  const [declineReason, setDeclineReason] = useState<string>('Transaction was cancelled in UPI app or timed out by bank.');
+  const [hasOpenedUpi, setHasOpenedUpi] = useState(false);
+  const [showReturnedBanner, setShowReturnedBanner] = useState(false);
+
+  // Play pleasant notification sound effects
+  const playSuccessSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioCtx = new AudioCtx();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } catch (e) {}
+  };
+
+  const playErrorSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioCtx = new AudioCtx();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+      osc.frequency.setValueAtTime(146.83, audioCtx.currentTime + 0.12); // D3
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } catch (e) {}
+  };
 
   // Clean up object URL on unmount
   useEffect(() => {
@@ -121,6 +168,23 @@ export default function DocumentUploadAndPrintFlowPage() {
       }
     };
   }, [previewUrl]);
+
+  // Detect when user returns from UPI app (GPay / PhonePe / Paytm)
+  useEffect(() => {
+    const handleReturnFromUpi = () => {
+      if (document.visibilityState === 'visible' && hasOpenedUpi && !isPaid && paymentStatus !== 'success') {
+        setShowReturnedBanner(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleReturnFromUpi);
+    window.addEventListener('focus', handleReturnFromUpi);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleReturnFromUpi);
+      window.removeEventListener('focus', handleReturnFromUpi);
+    };
+  }, [hasOpenedUpi, isPaid, paymentStatus]);
 
   useEffect(() => {
     if (!slug) return;
@@ -432,6 +496,8 @@ export default function DocumentUploadAndPrintFlowPage() {
     setCurrentStep(1);
     setOrder(null);
     setIsPaid(false);
+    setHasOpenedUpi(false);
+    setShowReturnedBanner(false);
     setPagesList([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -464,6 +530,8 @@ export default function DocumentUploadAndPrintFlowPage() {
       });
 
       setOrder(newOrder);
+      setHasOpenedUpi(false);
+      setShowReturnedBanner(false);
       setCurrentStep(3);
     } catch (err: any) {
       console.error('Create order failed:', err);
@@ -473,19 +541,39 @@ export default function DocumentUploadAndPrintFlowPage() {
     }
   };
 
-  // Step 3: Simulate UPI Payment & Auto-Print trigger
+  // Step 3: Simulate UPI Payment & Auto-Print trigger (Duplicate-Safe)
   const handleSimulatePayment = async () => {
-    if (!order) return;
+    if (!order || isPaid || simulatingPayment) return;
     try {
       setSimulatingPayment(true);
+      setPaymentStatus('processing');
+      setError(null);
       await simulateOrderPayment(order.orderNumber);
       setIsPaid(true);
+      setPaymentStatus('success');
+      setShowReturnedBanner(false);
+      playSuccessSound();
     } catch (err: any) {
       console.error('Payment error:', err);
+      setPaymentStatus('declined');
+      setDeclineReason(err.message || 'Payment verification was declined or timed out by the bank.');
       setError(err.message || 'Payment verification failed');
+      playErrorSound();
     } finally {
       setSimulatingPayment(false);
     }
+  };
+
+  const handleSimulateDecline = () => {
+    setPaymentStatus('declined');
+    setDeclineReason('Payment was cancelled in UPI app or transaction failed at bank.');
+    setShowReturnedBanner(false);
+    playErrorSound();
+  };
+
+  const handleRetryPayment = () => {
+    setPaymentStatus('idle');
+    setError(null);
   };
 
   const activePage = pagesList[activePageIndex];
@@ -1135,24 +1223,224 @@ export default function DocumentUploadAndPrintFlowPage() {
         {/* ================= STEP 3: UPI PAYMENT & LIVE TRACKING ================= */}
         {currentStep === 3 && order && (
           <div className="max-w-md mx-auto w-full py-6 space-y-5">
-            {/* Payment Card */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-xl text-center space-y-4">
+            {/* Main Payment Container Card */}
+            <div className={`p-6 rounded-3xl bg-white border shadow-xl text-center space-y-4 transition-all duration-300 ${
+              paymentStatus === 'declined'
+                ? 'border-red-300 ring-4 ring-red-100/70 shadow-red-500/10 animate-shake'
+                : paymentStatus === 'success' || isPaid
+                ? 'border-emerald-200 ring-4 ring-emerald-100/70 shadow-emerald-500/10'
+                : 'border-blue-100 shadow-blue-500/5'
+            }`}>
+              {/* Header Status Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
                 <span className="font-mono font-bold text-slate-900">{order.orderNumber}</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                  {isPaid ? 'PAYMENT VERIFIED' : 'AWAITING UPI'}
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    paymentStatus === 'success' || isPaid
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : paymentStatus === 'declined'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }`}
+                >
+                  {paymentStatus === 'success' || isPaid
+                    ? 'PAYMENT VERIFIED'
+                    : paymentStatus === 'declined'
+                    ? 'PAYMENT DECLINED'
+                    : 'AWAITING UPI'}
                 </span>
               </div>
 
+              {/* Amount Display */}
               <div>
-                <span className="text-xs text-slate-500 block">Total Amount to Pay</span>
+                <span className="text-xs text-slate-500 block">Total Amount</span>
                 <div className="text-3xl font-black text-slate-900 font-['Outfit'] mt-1">
                   ₹{(order.total || priceCalculation.grandTotal).toFixed(2)}
                 </div>
               </div>
 
-              {!isPaid ? (
+              {/* ----------------- STATE 1: PAYMENT SUCCESSFUL ANIMATION ----------------- */}
+              {paymentStatus === 'success' || isPaid ? (
+                <div className="space-y-5 py-3 animate-in fade-in zoom-in-95 duration-300">
+                  {/* Glowing Animated Success Badge */}
+                  <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping" />
+                    <div className="absolute inset-1 rounded-full bg-emerald-100 animate-pulse" />
+                    <div className="relative w-18 h-18 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                      <CheckCircle2 className="w-10 h-10 stroke-[2.5] animate-bounce" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 mb-1.5">
+                      <PartyPopper className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Payment Verified Successfully!</span>
+                    </div>
+                    <h2 className="text-xl font-black text-slate-900 font-['Outfit']">
+                      Printing in Progress
+                    </h2>
+                    <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">
+                      Order sent to shop printer. Pages are being spooled and printed right now!
+                    </p>
+                  </div>
+
+                  {/* Hardware Spooling & Print Progress Card */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white text-left space-y-3 shadow-md">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 font-bold text-emerald-400">
+                        <Printer className="w-4 h-4 animate-pulse" />
+                        <span>Hardware Spooling: Active</span>
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-400">100% Ready</span>
+                    </div>
+
+                    {/* Progress Bar Animation */}
+                    <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-full animate-pulse" />
+                    </div>
+
+                    <div className="space-y-1.5 text-[11px] text-slate-300 pt-1 border-t border-slate-700/60 font-medium">
+                      <div className="flex items-center justify-between">
+                        <span>Shop Station:</span>
+                        <span className="font-semibold text-white">{shop?.name || 'PRINTX SHOP'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Job ID:</span>
+                        <span className="font-mono text-emerald-300">PJ-{order.orderNumber.slice(-8)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Paid Amount:</span>
+                        <span className="font-semibold text-white">₹{(order.total || priceCalculation.grandTotal).toFixed(2)} (UPI)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="pt-2">
+                    <button
+                      onClick={() => router.push(`/shop/${slug}`)}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+                    >
+                      Done / Print Another Document
+                    </button>
+                  </div>
+                </div>
+              ) : paymentStatus === 'declined' ? (
+                /* ----------------- STATE 2: PAYMENT DECLINED ANIMATION ----------------- */
+                <div className="space-y-5 py-3 animate-in fade-in zoom-in-95 duration-300">
+                  {/* Glowing Animated Declined Badge with Shake */}
+                  <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-rose-400/20 animate-ping" />
+                    <div className="absolute inset-1 rounded-full bg-rose-100 animate-pulse" />
+                    <div className="relative w-18 h-18 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 animate-shake">
+                      <XCircle className="w-10 h-10 stroke-[2.5]" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200 mb-1.5">
+                      <AlertOctagon className="w-3.5 h-3.5 text-rose-600" />
+                      <span>Payment Declined / Incomplete</span>
+                    </div>
+                    <h2 className="text-xl font-black text-slate-900 font-['Outfit']">
+                      Payment Not Received
+                    </h2>
+                    <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">
+                      {declineReason}
+                    </p>
+                  </div>
+
+                  {/* Safety & Bank Refund Note */}
+                  <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-left text-xs space-y-1 text-slate-700">
+                    <div className="flex items-center gap-1.5 font-bold text-rose-800">
+                      <ShieldCheck className="w-4 h-4 text-rose-600" />
+                      <span>No Duplicate Payment Risk</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      If money was debited from your account, your bank will auto-reverse it within 24-48 hours. No duplicate order was charged.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons for Declined State */}
+                  <div className="space-y-2.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleRetryPayment();
+                        setHasOpenedUpi(true);
+                        window.location.href = `upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                          shop?.name || 'PRINTX SHOP'
+                        )}&am=${order.total || priceCalculation.grandTotal}&cu=INR&tn=${order.orderNumber}`;
+                      }}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white text-xs font-bold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Retry Payment with UPI App</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRetryPayment}
+                      className="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <QrCode className="w-4 h-4" />
+                      <span>Show QR Code Again</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSimulatePayment}
+                      disabled={simulatingPayment}
+                      className="w-full py-2.5 text-[11px] font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer"
+                    >
+                      {simulatingPayment ? 'Re-checking Bank...' : 'Already debited? Click here to re-verify payment'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* ----------------- STATE 3: PENDING UPI QR & CONFIRMATION FLOW ----------------- */
                 <>
+                  {/* Returned from UPI App Banner with animation */}
+                  {showReturnedBanner && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400 text-center space-y-3 shadow-md animate-in fade-in zoom-in-95 duration-200">
+                      <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-md animate-bounce">
+                        <Check className="w-6 h-6 stroke-[3]" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900 font-['Outfit']">Returned from UPI App!</h3>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          Payment completed? Tap below to confirm and start printing instantly.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSimulatePayment}
+                        disabled={simulatingPayment || isPaid}
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {simulatingPayment ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Verifying & Sending to Printer...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Printer className="w-4 h-4 animate-pulse" />
+                            <span>Confirm Payment & Print Now (₹{(order.total || priceCalculation.grandTotal).toFixed(2)})</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSimulateDecline}
+                        className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline pt-1 block mx-auto cursor-pointer"
+                      >
+                        Payment failed / cancelled? Click here
+                      </button>
+                    </div>
+                  )}
+
                   {/* Dynamic UPI QR Code */}
                   <div className="p-4 bg-white border-2 border-slate-900 rounded-2xl shadow-inner inline-block">
                     <img
@@ -1182,64 +1470,45 @@ export default function DocumentUploadAndPrintFlowPage() {
                       href={`upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
                         shop?.name || 'PRINTX SHOP'
                       )}&am=${order.total || priceCalculation.grandTotal}&cu=INR&tn=${order.orderNumber}`}
-                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs"
+                      onClick={() => setHasOpenedUpi(true)}
+                      className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2"
                     >
-                      Open Any UPI App
+                      <CreditCard className="w-4 h-4" />
+                      <span>Open Any UPI App (GPay / PhonePe / Paytm)</span>
                     </a>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={handleSimulatePayment}
-                      disabled={simulatingPayment}
-                      className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Zap className="w-4 h-4 text-emerald-600" />
-                      <span>{simulatingPayment ? 'Verifying with Bank...' : 'Verify UPI Payment / Auto-Print'}</span>
-                    </button>
-                  </div>
+                  {!showReturnedBanner && (
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <button
+                        type="button"
+                        onClick={handleSimulatePayment}
+                        disabled={simulatingPayment || isPaid}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {simulatingPayment ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Verifying with Bank...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-4 h-4 text-amber-300" />
+                            <span>I Have Paid via UPI — Confirm & Start Printing</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSimulateDecline}
+                        className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                      >
+                        Payment issue / transaction declined?
+                      </button>
+                    </div>
+                  )}
                 </>
-              ) : (
-                /* Payment Success View */
-                <div className="space-y-4 py-2">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
-                    <CheckCircle2 className="w-9 h-9" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 font-['Outfit']">
-                      Payment Confirmed!
-                    </h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Your document was sent to the shop printer. Prints are coming out now!
-                    </p>
-                  </div>
-
-                  {/* Order Timeline */}
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-emerald-700 font-semibold">
-                      <Check className="w-4 h-4" />
-                      <span>Order Recorded (#{order.orderNumber})</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-emerald-700 font-semibold">
-                      <Check className="w-4 h-4" />
-                      <span>UPI Payment Verified</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-brand-600 font-bold">
-                      <Printer className="w-4 h-4 animate-pulse" />
-                      <span>Spooling on Shop Hardware Printer...</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 flex items-center justify-center">
-                    <button
-                      onClick={() => router.push(`/shop/${slug}`)}
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all"
-                    >
-                      Done / Print Another
-                    </button>
-                  </div>
-                </div>
               )}
             </div>
           </div>
