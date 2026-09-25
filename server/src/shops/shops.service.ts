@@ -93,8 +93,11 @@ export class ShopsService {
       include: {
         pricingRules: { where: { isActive: true } },
         printers: {
-          where: { status: { in: [PrinterStatus.READY, PrinterStatus.PRINTING] } },
           select: { id: true, name: true, status: true, capabilities: true },
+        },
+        agents: {
+          select: { id: true, name: true, status: true, lastHeartbeatAt: true },
+          orderBy: { lastHeartbeatAt: 'desc' },
         },
       },
     });
@@ -107,6 +110,13 @@ export class ShopsService {
       throw new ForbiddenException(`This Xerox shop is currently ${shop.status.toLowerCase()}`);
     }
 
+    // Determine if Desktop Agent is actively running & sending heartbeats within last 45s
+    const activeAgent = shop.agents?.[0];
+    const isAgentOnline = Boolean(
+      activeAgent?.lastHeartbeatAt &&
+      (Date.now() - new Date(activeAgent.lastHeartbeatAt).getTime()) / 1000 <= 45
+    );
+
     return {
       id: shop.id,
       name: shop.name,
@@ -118,6 +128,8 @@ export class ShopsService {
       logoUrl: shop.logoUrl,
       upiId: shop.upiId,
       hasActivePrinter: shop.printers.length > 0,
+      isAgentOnline,
+      lastAgentHeartbeatAt: activeAgent?.lastHeartbeatAt || null,
       pricingRules: shop.pricingRules,
       printers: shop.printers,
     } as any;
@@ -182,7 +194,7 @@ export class ShopsService {
   }
 
   async listAllShops() {
-    return this.prisma.shop.findMany({
+    const shops = await this.prisma.shop.findMany({
       select: {
         id: true,
         name: true,
@@ -191,8 +203,33 @@ export class ShopsService {
         phone: true,
         status: true,
         createdAt: true,
+        agents: {
+          select: { id: true, name: true, status: true, lastHeartbeatAt: true },
+          orderBy: { lastHeartbeatAt: 'desc' },
+          take: 1,
+        },
       },
       orderBy: { createdAt: 'desc' },
+    });
+
+    return shops.map((s) => {
+      const activeAgent = s.agents?.[0];
+      const isAgentOnline = Boolean(
+        activeAgent?.lastHeartbeatAt &&
+        (Date.now() - new Date(activeAgent.lastHeartbeatAt).getTime()) / 1000 <= 45
+      );
+
+      return {
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        address: s.address,
+        phone: s.phone,
+        status: s.status,
+        createdAt: s.createdAt,
+        isAgentOnline,
+        lastAgentHeartbeatAt: activeAgent?.lastHeartbeatAt || null,
+      };
     });
   }
 }

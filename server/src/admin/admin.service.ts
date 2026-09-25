@@ -65,6 +65,7 @@ export class AdminService {
           createdAt: true,
           owner: { select: { name: true, email: true, phone: true } },
           printers: { select: { id: true, name: true, status: true } },
+          agents: { select: { id: true, name: true, status: true, lastHeartbeatAt: true } },
           qrCodes: { where: { isActive: true }, take: 1, select: { code: true, qrImageUrl: true } },
           _count: { select: { orders: true, customerSessions: true } },
         },
@@ -113,6 +114,14 @@ export class AdminService {
       return sum + pages * copies;
     }, 0);
 
+    const onlineShopsWithAgents = recentShops.filter((s) => {
+      const activeAgent = s.agents?.[0];
+      return Boolean(
+        activeAgent?.lastHeartbeatAt &&
+        (Date.now() - new Date(activeAgent.lastHeartbeatAt).getTime()) / 1000 <= 45
+      );
+    }).length;
+
     const result = {
       metrics: {
         totalShops,
@@ -123,27 +132,38 @@ export class AdminService {
         totalRevenue: Math.round(totalRevenue * 100) / 100,
         totalPagesPrinted,
         activePrinters,
+        onlineAgents: onlineShopsWithAgents,
       },
-      recentShops: recentShops.map((s) => ({
-        id: s.id,
-        name: s.name,
-        slug: s.slug,
-        address: s.address,
-        upiId: s.upiId,
-        ownerName: s.owner?.name || 'Owner',
-        ownerEmail: s.owner?.email,
-        ownerPhone: s.owner?.phone,
-        status: s.status,
-        qrCode: s.qrCodes[0]?.code,
-        qrImageUrl: s.qrCodes[0]?.qrImageUrl,
-        printersCount: s.printers.length,
-        hasOnlinePrinter: s.printers.some(
-          (p) => p.status === PrinterStatus.READY || p.status === PrinterStatus.PRINTING,
-        ),
-        totalOrders: s._count.orders,
-        totalCustomers: s._count.customerSessions,
-        createdAt: s.createdAt,
-      })),
+      recentShops: recentShops.map((s) => {
+        const activeAgent = s.agents?.[0];
+        const isAgentOnline = Boolean(
+          activeAgent?.lastHeartbeatAt &&
+          (Date.now() - new Date(activeAgent.lastHeartbeatAt).getTime()) / 1000 <= 45
+        );
+
+        return {
+          id: s.id,
+          name: s.name,
+          slug: s.slug,
+          address: s.address,
+          upiId: s.upiId,
+          ownerName: s.owner?.name || 'Owner',
+          ownerEmail: s.owner?.email,
+          ownerPhone: s.owner?.phone,
+          status: s.status,
+          isAgentOnline,
+          lastAgentHeartbeatAt: activeAgent?.lastHeartbeatAt || null,
+          qrCode: s.qrCodes[0]?.code,
+          qrImageUrl: s.qrCodes[0]?.qrImageUrl,
+          printersCount: s.printers.length,
+          hasOnlinePrinter: s.printers.some(
+            (p) => p.status === PrinterStatus.READY || p.status === PrinterStatus.PRINTING,
+          ),
+          totalOrders: s._count.orders,
+          totalCustomers: s._count.customerSessions,
+          createdAt: s.createdAt,
+        };
+      }),
       recentOrders: recentOrders.map((o) => ({
         id: o.id,
         orderNumber: o.orderNumber,

@@ -863,16 +863,29 @@ export default function SuperAdminDashboard() {
                             <h4 className="font-bold text-slate-900 text-sm">{shop.name}</h4>
                             <span className="text-[11px] text-brand-600 font-mono">/{shop.slug}</span>
                           </div>
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              !sub.isLocked
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-red-50 text-red-700 border border-red-200'
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${!sub.isLocked ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {!sub.isLocked ? 'Active' : 'Locked'}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                            {shop.isAgentOnline ? (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Agent Live
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                Agent Off
+                              </span>
+                            )}
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                !sub.isLocked
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : 'bg-red-50 text-red-700 border border-red-200'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${!sub.isLocked ? 'bg-blue-500' : 'bg-red-500'}`} />
+                              {!sub.isLocked ? 'QR Active' : 'Locked'}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="p-2.5 rounded-xl bg-white border border-slate-200/70 my-2 space-y-1">
@@ -1060,16 +1073,30 @@ export default function SuperAdminDashboard() {
                             </div>
                           </div>
 
-                          <span
-                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
-                              !sub.isLocked
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
-                            }`}
-                          >
-                            <span className={`w-2 h-2 rounded-full ${!sub.isLocked ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {!sub.isLocked ? 'ACTIVE (QR LIVE)' : 'LOCKED (QR BLOCKED)'}
-                          </span>
+                          <div className="flex items-center gap-2 flex-wrap justify-end shrink-0">
+                            {shop.isAgentOnline ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                AGENT ONLINE
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs">
+                                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                AGENT OFFLINE
+                              </span>
+                            )}
+
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                !sub.isLocked
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${!sub.isLocked ? 'bg-blue-500' : 'bg-red-500'}`} />
+                              {!sub.isLocked ? 'QR ACTIVE' : 'QR LOCKED'}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Owner, Contact & UPI Details */}

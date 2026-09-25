@@ -356,6 +356,100 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Live Network Stations Section */}
+      <section id="shops" className="py-16 md:py-20 bg-gradient-to-b from-blue-50/50 via-slate-50 to-white border-y border-slate-200/80 relative">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2 border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>LIVE CONNECTED STATIONS</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
+              Find a Connected Xerox Counter Nearby
+            </h2>
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              Real-time hardware status of partner Xerox stations. Stations with running Desktop Agents show <strong>ONLINE</strong> for instant auto-print.
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="p-12 text-center text-xs text-slate-500">Loading live print stations...</div>
+          ) : shops.length === 0 ? (
+            <div className="p-8 rounded-3xl bg-white border border-slate-200 text-center max-w-md mx-auto">
+              <Store className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+              <div className="font-bold text-slate-900 text-sm">Demo PrintX Station</div>
+              <p className="text-xs text-slate-500 mt-1">Visit our flagship counter to test instant phone-to-printer dispatch.</p>
+              <a
+                href="/shop/printx-shop"
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20"
+              >
+                <span>Open Station</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {shops.map((s) => (
+                <div
+                  key={s.id}
+                  className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="font-mono text-xs px-2.5 py-0.5 rounded-lg bg-blue-50 text-brand-700 font-bold border border-blue-200">
+                        /{s.slug}
+                      </span>
+                      {s.isAgentOnline ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          ONLINE (Agent Active)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs">
+                          <span className="w-2 h-2 rounded-full bg-rose-500" />
+                          OFFLINE (Agent Closed)
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="font-extrabold text-slate-900 text-lg font-['Outfit'] group-hover:text-brand-600 transition-colors">
+                      {s.name}
+                    </h3>
+                    {s.address && (
+                      <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{s.address}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="text-[11px] text-slate-500 font-medium">
+                      {s.isAgentOnline ? (
+                        <span className="text-emerald-600 font-bold">⚡ Ready to Print</span>
+                      ) : (
+                        <span className="text-slate-400">Agent Disconnected</span>
+                      )}
+                    </div>
+                    <a
+                      href={`/shop/${s.slug}`}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                        s.isAgentOnline
+                          ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/20'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                      }`}
+                    >
+                      <span>Open Counter</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Services Section */}
       <section id="services" className="py-16 md:py-24 max-w-6xl mx-auto px-4 w-full">
         <div className="text-center max-w-2xl mx-auto mb-12">
