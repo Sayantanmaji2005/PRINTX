@@ -191,20 +191,24 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 pt-10 pb-14 md:pt-14 md:pb-20 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-5 shadow-xs">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-5 shadow-xs">
           <Zap className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
-          <span>Smart Xerox & Automated Cloud Printing SaaS</span>
+          <span>⚡ INDIA&apos;S SMARTEST CONTACTLESS XEROX & PRINT KIOSK</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl leading-[1.12] text-slate-900 font-['Outfit']">
-          Print anything. <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 bg-clip-text text-transparent">
-            Pay digitally. Collect instantly.
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight max-w-4xl leading-[1.15] text-slate-900 font-['Outfit']">
+          Instant Cloud Xerox,{' '}
+          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent font-black">
+            Zero Waiting Time.
+          </span>
+          <br className="hidden sm:inline" />
+          <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 bg-clip-text text-transparent block mt-2 sm:mt-1">
+            Scan & Print Directly from Your Phone.
           </span>
         </h1>
 
         <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
-          Say goodbye to crowded xerox lines, pen drives, and WhatsApp files. Scan the shop counter QR, upload your PDF, pay securely via UPI, and your prints shoot right out of the printer.
+          Transform your smartphone into an on-demand printing studio. No app installation, no pendrives, no WhatsApp file sharing — simply scan the shop counter QR and your fresh prints roll out in seconds.
         </p>
 
         {/* Hero Quick Action Buttons */}
