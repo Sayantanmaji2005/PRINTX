@@ -1113,23 +1113,23 @@ export default function SuperAdminDashboard() {
                         </div>
 
                         {/* LIVE SUBSCRIPTION COUNTDOWN BOX (₹299/MO PLAN) */}
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white shadow-md relative overflow-hidden my-4">
-                          <div className="flex items-center justify-between pb-2 border-b border-white/10 text-xs">
-                            <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                              <Clock className="w-4 h-4 animate-spin" />
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-blue-50/40 to-white border border-emerald-200/80 text-slate-900 shadow-xs relative overflow-hidden my-4">
+                          <div className="flex items-center justify-between pb-2 border-b border-emerald-100 text-xs">
+                            <div className="flex items-center gap-1.5 text-emerald-800 font-bold">
+                              <Clock className="w-4 h-4 text-emerald-600 animate-spin" />
                               <span>LIVE SUBSCRIPTION COUNTDOWN (₹299/mo)</span>
                             </div>
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white/10 text-white">
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
                               30-Day Cycle
                             </span>
                           </div>
 
                           <div className="my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div>
-                              <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                              <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900">
                                 {sub.formattedTime}
                               </div>
-                              <div className="text-[11px] text-slate-300 mt-0.5">
+                              <div className="text-[11px] text-slate-600 mt-0.5 font-medium">
                                 {!sub.isLocked
                                   ? '🟢 Counter QR active & receiving paid print jobs'
                                   : '🔴 Subscription expired. Customer QR is automatically locked.'}
@@ -1138,7 +1138,7 @@ export default function SuperAdminDashboard() {
 
                             <button
                               onClick={() => handleRechargeShop(shop.id)}
-                              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1.5 transition-all shrink-0 active:scale-95 cursor-pointer"
+                              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all shrink-0 active:scale-95 cursor-pointer"
                             >
                               <Zap className="w-4 h-4 fill-white" />
                               <span>Recharge (+30 Days)</span>
@@ -1146,18 +1146,18 @@ export default function SuperAdminDashboard() {
                           </div>
 
                           {/* Progress bar */}
-                          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden p-0.5">
+                          <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden p-0.5">
                             <div
                               className={`h-full rounded-full transition-all duration-1000 ${
-                                sub.percent > 30 ? 'bg-gradient-to-r from-emerald-400 to-teal-300' : 'bg-red-500'
+                                sub.percent > 30 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-red-500'
                               }`}
                               style={{ width: `${sub.percent}%` }}
                             />
                           </div>
 
-                          <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2">
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 font-medium">
                             <span>Auto-lock on countdown expiry</span>
-                            <span>{Math.round(sub.percent)}% Remaining</span>
+                            <span className="font-bold text-slate-700">{Math.round(sub.percent)}% Remaining</span>
                           </div>
                         </div>
 
@@ -1567,17 +1567,17 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* Architecture Explainer Card */}
-            <div className="p-6 rounded-3xl bg-slate-900 text-white shadow-xl relative overflow-hidden">
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-white border border-blue-200/80 text-slate-900 shadow-xs relative overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="max-w-xl">
-                  <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider mb-2">
+                  <div className="flex items-center gap-2 text-brand-600 font-bold text-xs uppercase tracking-wider mb-2">
                     <Terminal className="w-4 h-4" />
                     <span>PrintX Universal Hardware Agent</span>
                   </div>
-                  <h3 className="text-lg font-bold font-['Outfit']">
+                  <h3 className="text-lg font-bold font-['Outfit'] text-slate-900">
                     Autonomous Print Spooler for Counter PCs
                   </h3>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                     Runs natively on Windows 10/11 using PowerShell 5.1+ or Node.js. No third-party drivers or printer software required. Automatically listens to customer UPI payments and fires physical prints.
                   </p>
                 </div>
@@ -1585,7 +1585,7 @@ export default function SuperAdminDashboard() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSelectedPrinterShop(data?.recentShops?.[0] || { name: 'PRINTX SHOP', slug: 'printx-shop' })}
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all cursor-pointer flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
                     <span>Setup Shop PC</span>
@@ -2241,21 +2241,21 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* 1-Click Download Connector Package ZIP */}
-            <div className="mt-5 p-4 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 text-white space-y-3 shadow-lg border border-indigo-500/30">
+            <div className="mt-5 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/50 text-slate-900 space-y-3 shadow-xs border border-blue-200/80">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5 font-['Outfit']">
-                    <Download className="w-4 h-4 text-indigo-400" />
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5 font-['Outfit']">
+                    <Download className="w-4 h-4 text-brand-600" />
                     <span>Download Ready-To-Run Agent Package</span>
                   </div>
-                  <div className="text-[11px] text-indigo-200/80 mt-0.5">
-                    Includes pre-configured <code className="text-indigo-300">start-agent.bat</code> and <code className="text-indigo-300">config.json</code> for {selectedPrinterShop.name}.
+                  <div className="text-[11px] text-slate-600 mt-0.5">
+                    Includes pre-configured <code className="bg-blue-100 text-blue-900 px-1 py-0.5 rounded font-mono font-medium">start-agent.bat</code> and <code className="bg-blue-100 text-blue-900 px-1 py-0.5 rounded font-mono font-medium">config.json</code> for {selectedPrinterShop.name}.
                   </div>
                 </div>
 
                 <button
                   onClick={() => downloadAgentZip(selectedPrinterShop)}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Agent (.ZIP)</span>
@@ -2267,7 +2267,7 @@ export default function SuperAdminDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedPrinterShop(null)}
-                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-colors cursor-pointer"
               >
                 Close Window
               </button>
