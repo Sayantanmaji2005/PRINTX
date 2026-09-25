@@ -679,7 +679,7 @@ export default function HomePage() {
 
               <div className="space-y-4">
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20PrintX%20Team,%20I%20want%20to%20know%20more%20about%20your%20Smart%20Printing%20Station."
+                  href="https://wa.me/919002761536?text=Hi%20PrintX%20Team,%20I%20want%20to%20know%20more%20about%20your%20Smart%20Printing%20Station."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 transition-colors group"
@@ -689,19 +689,22 @@ export default function HomePage() {
                   </div>
                   <div>
                     <div className="text-xs font-bold">WhatsApp Direct Support</div>
-                    <div className="text-[11px] text-emerald-700">+91 98765 43210 (Tap to Chat)</div>
+                    <div className="text-[11px] text-emerald-700">+91 9002761536 (Tap to Chat)</div>
                   </div>
                 </a>
 
-                <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-slate-700">
+                <a
+                  href="tel:+919002761536"
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-blue-50/50 hover:bg-blue-100/60 border border-blue-100 text-slate-700 transition-colors group"
+                >
                   <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-xs font-bold text-slate-900">Helpline / Support Phone</div>
-                    <div className="text-[11px] text-slate-600">+91 1800-PRINTX-HELP (Toll Free)</div>
+                    <div className="text-[11px] text-slate-600">+91 9002761536 (Tap to Call)</div>
                   </div>
-                </div>
+                </a>
 
                 <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-slate-700">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
