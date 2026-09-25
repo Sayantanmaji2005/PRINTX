@@ -1681,12 +1681,12 @@ export default function DocumentUploadAndPrintFlowPage() {
                         </button>
                       </div>
 
-                      {/* Primary Single Call to Action: Open UPI App */}
+                      {/* Primary Call to Action: Open UPI App with Clean Link */}
                       <div className="space-y-2 pt-1">
                         <a
                           href={`upi://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
-                            shop?.name || 'PRINTX SHOP'
-                          )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR&tn=${order.orderNumber}`}
+                            shop?.owner?.name || shop?.name || 'Sayantan Maji'
+                          )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR`}
                           onClick={() => {
                             setHasOpenedUpi(true);
                             setShowReturnedBanner(true);
@@ -1696,6 +1696,48 @@ export default function DocumentUploadAndPrintFlowPage() {
                           <CreditCard className="w-4 h-4" />
                           <span>Pay ₹{(order.total || priceCalculation.grandTotal).toFixed(2)} with Any UPI App</span>
                         </a>
+
+                        {/* Individual Direct App Buttons for seamless compatibility */}
+                        <div className="grid grid-cols-3 gap-2 pt-1">
+                          <a
+                            href={`phonepe://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                              shop?.owner?.name || shop?.name || 'Sayantan Maji'
+                            )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR`}
+                            onClick={() => {
+                              setHasOpenedUpi(true);
+                              setShowReturnedBanner(true);
+                            }}
+                            className="py-2.5 px-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                          >
+                            <span>PhonePe</span>
+                          </a>
+
+                          <a
+                            href={`tez://upi/pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                              shop?.owner?.name || shop?.name || 'Sayantan Maji'
+                            )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR`}
+                            onClick={() => {
+                              setHasOpenedUpi(true);
+                              setShowReturnedBanner(true);
+                            }}
+                            className="py-2.5 px-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                          >
+                            <span>Google Pay</span>
+                          </a>
+
+                          <a
+                            href={`paytmmp://pay?pa=${shop?.upiId || '9002761536@axl'}&pn=${encodeURIComponent(
+                              shop?.owner?.name || shop?.name || 'Sayantan Maji'
+                            )}&am=${(order.total || priceCalculation.grandTotal).toFixed(2)}&cu=INR`}
+                            onClick={() => {
+                              setHasOpenedUpi(true);
+                              setShowReturnedBanner(true);
+                            }}
+                            className="py-2.5 px-2 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                          >
+                            <span>Paytm</span>
+                          </a>
+                        </div>
 
                         {/* Subtle helper text link */}
                         <button
