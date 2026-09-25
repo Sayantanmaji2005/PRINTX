@@ -139,8 +139,8 @@ export default function HomePage() {
       <div className="fixed top-1/3 -right-40 w-96 h-96 bg-indigo-400/15 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-10 left-1/4 w-80 h-80 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/85 border-b border-blue-100/80 shadow-xs transition-all">
+      {/* Top Navbar (Fixed & 100% Stable) */}
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/90 border-b border-blue-100/80 shadow-xs transition-all">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
@@ -176,7 +176,7 @@ export default function HomePage() {
       </header>
 
       {/* Brand Showcase Section (Pure Visual, Zero Text Overlay) */}
-      <section id="brand" className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-8 w-full scroll-mt-20">
+      <section id="brand" className="relative z-10 max-w-6xl mx-auto px-4 pt-20 md:pt-24 w-full scroll-mt-20">
         <div className="relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl bg-slate-950">
           <img
             src="/printxdemo.png"
