@@ -116,6 +116,7 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [order, setOrder] = useState<any>(null);
   const [simulatingPayment, setSimulatingPayment] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [isPrintingStarted, setIsPrintingStarted] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined'>('idle');
   const [declineReason, setDeclineReason] = useState<string>('Transaction was cancelled in UPI app or timed out by bank.');
   const [hasOpenedUpi, setHasOpenedUpi] = useState(false);
@@ -530,6 +531,9 @@ export default function DocumentUploadAndPrintFlowPage() {
       });
 
       setOrder(newOrder);
+      setIsPaid(false);
+      setIsPrintingStarted(false);
+      setPaymentStatus('idle');
       setHasOpenedUpi(false);
       setShowReturnedBanner(false);
       setCurrentStep(3);
@@ -1277,53 +1281,84 @@ export default function DocumentUploadAndPrintFlowPage() {
                       <span>Payment Verified Successfully!</span>
                     </div>
                     <h2 className="text-xl font-black text-slate-900 font-['Outfit']">
-                      Printing in Progress
+                      ₹{(order.total || priceCalculation.grandTotal).toFixed(2)} Received
                     </h2>
                     <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">
-                      Order sent to shop printer. Pages are being spooled and printed right now!
+                      {!isPrintingStarted
+                        ? 'Payment has been 100% verified. Tap the button below to start printing your pages on the Xerox machine!'
+                        : 'Order sent to shop printer. Pages are being spooled and printed right now!'}
                     </p>
                   </div>
 
-                  {/* Hardware Spooling & Print Progress Card */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white text-left space-y-3 shadow-md">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 font-bold text-emerald-400">
-                        <Printer className="w-4 h-4 animate-pulse" />
-                        <span>Hardware Spooling: Active</span>
-                      </div>
-                      <span className="text-[11px] font-mono text-slate-400">100% Ready</span>
+                  {/* Payment Receipt Box */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-left text-xs space-y-1.5 text-slate-700">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Shop Station:</span>
+                      <span className="font-bold text-slate-900">{shop?.name || 'PRINTX SHOP'}</span>
                     </div>
-
-                    {/* Progress Bar Animation */}
-                    <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-full animate-pulse" />
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Order Number:</span>
+                      <span className="font-mono font-bold text-emerald-800">{order.orderNumber}</span>
                     </div>
-
-                    <div className="space-y-1.5 text-[11px] text-slate-300 pt-1 border-t border-slate-700/60 font-medium">
-                      <div className="flex items-center justify-between">
-                        <span>Shop Station:</span>
-                        <span className="font-semibold text-white">{shop?.name || 'PRINTX SHOP'}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Job ID:</span>
-                        <span className="font-mono text-emerald-300">PJ-{order.orderNumber.slice(-8)}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Paid Amount:</span>
-                        <span className="font-semibold text-white">₹{(order.total || priceCalculation.grandTotal).toFixed(2)} (UPI)</span>
-                      </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Payment Status:</span>
+                      <span className="font-bold text-emerald-600">PAID & VERIFIED (UPI)</span>
                     </div>
                   </div>
 
-                  {/* Action Button */}
-                  <div className="pt-2">
-                    <button
-                      onClick={() => router.push(`/shop/${slug}`)}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
-                    >
-                      Done / Print Another Document
-                    </button>
-                  </div>
+                  {/* If Print NOT yet started -> Show Confirm & Print Out Button */}
+                  {!isPrintingStarted ? (
+                    <div className="pt-2 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsPrintingStarted(true)}
+                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-2.5 transition-all cursor-pointer active:scale-[0.98] animate-pulse"
+                      >
+                        <Printer className="w-5 h-5" />
+                        <span>Confirm & Print Out Now</span>
+                      </button>
+                      <span className="text-[11px] text-slate-500 block">
+                        Clicking this will instantly release the job to the printer
+                      </span>
+                    </div>
+                  ) : (
+                    /* If Print Started -> Show Hardware Spooling Status & Done */
+                    <div className="space-y-4 pt-1">
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white text-left space-y-3 shadow-md">
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 font-bold text-emerald-400">
+                            <Printer className="w-4 h-4 animate-pulse" />
+                            <span>Hardware Spooling: Active</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-400">Printing Now</span>
+                        </div>
+
+                        {/* Progress Bar Animation */}
+                        <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-full animate-pulse" />
+                        </div>
+
+                        <div className="space-y-1.5 text-[11px] text-slate-300 pt-1 border-t border-slate-700/60 font-medium">
+                          <div className="flex items-center justify-between">
+                            <span>Job ID:</span>
+                            <span className="font-mono text-emerald-300">PJ-{order.orderNumber.slice(-8)}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Sheets:</span>
+                            <span className="text-white font-semibold">{priceCalculation.totalSheets} sheets ({copies} copies)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/shop/${slug}`)}
+                        className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+                      >
+                        Done / Print Another Document
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : paymentStatus === 'declined' ? (
                 /* ----------------- STATE 2: PAYMENT DECLINED ANIMATION ----------------- */
@@ -1398,35 +1433,35 @@ export default function DocumentUploadAndPrintFlowPage() {
                   </div>
                 </div>
               ) : (
-                /* ----------------- STATE 3: PENDING UPI QR & CONFIRMATION FLOW ----------------- */
+                /* ----------------- STATE 3: PENDING UPI QR & VERIFICATION FLOW ----------------- */
                 <>
-                  {/* Returned from UPI App Banner with animation */}
+                  {/* Returned from UPI App Banner */}
                   {showReturnedBanner && (
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400 text-center space-y-3 shadow-md animate-in fade-in zoom-in-95 duration-200">
-                      <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-md animate-bounce">
-                        <Check className="w-6 h-6 stroke-[3]" />
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-indigo-300 text-center space-y-3 shadow-md animate-in fade-in zoom-in-95 duration-200">
+                      <div className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-md">
+                        <CreditCard className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-black text-slate-900 font-['Outfit']">Returned from UPI App!</h3>
+                        <h3 className="text-sm font-black text-slate-900 font-['Outfit']">Returned from UPI App</h3>
                         <p className="text-xs text-slate-600 mt-0.5">
-                          Payment completed? Tap below to confirm and start printing instantly.
+                          Did you complete payment in your UPI app? Tap below to verify.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={handleSimulatePayment}
                         disabled={simulatingPayment || isPaid}
-                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-700 hover:to-brand-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                       >
                         {simulatingPayment ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Verifying & Sending to Printer...</span>
+                            <span>Verifying with Bank...</span>
                           </>
                         ) : (
                           <>
-                            <Printer className="w-4 h-4 animate-pulse" />
-                            <span>Confirm Payment & Print Now (₹{(order.total || priceCalculation.grandTotal).toFixed(2)})</span>
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>I Have Paid — Verify Payment (₹{(order.total || priceCalculation.grandTotal).toFixed(2)})</span>
                           </>
                         )}
                       </button>
@@ -1436,7 +1471,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                         onClick={handleSimulateDecline}
                         className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline pt-1 block mx-auto cursor-pointer"
                       >
-                        Payment failed / cancelled? Click here
+                        Payment failed / cancelled in app?
                       </button>
                     </div>
                   )}
@@ -1484,7 +1519,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                         type="button"
                         onClick={handleSimulatePayment}
                         disabled={simulatingPayment || isPaid}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                       >
                         {simulatingPayment ? (
                           <>
@@ -1493,8 +1528,8 @@ export default function DocumentUploadAndPrintFlowPage() {
                           </>
                         ) : (
                           <>
-                            <Zap className="w-4 h-4 text-amber-300" />
-                            <span>I Have Paid via UPI — Confirm & Start Printing</span>
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>I Have Paid via UPI — Verify Payment</span>
                           </>
                         )}
                       </button>
@@ -1504,7 +1539,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                         onClick={handleSimulateDecline}
                         className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                       >
-                        Payment issue / transaction declined?
+                        Payment issue / transaction cancelled?
                       </button>
                     </div>
                   )}

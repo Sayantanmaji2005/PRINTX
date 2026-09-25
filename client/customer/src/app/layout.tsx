@@ -7,6 +7,14 @@ export const metadata: Metadata = {
     'Scan shop QR code, upload documents, configure print settings, pay via UPI and print automatically.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover' as const,
+};
+
 export default function RootLayout({
   children,
 }: {
