@@ -152,11 +152,14 @@ export default function HomePage() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
             <a href="#brand" className="hover:text-brand-600 transition-colors font-semibold text-brand-600">Brand</a>
             <a href="#services" className="hover:text-brand-600 transition-colors">Services</a>
             <a href="#how-it-works" className="hover:text-brand-600 transition-colors">How It Works</a>
             <a href="#pricing" className="hover:text-brand-600 transition-colors">Pricing List</a>
+            <a href="#recharge" className="text-emerald-700 font-bold hover:text-emerald-800 transition-colors px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
+              Shop Plan ₹299
+            </a>
             <a href="#shops" className="hover:text-brand-600 transition-colors">Find Station</a>
             <a href="#about" className="hover:text-brand-600 transition-colors">About Us</a>
             <a href="#contact" className="hover:text-brand-600 transition-colors">Contact</a>
@@ -505,6 +508,169 @@ export default function HomePage() {
               >
                 Go to Live Print Station →
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Shop Partner ₹299 Monthly Recharge Pack Section */}
+      <section id="recharge" className="py-16 md:py-20 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-b border-slate-800">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold mb-3 border border-emerald-400/30">
+              <Zap className="w-3.5 h-3.5 fill-emerald-400" />
+              <span>SHOP PARTNER PLAN • FLAT MONTHLY RECHARGE</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-['Outfit'] tracking-tight">
+              Power Your Xerox Shop for Just{' '}
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 bg-clip-text text-transparent">
+                ₹299 / Month
+              </span>
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
+              Everything a Cyber Cafe or Xerox store needs to run automated, queue-free cloud printing. Zero commission on your print income — you keep 100% of your earnings.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* Pricing Feature Highlight Box (Left) */}
+            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-slate-800/80 border border-slate-700 backdrop-blur-xl shadow-2xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-6 border-b border-slate-700/80">
+                  <div>
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">ALL-IN-ONE XEROX LICENSE</span>
+                    <h3 className="text-2xl font-black text-white font-['Outfit'] mt-1">Smart PrintX Station Pack</h3>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-baseline gap-1 justify-end">
+                      <span className="text-3xl sm:text-4xl font-black text-white font-['Outfit']">₹299</span>
+                      <span className="text-xs text-slate-400">/ month</span>
+                    </div>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mt-1">
+                      0% Commission Cut
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300">
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Unlimited Print Dispatch:</strong> Zero page limits. Run thousands of prints every day smoothly.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Custom Standee QR:</strong> High-res printable counter QR standee generated with your shop name.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Direct UPI Payouts:</strong> Customer payment goes straight to your own UPI ID (GPay/PhonePe).
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Desktop Agent Driver:</strong> Connects with all Canon, HP, Epson, Brother & Konica printers.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Live Daily Accounts:</strong> Real-time dashboard showing total earnings, pages & order history.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white">Anti-Fraud Protection:</strong> Zero prints are executed before UPI payment confirmation.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-5 border-t border-slate-700/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-slate-400">
+                  💳 Instant recharge via UPI • Auto-renew or cancel anytime
+                </div>
+                <a
+                  href="https://wa.me/919002761536?text=Hi%20PrintX%20Team,%20I%20want%20to%20recharge/activate%20the%20Rs%20299%20Monthly%20Shop%20Partner%20Pack%20for%20my%20Xerox%20Shop."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                >
+                  <MessageCircle className="w-4 h-4 fill-slate-950" />
+                  <span>Recharge Shop Now (₹299)</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Why Recharge with PrintX (Right) */}
+            <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-slate-700 backdrop-blur-xl flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-400 flex items-center justify-center mb-4">
+                  <Store className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white font-['Outfit']">How ₹299 Transforms Your Shop</h3>
+                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                  Save 2+ hours daily, stop taking WhatsApp prints manually, eliminate loose change arguments, and handle 3x more customers during exam rush hours.
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      ₹0
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-white">No Commission Deductions</span>
+                      <p className="text-[11px] text-slate-400">All customer UPI payments reach your account directly.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      10x
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-white">Parallel Customer Queue</span>
+                      <p className="text-[11px] text-slate-400">Multiple students can upload and print simultaneously.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      24h
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-white">Technician Support Included</span>
+                      <p className="text-[11px] text-slate-400">Call or WhatsApp +91 9002761536 for instant remote setup.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-700">
+                <a
+                  href={(process.env.NEXT_PUBLIC_ADMIN_URL || 'https://printx-admin.vercel.app').replace(/\/+$/, '') + '/login'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <span>Already a partner? Open Shop Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
