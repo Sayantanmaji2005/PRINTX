@@ -411,35 +411,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Transparent Pricing List Section */}
-      <section id="pricing" className="py-16 bg-slate-900 text-white relative overflow-hidden">
-        {/* Glowing background highlights */}
-        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+      {/* Transparent Pricing List Section (Light Theme) */}
+      <section id="pricing" className="py-16 bg-gradient-to-b from-blue-50/50 via-white to-slate-50 border-y border-slate-200/80 text-slate-900 relative overflow-hidden">
+        {/* Soft ambient glowing highlights */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold mb-3 border border-blue-400/30">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-3 border border-blue-200 shadow-xs">
               <BadgePercent className="w-3.5 h-3.5" /> 100% TRANSPARENT RATE CARD
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold font-['Outfit']">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
               Standard Print & Xerox Pricing
             </h2>
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm text-slate-600">
               No hidden fees. Dynamic volume discounts automatically applied at checkout.
             </p>
           </div>
 
           {/* Pricing Category Tabs */}
           <div className="flex justify-center mb-8">
-            <div className="p-1 rounded-2xl bg-slate-800/90 border border-slate-700 inline-flex gap-1 shadow-inner">
+            <div className="p-1 rounded-2xl bg-slate-100 border border-slate-200 inline-flex gap-1 shadow-inner">
               <button
                 type="button"
                 onClick={() => setPricingCategory('standard')}
                 className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
                   pricingCategory === 'standard'
                     ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Black & White Docs
@@ -450,7 +450,7 @@ export default function HomePage() {
                 className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
                   pricingCategory === 'color'
                     ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Color & Photo Prints
@@ -461,7 +461,7 @@ export default function HomePage() {
                 className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
                   pricingCategory === 'finishing'
                     ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Binding & Lamination
@@ -469,10 +469,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Pricing Table Card */}
-          <div className="rounded-2xl bg-slate-800/70 border border-slate-700/80 backdrop-blur-md overflow-hidden shadow-2xl">
-            <div className="divide-y divide-slate-700/60">
-              <div className="grid grid-cols-12 px-6 py-3.5 bg-slate-800/90 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          {/* Pricing Table Card (Light) */}
+          <div className="rounded-3xl bg-white border border-slate-200 shadow-lg overflow-hidden">
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 px-6 py-3.5 bg-slate-50/90 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                 <div className="col-span-6 sm:col-span-7">Service / Specification</div>
                 <div className="col-span-3 sm:col-span-2 text-right">Standard Rate</div>
                 <div className="col-span-3 text-right">Bulk / Student Offer</div>
@@ -481,30 +481,32 @@ export default function HomePage() {
               {pricingData[pricingCategory].map((row, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-12 px-6 py-4 items-center hover:bg-slate-750/50 transition-colors text-sm"
+                  className="grid grid-cols-12 px-6 py-4 items-center hover:bg-blue-50/30 transition-colors text-sm"
                 >
                   <div className="col-span-6 sm:col-span-7">
-                    <div className="font-semibold text-white">{row.item}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{row.specs}</div>
+                    <div className="font-bold text-slate-900">{row.item}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{row.specs}</div>
                   </div>
-                  <div className="col-span-3 sm:col-span-2 text-right font-bold text-brand-400">
+                  <div className="col-span-3 sm:col-span-2 text-right font-black text-brand-600">
                     {row.rate}
                   </div>
-                  <div className="col-span-3 text-right text-xs font-semibold text-emerald-400">
-                    {row.bulk}
+                  <div className="col-span-3 text-right">
+                    <span className="inline-block text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                      {row.bulk}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-4 bg-slate-800/40 border-t border-slate-700/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+            <div className="p-4 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-3">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Rates may slightly vary depending on individual shop configuration.</span>
               </div>
               <a
                 href="#shops"
-                className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold transition-all text-xs shrink-0"
+                className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all text-xs shrink-0 shadow-sm"
               >
                 Go to Live Print Station →
               </a>
@@ -513,159 +515,159 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Shop Partner ₹299 Monthly Recharge Pack Section */}
-      <section id="recharge" className="py-16 md:py-20 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-b border-slate-800">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Shop Partner ₹299 Monthly Recharge Pack Section (Light Theme) */}
+      <section id="recharge" className="py-16 md:py-20 bg-gradient-to-b from-slate-50 via-blue-50/40 to-white text-slate-900 relative overflow-hidden border-b border-slate-200/80">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold mb-3 border border-emerald-400/30">
-              <Zap className="w-3.5 h-3.5 fill-emerald-400" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-3 border border-emerald-200 shadow-xs">
+              <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
               <span>SHOP PARTNER PLAN • FLAT MONTHLY RECHARGE</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-['Outfit'] tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-['Outfit'] tracking-tight text-slate-900">
               Power Your Xerox Shop for Just{' '}
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                 ₹299 / Month
               </span>
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
               Everything a Cyber Cafe or Xerox store needs to run automated, queue-free cloud printing. Zero commission on your print income — you keep 100% of your earnings.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Pricing Feature Highlight Box (Left) */}
-            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-slate-800/80 border border-slate-700 backdrop-blur-xl shadow-2xl flex flex-col justify-between">
+            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-6 border-b border-slate-700/80">
+                <div className="flex items-center justify-between pb-6 border-b border-slate-100">
                   <div>
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">ALL-IN-ONE XEROX LICENSE</span>
-                    <h3 className="text-2xl font-black text-white font-['Outfit'] mt-1">Smart PrintX Station Pack</h3>
+                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">ALL-IN-ONE XEROX LICENSE</span>
+                    <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] mt-1">Smart PrintX Station Pack</h3>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-1 justify-end">
-                      <span className="text-3xl sm:text-4xl font-black text-white font-['Outfit']">₹299</span>
-                      <span className="text-xs text-slate-400">/ month</span>
+                      <span className="text-3xl sm:text-4xl font-black text-slate-900 font-['Outfit']">₹299</span>
+                      <span className="text-xs text-slate-500">/ month</span>
                     </div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mt-1">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">
                       0% Commission Cut
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300">
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Unlimited Print Dispatch:</strong> Zero page limits. Run thousands of prints every day smoothly.
+                      <strong className="text-slate-900">Unlimited Print Dispatch:</strong> Zero page limits. Run thousands of prints every day smoothly.
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Custom Standee QR:</strong> High-res printable counter QR standee generated with your shop name.
+                      <strong className="text-slate-900">Custom Standee QR:</strong> High-res printable counter QR standee generated with your shop name.
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Direct UPI Payouts:</strong> Customer payment goes straight to your own UPI ID (GPay/PhonePe).
+                      <strong className="text-slate-900">Direct UPI Payouts:</strong> Customer payment goes straight to your own UPI ID (GPay/PhonePe).
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Desktop Agent Driver:</strong> Connects with all Canon, HP, Epson, Brother & Konica printers.
+                      <strong className="text-slate-900">Desktop Agent Driver:</strong> Connects with all Canon, HP, Epson, Brother & Konica printers.
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Live Daily Accounts:</strong> Real-time dashboard showing total earnings, pages & order history.
+                      <strong className="text-slate-900">Live Daily Accounts:</strong> Real-time dashboard showing total earnings, pages & order history.
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white">Anti-Fraud Protection:</strong> Zero prints are executed before UPI payment confirmation.
+                      <strong className="text-slate-900">Anti-Fraud Protection:</strong> Zero prints are executed before UPI payment confirmation.
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-5 border-t border-slate-700/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-slate-400">
+              <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-slate-500">
                   💳 Instant recharge via UPI • Auto-renew or cancel anytime
                 </div>
                 <a
                   href="https://wa.me/919002761536?text=Hi%20PrintX%20Team,%20I%20want%20to%20recharge/activate%20the%20Rs%20299%20Monthly%20Shop%20Partner%20Pack%20for%20my%20Xerox%20Shop."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all active:scale-95"
                 >
-                  <MessageCircle className="w-4 h-4 fill-slate-950" />
+                  <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
                   <span>Recharge Shop Now (₹299)</span>
                 </a>
               </div>
             </div>
 
             {/* Why Recharge with PrintX (Right) */}
-            <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-slate-700 backdrop-blur-xl flex flex-col justify-between">
+            <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-400 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-brand-600 flex items-center justify-center mb-4">
                   <Store className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-white font-['Outfit']">How ₹299 Transforms Your Shop</h3>
-                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                <h3 className="text-xl font-bold text-slate-900 font-['Outfit']">How ₹299 Transforms Your Shop</h3>
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                   Save 2+ hours daily, stop taking WhatsApp prints manually, eliminate loose change arguments, and handle 3x more customers during exam rush hours.
                 </p>
 
                 <div className="mt-6 space-y-3">
-                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-xs shrink-0">
                       ₹0
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-white">No Commission Deductions</span>
-                      <p className="text-[11px] text-slate-400">All customer UPI payments reach your account directly.</p>
+                      <span className="font-bold text-slate-900">No Commission Deductions</span>
+                      <p className="text-[11px] text-slate-500">All customer UPI payments reach your account directly.</p>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-brand-700 border border-blue-200 flex items-center justify-center font-bold text-xs shrink-0">
                       10x
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-white">Parallel Customer Queue</span>
-                      <p className="text-[11px] text-slate-400">Multiple students can upload and print simultaneously.</p>
+                      <span className="font-bold text-slate-900">Parallel Customer Queue</span>
+                      <p className="text-[11px] text-slate-500">Multiple students can upload and print simultaneously.</p>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold text-xs shrink-0">
                       24h
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-white">Technician Support Included</span>
-                      <p className="text-[11px] text-slate-400">Call or WhatsApp +91 9002761536 for instant remote setup.</p>
+                      <span className="font-bold text-slate-900">Technician Support Included</span>
+                      <p className="text-[11px] text-slate-500">Call or WhatsApp +91 9002761536 for instant remote setup.</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-700">
+              <div className="mt-6 pt-4 border-t border-slate-100">
                 <a
                   href={(process.env.NEXT_PUBLIC_ADMIN_URL || 'https://printx-admin.vercel.app').replace(/\/+$/, '') + '/login'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <span>Already a partner? Open Shop Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
