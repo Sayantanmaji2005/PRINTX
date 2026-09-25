@@ -891,8 +891,11 @@ export default function ShopCustomerPage() {
                 )}
                 <button
                   onClick={() => {
+                    sessionStorage.setItem('printx_preset_paper', 'glossy');
+                    sessionStorage.setItem('printx_preset_color', 'COLOR');
+                    sessionStorage.setItem('printx_preset_notes', `Passport Studio (${passportLayout} Photos on A4 Glossy)`);
                     setActiveModal(null);
-                    router.push(`/shop/${slug}/upload`);
+                    router.push(`/shop/${slug}/upload?preset=passport`);
                   }}
                   disabled={!passportPhoto}
                   className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 disabled:opacity-40"
@@ -972,8 +975,12 @@ export default function ShopCustomerPage() {
               </button>
               <button
                 onClick={() => {
+                  sessionStorage.setItem('printx_preset_paper', resumePaperGsm);
+                  sessionStorage.setItem('printx_preset_color', resumeColor);
+                  sessionStorage.setItem('printx_preset_side', 'SINGLE');
+                  sessionStorage.setItem('printx_preset_notes', `Executive Resume (${resumePaperGsm} GSM Paper)`);
                   setActiveModal(null);
-                  router.push(`/shop/${slug}/upload`);
+                  router.push(`/shop/${slug}/upload?preset=resume`);
                 }}
                 className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
               >
@@ -1036,8 +1043,17 @@ export default function ShopCustomerPage() {
               </span>
               <button
                 onClick={() => {
+                  const safeBinding =
+                    bindingType === 'hardcover'
+                      ? 'HARDCOVER'
+                      : bindingType === 'comb'
+                      ? 'COMB'
+                      : bindingType === 'staple'
+                      ? 'STAPLE'
+                      : 'SPIRAL';
+                  sessionStorage.setItem('printx_preset_binding', safeBinding);
                   setActiveModal(null);
-                  router.push(`/shop/${slug}/upload`);
+                  router.push(`/shop/${slug}/upload?preset=binding`);
                 }}
                 className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
               >
@@ -1123,8 +1139,10 @@ export default function ShopCustomerPage() {
               </button>
               <button
                 onClick={() => {
+                  sessionStorage.setItem('printx_preset_lamination', laminationFinish === 'matte' ? 'MATTE' : 'GLOSS');
+                  sessionStorage.setItem('printx_preset_size', laminationSize === 'A3' ? 'A3' : 'A4');
                   setActiveModal(null);
-                  router.push(`/shop/${slug}/upload`);
+                  router.push(`/shop/${slug}/upload?preset=lamination`);
                 }}
                 className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
               >
@@ -1203,8 +1221,9 @@ export default function ShopCustomerPage() {
                 </div>
                 <button
                   onClick={() => {
+                    sessionStorage.setItem('printx_preset_copies', String(Math.max(1, Math.round(bulkPages / 20))));
                     setActiveModal(null);
-                    router.push(`/shop/${slug}/upload`);
+                    router.push(`/shop/${slug}/upload?preset=bulk`);
                   }}
                   className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
                 >

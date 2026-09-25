@@ -213,6 +213,24 @@ export default function DocumentUploadAndPrintFlowPage() {
       if (search.includes('mode=camera')) {
         setTimeout(() => cameraInputRef.current?.click(), 300);
       }
+
+      // Load presets saved from specialized shop services
+      const presetPaper = sessionStorage.getItem('printx_preset_paper');
+      if (presetPaper) setPaperGsm(presetPaper);
+      const presetColor = sessionStorage.getItem('printx_preset_color');
+      if (presetColor) setColorMode(presetColor as any);
+      const presetSide = sessionStorage.getItem('printx_preset_side');
+      if (presetSide) setPrintSide(presetSide as any);
+      const presetBinding = sessionStorage.getItem('printx_preset_binding');
+      if (presetBinding) setBindingOption(presetBinding as any);
+      const presetLamination = sessionStorage.getItem('printx_preset_lamination');
+      if (presetLamination) setLaminationOption(presetLamination as any);
+      const presetSize = sessionStorage.getItem('printx_preset_size');
+      if (presetSize) setPaperSize(presetSize);
+      const presetCopies = sessionStorage.getItem('printx_preset_copies');
+      if (presetCopies) setCopies(Number(presetCopies) || 1);
+      const presetNotes = sessionStorage.getItem('printx_preset_notes');
+      if (presetNotes) setCustomNotes(presetNotes);
     }
   }, [slug, router]);
 
@@ -1031,154 +1049,248 @@ export default function DocumentUploadAndPrintFlowPage() {
                     <Sliders className="w-4 h-4 text-brand-600" />
                     <span>Print Specifications</span>
                   </h3>
-                  <span className="text-[10px] text-slate-400 uppercase font-mono">Auto-Bridge</span>
+                  <span className="text-[10px] text-emerald-600 font-bold px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                    Live Engine
+                  </span>
                 </div>
 
-                {/* 1. Color Mode */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Color Composition</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setColorMode('BW')}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        colorMode === 'BW' ? 'border-brand-600 bg-blue-50/80 font-bold' : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <div className="text-xs text-slate-900">Black & White</div>
-                      <div className="text-[10px] text-slate-500 font-normal">Sharp Monochrome</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setColorMode('COLOR')}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        colorMode === 'COLOR' ? 'border-brand-600 bg-blue-50/80 font-bold' : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <div className="text-xs text-slate-900">Full Color</div>
-                      <div className="text-[10px] text-brand-600 font-normal">Rich Vibrant Ink</div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 2. Sides (Single vs Double / Duplex) */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Sides & Duplex</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPrintSide('SINGLE')}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        printSide === 'SINGLE' ? 'border-brand-600 bg-blue-50/80 font-bold' : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <div className="text-xs text-slate-900">Single Sided</div>
-                      <div className="text-[10px] text-slate-500 font-normal">1 Side per Sheet</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPrintSide('DOUBLE')}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        printSide === 'DOUBLE' ? 'border-brand-600 bg-blue-50/80 font-bold' : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <div className="text-xs text-slate-900">Double Sided</div>
-                      <div className="text-[10px] text-emerald-600 font-semibold">Save 50% Paper</div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 3. Paper Size & Quality GSM */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Paper Dimensions</label>
-                    <select
-                      value={paperSize}
-                      onChange={(e) => setPaperSize(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
-                    >
-                      <option value="A4">A4 (Standard 210 × 297 mm)</option>
-                      <option value="A3">A3 (Poster 297 × 420 mm)</option>
-                      <option value="A5">A5 (Half Sheet 148 × 210 mm)</option>
-                      <option value="LEGAL">Legal (8.5 × 14 in)</option>
-                      <option value="LETTER">Letter (8.5 × 11 in)</option>
-                    </select>
+                {/* 1. Color Composition & Print Sides */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-brand-600" />
+                    <span>1. Color & Print Sides</span>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Paper Weight (GSM)</label>
-                    <select
-                      value={paperGsm}
-                      onChange={(e) => setPaperGsm(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
-                    >
-                      <option value="75">75 GSM (Standard Xerox)</option>
-                      <option value="80">80 GSM (Executive Bond +₹1)</option>
-                      <option value="100">100 GSM (Heavyweight +₹2)</option>
-                      <option value="glossy">Glossy Photo Paper (+₹10)</option>
-                      <option value="matte">Matte Fine Paper (+₹8)</option>
-                    </select>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Color Mode</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setColorMode('BW')}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          colorMode === 'BW' ? 'border-brand-600 bg-blue-50/90 font-bold shadow-xs' : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <div className="text-xs text-slate-900">Black & White</div>
+                        <div className="text-[10px] text-slate-500 font-normal">Sharp Monochrome</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setColorMode('COLOR')}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          colorMode === 'COLOR' ? 'border-brand-600 bg-blue-50/90 font-bold shadow-xs' : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <div className="text-xs text-slate-900">Full Color</div>
+                        <div className="text-[10px] text-brand-600 font-normal">Rich Vibrant Ink</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Sides & Duplex</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPrintSide('SINGLE')}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          printSide === 'SINGLE' ? 'border-brand-600 bg-blue-50/90 font-bold shadow-xs' : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <div className="text-xs text-slate-900">Single Sided</div>
+                        <div className="text-[10px] text-slate-500 font-normal">1 Side / Sheet</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrintSide('DOUBLE')}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          printSide === 'DOUBLE' ? 'border-brand-600 bg-blue-50/90 font-bold shadow-xs' : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <div className="text-xs text-slate-900">Double Sided</div>
+                        <div className="text-[10px] text-emerald-600 font-semibold">Save 50% Paper</div>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* 4. Copies Counter */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Copies Required</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setCopies((c) => Math.max(1, c - 1))}
-                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition-colors"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
+                {/* 2. Paper Dimensions & GSM Weight */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-brand-600" />
+                    <span>2. Paper Sizing & Weight</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Paper Size</label>
+                      <select
+                        value={paperSize}
+                        onChange={(e) => setPaperSize(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value="A4">A4 (210 × 297 mm)</option>
+                        <option value="A3">A3 (297 × 420 mm)</option>
+                        <option value="A5">A5 (148 × 210 mm)</option>
+                        <option value="LEGAL">Legal (8.5 × 14 in)</option>
+                        <option value="LETTER">Letter (8.5 × 11 in)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Quality GSM</label>
+                      <select
+                        value={paperGsm}
+                        onChange={(e) => setPaperGsm(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value="75">75 GSM Standard</option>
+                        <option value="80">80 GSM Bond (+₹1)</option>
+                        <option value="100">100 GSM Bond (+₹2)</option>
+                        <option value="glossy">Glossy Photo (+₹10)</option>
+                        <option value="matte">Matte Paper (+₹8)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Copies, Range & Layout */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-brand-600" />
+                    <span>3. Copies & Page Range</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Copies</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCopies((c) => Math.max(1, c - 1))}
+                        className="w-9 h-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-bold flex items-center justify-center transition-colors shadow-2xs"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={999}
+                        value={copies}
+                        onChange={(e) => setCopies(Math.max(1, Math.min(999, Number(e.target.value) || 1)))}
+                        className="w-16 text-center py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-xs text-slate-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCopies((c) => Math.min(999, c + 1))}
+                        className="w-9 h-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-bold flex items-center justify-center transition-colors shadow-2xs"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+
+                      <div className="flex items-center gap-1 ml-auto">
+                        {[1, 2, 5, 10].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setCopies(num)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                              copies === num ? 'bg-brand-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            {num}x
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Page Range</label>
+                      <select
+                        value={pageRangeMode}
+                        onChange={(e) => setPageRangeMode(e.target.value as any)}
+                        className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value="ALL">All Pages ({pagesList.length})</option>
+                        <option value="CUSTOM">Custom Range</option>
+                        <option value="ODD">Odd Pages Only</option>
+                        <option value="EVEN">Even Pages Only</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Pages Per Sheet</label>
+                      <select
+                        value={pagesPerSheet}
+                        onChange={(e) => setPagesPerSheet(Number(e.target.value) as any)}
+                        className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value={1}>1 Page / Sheet</option>
+                        <option value={2}>2 Pages (Side-by-side)</option>
+                        <option value={4}>4 Pages (Compact)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {pageRangeMode === 'CUSTOM' && (
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1-5, 8, 11-14"
+                        value={customRangeString}
+                        onChange={(e) => setCustomRangeString(e.target.value)}
+                        className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Finishing, Binding & Special Instructions */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-brand-600" />
+                    <span>4. Finishing & Instructions</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Binding Finishing</label>
+                      <select
+                        value={bindingOption}
+                        onChange={(e) => setBindingOption(e.target.value as any)}
+                        className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value="NONE">No Binding</option>
+                        <option value="STAPLE">Corner Staple (+₹5)</option>
+                        <option value="SPIRAL">Spiral Coil (+₹40)</option>
+                        <option value="COMB">Comb Binding (+₹40)</option>
+                        <option value="HARDCOVER">Hard Cover (+₹250)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Lamination Pouch</label>
+                      <select
+                        value={laminationOption}
+                        onChange={(e) => setLaminationOption(e.target.value as any)}
+                        className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+                      >
+                        <option value="NONE">No Lamination</option>
+                        <option value="GLOSS">Glossy Clear (+₹20)</option>
+                        <option value="MATTE">Matte Velvet (+₹25)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
                     <input
-                      type="number"
-                      min={1}
-                      max={999}
-                      value={copies}
-                      onChange={(e) => setCopies(Math.max(1, Math.min(999, Number(e.target.value) || 1)))}
-                      className="w-20 text-center py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-900"
+                      type="text"
+                      placeholder="Special note for counter (e.g. staple top-left corner)..."
+                      value={customNotes}
+                      onChange={(e) => setCustomNotes(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400"
                     />
-                    <button
-                      onClick={() => setCopies((c) => Math.min(999, c + 1))}
-                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <span className="text-[11px] text-slate-500 font-medium">
-                      = {priceCalculation.totalSheets} Total Printed Sheets
-                    </span>
-                  </div>
-                </div>
-
-                {/* 5. Finishing & Binding Addons */}
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Binding Finishing</label>
-                    <select
-                      value={bindingOption}
-                      onChange={(e) => setBindingOption(e.target.value as any)}
-                      className="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
-                    >
-                      <option value="NONE">No Binding (Loose Sheets)</option>
-                      <option value="STAPLE">Corner Staple (+₹5)</option>
-                      <option value="SPIRAL">Spiral Coil (+₹40)</option>
-                      <option value="COMB">Comb Binding (+₹40)</option>
-                      <option value="HARDCOVER">Golden Hard Cover (+₹250)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Lamination Pouch</label>
-                    <select
-                      value={laminationOption}
-                      onChange={(e) => setLaminationOption(e.target.value as any)}
-                      className="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
-                    >
-                      <option value="NONE">No Lamination</option>
-                      <option value="GLOSS">Glossy Clear (+₹20/sheet)</option>
-                      <option value="MATTE">Matte Velvet (+₹25/sheet)</option>
-                    </select>
                   </div>
                 </div>
               </div>
