@@ -746,31 +746,17 @@ export default function DocumentUploadAndPrintFlowPage() {
 
             {/* Upload Progress Loader */}
             {uploading && (
-              <div className="p-10 rounded-3xl bg-white/95 backdrop-blur-xl border border-blue-100 shadow-xl shadow-blue-500/10 text-center flex flex-col items-center relative overflow-hidden">
-                <div className="relative flex items-center justify-center mb-5">
-                  <div className="absolute w-24 h-24 rounded-full border-2 border-brand-500/30 animate-radar-wave" />
-                  <div className="absolute w-20 h-20 rounded-full bg-brand-500/10 animate-ping" />
-                  <div className="w-16 h-16 rounded-2xl bg-white border border-blue-200/80 shadow-lg shadow-blue-500/15 flex items-center justify-center overflow-hidden relative">
-                    <div className="animate-laser inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-xs shadow-cyan-400" />
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white animate-bounce-gentle">
-                      <UploadCloud className="w-5 h-5" />
-                    </div>
-                  </div>
-                </div>
+              <div className="p-8 rounded-3xl bg-white border border-blue-100 shadow-sm text-center flex flex-col items-center">
+                <div className="w-10 h-10 border-3 border-blue-200 border-t-brand-600 rounded-full animate-spin mb-4" />
 
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-brand-700 border border-blue-200/80 mb-1.5 uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping" />
-                  <span>Cloud PDF Engine</span>
-                </div>
-
-                <h2 className="text-base font-extrabold text-slate-900 font-['Outfit']">Analyzing Document & Pages...</h2>
+                <h2 className="text-base font-bold text-slate-900 font-['Outfit']">Analyzing Document...</h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Scanning page count, color density & calculating best print rates ({uploadProgress}%)
+                  Scanning page count & print rates ({uploadProgress}%)
                 </p>
 
-                <div className="w-full bg-slate-100 rounded-full h-2.5 mt-5 overflow-hidden max-w-sm border border-slate-200/70 p-0.5 relative">
+                <div className="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden max-w-xs border border-slate-200/70">
                   <div
-                    className="bg-gradient-to-r from-brand-500 via-cyan-400 to-indigo-600 h-full rounded-full transition-all duration-300"
+                    className="bg-brand-600 h-full rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
