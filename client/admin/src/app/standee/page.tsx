@@ -80,12 +80,20 @@ function StandeeContent() {
         </div>
 
         {/* Direct Link Caption */}
-        <div className="mb-4 text-[11px] font-mono text-slate-500 font-semibold max-w-xs break-all bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+        <div className="mb-3 text-[11px] font-mono text-slate-600 font-semibold max-w-xs break-all bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
           {customerUrl}
         </div>
 
+        {/* Direct PhonePe / UPI ID Badge */}
+        {shop?.upiId && (
+          <div className="mb-3 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold inline-flex items-center gap-1.5">
+            <span>⚡ Direct PhonePe / UPI:</span>
+            <code className="font-mono font-bold text-emerald-950">{shop.upiId}</code>
+          </div>
+        )}
+
         {/* 3 Steps Badge */}
-        <div className="w-full grid grid-cols-3 gap-1 text-slate-700 text-[10px] font-bold border-t border-slate-100 pt-4 mt-2">
+        <div className="w-full grid grid-cols-3 gap-1 text-slate-700 text-[10px] font-bold border-t border-slate-100 pt-3 mt-1">
           <div className="p-1">
             <span className="block text-brand-600 text-xs">1. SCAN</span>
             <span>Shop QR</span>
@@ -101,7 +109,7 @@ function StandeeContent() {
         </div>
 
         {/* Footer */}
-        <div className="mt-4 text-[9px] text-slate-400 tracking-wider uppercase font-semibold">
+        <div className="mt-3 text-[9px] text-slate-400 tracking-wider uppercase font-semibold">
           No WhatsApp Needed • 100% Encrypted & Safe
         </div>
       </div>
