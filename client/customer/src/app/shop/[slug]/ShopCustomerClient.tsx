@@ -249,12 +249,55 @@ export default function ShopCustomerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/70 via-slate-50 to-white text-slate-800">
-        <div className="w-14 h-14 rounded-2xl bg-white border border-blue-200 flex items-center justify-center mb-4 shadow-md shadow-blue-500/10">
-          <Printer className="w-7 h-7 text-brand-600 animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/80 via-slate-50 to-white text-slate-800 relative overflow-hidden">
+        {/* Glowing ambient background orbs */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-tr from-brand-400/20 via-indigo-400/20 to-sky-300/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
+
+        {/* Dynamic Expanding Radar Wave Rings */}
+        <div className="relative flex items-center justify-center mb-6">
+          <div className="absolute w-32 h-32 rounded-full border-2 border-brand-500/30 animate-radar-wave" />
+          <div className="absolute w-24 h-24 rounded-full bg-brand-500/10 animate-ping" />
+          <div className="absolute w-20 h-20 rounded-3xl bg-gradient-to-tr from-brand-500/20 to-indigo-500/20 animate-pulse" />
+
+          {/* Central High-Tech Scanner Hub Card */}
+          <div className="relative w-20 h-20 rounded-3xl bg-white/95 backdrop-blur-xl border border-blue-200/90 shadow-2xl shadow-blue-500/20 flex items-center justify-center overflow-hidden">
+            {/* Realtime Laser Scanning Beam */}
+            <div className="animate-laser inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-sm shadow-cyan-400" />
+
+            {/* Bouncing Floating Icon */}
+            <div className="relative z-10 animate-bounce-gentle">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/30 text-white">
+                <Printer className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-sm font-bold text-slate-900 font-['Outfit']">Connecting to Xerox Station...</p>
-        <p className="text-xs text-slate-500 mt-1">Initializing secure guest print session</p>
+
+        {/* Animated Status Pill & Captions */}
+        <div className="text-center max-w-xs z-10 space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-brand-700 border border-blue-200 shadow-xs mb-1 tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-brand-500 animate-ping" />
+            <span>PRINTX HARDWARE LINK</span>
+          </div>
+
+          <h2 className="text-base font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
+            Connecting to Xerox Station...
+          </h2>
+
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Initializing secure 256-bit guest session & discovering live counter printers
+          </p>
+
+          {/* Flowing Shimmer Progress Bar */}
+          <div className="mt-4 w-48 mx-auto h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80 p-0.5 relative">
+            <div className="h-full rounded-full bg-gradient-to-r from-brand-500 via-cyan-400 to-indigo-600 animate-shimmer-bar" />
+          </div>
+
+          <div className="flex items-center justify-center gap-1.5 pt-2 text-[10px] text-slate-400 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Encrypted Cloud Spooler Active</span>
+          </div>
+        </div>
       </div>
     );
   }

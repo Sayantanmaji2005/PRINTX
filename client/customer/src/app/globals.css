@@ -170,3 +170,53 @@ img, canvas, svg {
   animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
+@keyframes laserScan {
+  0% { top: 0%; opacity: 0.2; }
+  50% { top: 92%; opacity: 1; }
+  100% { top: 0%; opacity: 0.2; }
+}
+
+.animate-laser {
+  position: absolute;
+  animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes shimmerBar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(50%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-shimmer-bar {
+  animation: shimmerBar 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  width: 60%;
+}
+
+@keyframes bounceGentle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.03); }
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 2.2s ease-in-out infinite;
+}
+
+@keyframes radarWave {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  50% { opacity: 0.4; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.animate-radar-wave {
+  animation: radarWave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
