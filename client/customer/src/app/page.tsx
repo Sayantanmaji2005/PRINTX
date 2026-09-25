@@ -153,6 +153,7 @@ export default function HomePage() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#brand" className="hover:text-brand-600 transition-colors font-semibold text-brand-600">Brand</a>
             <a href="#services" className="hover:text-brand-600 transition-colors">Services</a>
             <a href="#how-it-works" className="hover:text-brand-600 transition-colors">How It Works</a>
             <a href="#pricing" className="hover:text-brand-600 transition-colors">Pricing List</a>
@@ -174,37 +175,14 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Top Promotional Software Showcase Banner */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-10 w-full">
-        <div className="relative rounded-3xl overflow-hidden border border-blue-200/80 shadow-2xl shadow-blue-500/10 bg-white group">
-          {/* Main Showcase Image */}
-          <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/9] max-h-[540px] overflow-hidden bg-slate-900">
-            <img
-              src="/promo-banner.jpg"
-              alt="PrintX Smart Software Showcase & Digital Printing Kiosk"
-              className="w-full h-full object-cover object-center group-hover:scale-[1.01] transition-transform duration-700 ease-out"
-            />
-            {/* Ambient overlay subtle gradient for polish */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
-
-            {/* Quick Interactive Overlay floating badge */}
-            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto flex flex-wrap items-center gap-3">
-              <a
-                href="#shops"
-                className="px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-brand-900/40 flex items-center gap-2 transition-all active:scale-95 backdrop-blur-md"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Start Printing Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
-              <a
-                href="#how-it-works"
-                className="px-4 py-2.5 rounded-2xl bg-white/90 hover:bg-white text-slate-800 font-bold text-xs sm:text-sm shadow-lg backdrop-blur-md transition-all active:scale-95"
-              >
-                Watch 4-Step Demo
-              </a>
-            </div>
-          </div>
+      {/* Brand Showcase Section (Pure Visual, Zero Text Overlay) */}
+      <section id="brand" className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-8 w-full scroll-mt-20">
+        <div className="relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl bg-slate-950">
+          <img
+            src="/printxdemo.png"
+            alt="PRINTX Smart Xerox & Automated Cloud Printing Brand Showcase"
+            className="w-full h-auto object-cover object-center block select-none"
+          />
         </div>
       </section>
 
