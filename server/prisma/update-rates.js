@@ -1,45 +1,20 @@
-import { PrismaClient, UserRole, ShopStatus, PaperSize, ColorMode, PrintSide, PrinterStatus } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+const { PrismaClient, PaperSize, ColorMode, PrintSide } = require('@prisma/client');
+const path = require('path');
+const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Starting PrintX Database Seeding...');
-
-  // Hash default password
-  const salt = await bcrypt.genSalt(10);
-  const passwordHash = await bcrypt.hash('Password@123', salt);
-
-  // 1. Super Admin
-  let superAdmin = await prisma.user.findUnique({
-    where: { email: 'admin@printx.io' },
+async function run() {
+  console.log('Connecting to database...');
+  const shops = await prisma.shop.findMany({
+    include: { pricingRules: true },
   });
-  if (!superAdmin) {
-    superAdmin = await prisma.user.create({
-      data: {
-        email: 'admin@printx.io',
-        passwordHash,
-        name: 'PrintX Super Admin',
-        phone: '+919876543210',
-        role: UserRole.SUPER_ADMIN,
-      },
-    });
-  }
-  console.log('✅ Super Admin seeded:', superAdmin.email);
 
-  // 2. Sync official pricing rules for all existing shops
-  const shops = await prisma.shop.findMany({ include: { pricingRules: true } });
+  console.log(`Found ${shops.length} shops in database:`);
+
   const officialRates = [
     { paperSize: PaperSize.A4, colorMode: ColorMode.BW, printSide: PrintSide.SINGLE, pricePerUnit: 2.0 },
     { paperSize: PaperSize.A4, colorMode: ColorMode.BW, printSide: PrintSide.DOUBLE, pricePerUnit: 3.0 },
@@ -52,6 +27,12 @@ async function main() {
   ];
 
   for (const shop of shops) {
+    console.log(`\nUpdating pricing rules for shop: "${shop.name}" (${shop.slug})...`);
+    console.log(`Existing rules count: ${shop.pricingRules.length}`);
+    for (const r of shop.pricingRules) {
+      console.log(`  - ${r.paperSize} ${r.colorMode} ${r.printSide}: ₹${r.pricePerUnit}`);
+    }
+
     for (const rate of officialRates) {
       const existing = shop.pricingRules.find(
         (r) =>
@@ -59,11 +40,13 @@ async function main() {
           r.colorMode === rate.colorMode &&
           r.printSide === rate.printSide
       );
+
       if (existing) {
         await prisma.pricingRule.update({
           where: { id: existing.id },
           data: { pricePerUnit: rate.pricePerUnit, isActive: true },
         });
+        console.log(`  ✅ Updated ${rate.paperSize} ${rate.colorMode} ${rate.printSide} -> ₹${rate.pricePerUnit}`);
       } else {
         await prisma.pricingRule.create({
           data: {
@@ -76,19 +59,16 @@ async function main() {
             isActive: true,
           },
         });
+        console.log(`  ➕ Created ${rate.paperSize} ${rate.colorMode} ${rate.printSide} -> ₹${rate.pricePerUnit}`);
       }
     }
   }
-  console.log(`✅ Synced official pricing rules for ${shops.length} shop(s).`);
 
-  console.log('🎉 Database seeding/admin verification completed successfully!');
+  console.log('\n🎉 All shop pricing rules updated in database successfully!');
 }
 
-main()
+run()
   .catch((e) => {
-    console.error('❌ Seeding error:', e);
-    process.exit(1);
+    console.error('Error updating pricing rules:', e);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());
