@@ -534,18 +534,60 @@ function sendToPrinter(filePath, printerName, printConfig = {}) {
     const isColor = (printConfig.colorMode || '').toUpperCase() === 'COLOR';
     const isDuplex = (printConfig.printSide || '').toUpperCase() === 'DOUBLE';
     const cleanPrinter = (printerName || '').trim();
+    const ext = path.extname(filePath).toLowerCase();
+    const isImage = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tif', '.tiff', '.webp'].includes(ext);
 
-    console.log('[PRINT] Spooling to: "' + (cleanPrinter || 'DEFAULT') + '" (Copies: ' + copies + ', Mode: ' + (isColor ? 'COLOR' : 'BW') + ', Duplex: ' + (isDuplex ? 'DOUBLE' : 'SINGLE') + ')');
+    console.log('[PRINT] Spooling: "' + (cleanPrinter || 'DEFAULT') + '" (Copies: ' + copies + ', Mode: ' + (isColor ? 'COLOR' : 'BW') + ', Duplex: ' + (isDuplex ? 'DOUBLE' : 'SINGLE') + ')');
 
     if (process.platform === 'win32') {
-      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
-      const absolutePdf = path.resolve(filePath);
+      const absolutePath = path.resolve(filePath);
+      const safePath = absolutePath.replace(/'/g, "''");
+      const safePrinter = cleanPrinter.replace(/'/g, "''");
 
+      if (isImage) {
+        const psScript = [
+          'Add-Type -AssemblyName System.Drawing;',
+          '$doc = New-Object System.Drawing.Printing.PrintDocument;',
+          '$doc.PrinterSettings.PrinterName = ' + JSON.stringify(safePrinter) + ';',
+          '$doc.PrinterSettings.Copies = ' + copies + ';',
+          '$doc.DefaultPageSettings.Color = ' + (isColor ? '$true' : '$false') + ';',
+          '$script:img = [System.Drawing.Image]::FromFile(' + JSON.stringify(safePath) + ');',
+          '$doc.add_PrintPage({',
+          '  param($s, $e);',
+          '  if ($script:img) {',
+          '    $b = $e.MarginBounds;',
+          '    $scale = [Math]::Min($b.Width / $script:img.Width, $b.Height / $script:img.Height);',
+          '    $w = [int]($script:img.Width * $scale);',
+          '    $h = [int]($script:img.Height * $scale);',
+          '    $x = $b.X + [int](($b.Width - $w) / 2);',
+          '    $y = $b.Y + [int](($b.Height - $h) / 2);',
+          '    $e.Graphics.DrawImage($script:img, $x, $y, $w, $h);',
+          '  }',
+          '  $e.HasMorePages = $false;',
+          '});',
+          '$doc.Print();',
+          '$doc.Dispose();',
+          'if ($script:img) { $script:img.Dispose(); $script:img = $null; }'
+        ].join('\\n');
+
+        const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
+        exec('powershell -NoProfile -EncodedCommand ' + encoded, { windowsHide: true }, (err) => {
+          if (err) {
+            exec('mspaint.exe /pt "' + safePath + '" "' + safePrinter + '"', { windowsHide: true }, () => resolve(true));
+          } else {
+            console.log('[AGENT] Image spooled successfully to ' + (safePrinter || 'default printer'));
+            resolve(true);
+          }
+        });
+        return;
+      }
+
+      const sumatraPath = path.join(__dirname, 'SumatraPDF.exe');
       if (fs.existsSync(sumatraPath)) {
         const settings = 'copies=' + copies + ',' + (isColor ? 'color' : 'monochrome') + ',' + (isDuplex ? 'duplex' : 'simplex');
         const cmd = cleanPrinter
-          ? '"' + sumatraPath + '" -print-to "' + cleanPrinter + '" -print-settings "' + settings + '" -silent "' + absolutePdf + '"'
-          : '"' + sumatraPath + '" -print-to-default -print-settings "' + settings + '" -silent "' + absolutePdf + '"';
+          ? '"' + sumatraPath + '" -print-to "' + cleanPrinter + '" -print-settings "' + settings + '" -silent "' + absolutePath + '"'
+          : '"' + sumatraPath + '" -print-to-default -print-settings "' + settings + '" -silent "' + absolutePath + '"';
 
         console.log('[ENGINE] Executing hardware spool...');
         exec(cmd, { windowsHide: true, timeout: 45000 }, (err) => {
@@ -556,11 +598,9 @@ function sendToPrinter(filePath, printerName, printConfig = {}) {
         return;
       }
 
-      const safePrinter = cleanPrinter.replace(/"/g, '""');
-      const safePdf = absolutePdf.replace(/'/g, "''");
       const psPrint = cleanPrinter
-        ? 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + safePdf + '\\' -Verb PrintTo -ArgumentList \'\\\\"' + safePrinter + '\\\\\"\' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"'
-        : 'powershell -NoProfile -Command "Start-Process -FilePath \\'' + safePdf + '\\' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"';
+        ? 'powershell -NoProfile -Command "Start-Process -FilePath ' + JSON.stringify(safePath) + ' -Verb PrintTo -ArgumentList ' + JSON.stringify(safePrinter) + ' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"'
+        : 'powershell -NoProfile -Command "Start-Process -FilePath ' + JSON.stringify(safePath) + ' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"';
 
       exec(psPrint, { windowsHide: true }, () => resolve(true));
     } else {

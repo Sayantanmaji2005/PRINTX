@@ -276,8 +276,8 @@ if ($script:img) {
 
       // Fallback: PowerShell PrintTo if SumatraPDF is missing
       const psPrint = cleanPrinter
-        ? `powershell -NoProfile -Command "Start-Process -FilePath '${safePath}' -Verb PrintTo -ArgumentList '\\"${safePrinter}\\"' -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`
-        : `powershell -NoProfile -Command "Start-Process -FilePath '${safePath}' -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
+        ? `powershell -NoProfile -Command "Start-Process -FilePath ${JSON.stringify(safePath)} -Verb PrintTo -ArgumentList ${JSON.stringify(safePrinter)} -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`
+        : `powershell -NoProfile -Command "Start-Process -FilePath ${JSON.stringify(safePath)} -Verb Print -PassThru | ForEach-Object { Start-Sleep -Seconds 3; if (!$_.HasExited) { $_.Kill() } }"`;
 
       exec(psPrint, { windowsHide: true }, (err) => {
         if (err) {
