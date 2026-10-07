@@ -132,7 +132,7 @@ export class OrdersService {
       pricePerUnit = pricingRule.pricePerUnit;
     } else {
       if (dto.colorMode === ColorMode.COLOR) {
-        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 15.0 : 8.0;
+        pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 10.0 : 6.0;
       } else {
         pricePerUnit = dto.printSide === PrintSide.DOUBLE ? 3.0 : 2.0;
       }
@@ -140,8 +140,8 @@ export class OrdersService {
 
     if (dto.paperSize === PaperSize.A3) {
       pricePerUnit = dto.colorMode === ColorMode.COLOR
-        ? (dto.printSide === PrintSide.DOUBLE ? 20.0 : 10.0)
-        : (dto.printSide === PrintSide.DOUBLE ? 5.0 : 3.0);
+        ? (dto.printSide === PrintSide.DOUBLE ? 30.0 : 20.0)
+        : (dto.printSide === PrintSide.DOUBLE ? 12.0 : 8.0);
     }
 
     const calculatedSubtotal = Number((totalSheets * pricePerUnit).toFixed(2));

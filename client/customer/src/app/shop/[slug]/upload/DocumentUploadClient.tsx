@@ -367,17 +367,17 @@ export default function DocumentUploadAndPrintFlowPage() {
     const totalSheetsPerCopy = printSide === 'DOUBLE' ? Math.ceil(effectivePages / 2) : effectivePages;
     const totalSheets = totalSheetsPerCopy * copies;
 
-    // Base rates matching verified rates
+    // Base rates matching verified landing page rates
     let pricePerSheet = 2.0;
     if (colorMode === 'COLOR') {
-      pricePerSheet = printSide === 'DOUBLE' ? 15.0 : 8.0;
+      pricePerSheet = printSide === 'DOUBLE' ? 10.0 : 6.0;
     } else {
       pricePerSheet = printSide === 'DOUBLE' ? 3.0 : 2.0;
     }
     if (paperSize === 'A3') {
       pricePerSheet = colorMode === 'COLOR'
-        ? (printSide === 'DOUBLE' ? 20.0 : 10.0)
-        : (printSide === 'DOUBLE' ? 5.0 : 3.0);
+        ? (printSide === 'DOUBLE' ? 30.0 : 20.0)
+        : (printSide === 'DOUBLE' ? 12.0 : 8.0);
     }
 
     // Dynamic Shop Pricing Rule matching if available
@@ -405,12 +405,12 @@ export default function DocumentUploadAndPrintFlowPage() {
 
     const paperCost = totalSheets * paperGsmSurchargePerSheet;
 
-    // Finishing Surcharges
+    // Finishing Surcharges matching official landing page
     let finishingCost = 0;
     if (bindingOption === 'STAPLE') finishingCost += 5.0 * copies;
-    else if (bindingOption === 'SPIRAL') finishingCost += 40.0 * copies;
-    else if (bindingOption === 'COMB') finishingCost += 40.0 * copies;
-    else if (bindingOption === 'HARDCOVER') finishingCost += 250.0 * copies;
+    else if (bindingOption === 'SPIRAL') finishingCost += 35.0 * copies;
+    else if (bindingOption === 'COMB') finishingCost += 35.0 * copies;
+    else if (bindingOption === 'HARDCOVER') finishingCost += 220.0 * copies;
 
     if (laminationOption === 'GLOSS') finishingCost += 20.0 * totalSheets;
     else if (laminationOption === 'MATTE') finishingCost += 25.0 * totalSheets;

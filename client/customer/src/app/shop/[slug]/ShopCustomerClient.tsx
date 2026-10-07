@@ -616,23 +616,23 @@ export default function ShopCustomerPage() {
                 </div>
                 <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <span>A4 Color (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹8.00</strong>
+                  <strong className="text-brand-600 font-bold">₹6.00</strong>
                 </div>
                 <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <span>A4 Color (Both)</span>
-                  <strong className="text-brand-600 font-bold">₹15.00</strong>
-                </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A3 B&W (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹3.00</strong>
-                </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A3 Color (Single)</span>
                   <strong className="text-brand-600 font-bold">₹10.00</strong>
                 </div>
                 <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span>A3 B&W (Single)</span>
+                  <strong className="text-brand-600 font-bold">₹8.00</strong>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span>A3 Color (Single)</span>
+                  <strong className="text-brand-600 font-bold">₹20.00</strong>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <span>Spiral Binding</span>
-                  <strong className="text-brand-600 font-bold">₹40.00</strong>
+                  <strong className="text-brand-600 font-bold">₹35.00</strong>
                 </div>
                 <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <span>A4 Lamination</span>
@@ -940,7 +940,7 @@ export default function ShopCustomerPage() {
 
             <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900">
-                Rate: ₹50.00 <span className="text-[11px] text-slate-500 font-normal">/ A4 Photo Glossy Sheet</span>
+                Rate: ₹40.00 <span className="text-[11px] text-slate-500 font-normal">/ A4 Photo Glossy Sheet (8 Photos)</span>
               </span>
               <div className="flex items-center gap-2">
                 {passportPhoto && (
@@ -1075,12 +1075,12 @@ export default function ShopCustomerPage() {
             <div className="mt-4 space-y-3.5 text-xs text-slate-700">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {[
-                  { id: 'spiral', label: 'Spiral Coil Binding', price: '₹40.00', desc: 'Plastic spiral ring + sheet covers' },
-                  { id: 'comb', label: 'Comb Binding', price: '₹40.00', desc: 'Re-openable 19-ring spine' },
-                  { id: 'wiro', label: 'Wiro Twin Ring', price: '₹60.00', desc: 'Executive metal double-wire' },
+                  { id: 'spiral', label: 'Spiral Coil Binding', price: '₹35.00', desc: 'Plastic spiral ring + sheet covers' },
+                  { id: 'comb', label: 'Comb Binding', price: '₹35.00', desc: 'Re-openable 19-ring spine' },
+                  { id: 'wiro', label: 'Wiro Twin Ring', price: '₹50.00', desc: 'Executive metal double-wire' },
                   { id: 'staple', label: 'Corner / Edge Staple', price: '₹5.00', desc: 'Heavy-duty steel staple' },
-                  { id: 'softcover', label: 'Thermal Soft Cover', price: '₹80.00', desc: 'Glued spine with clear front' },
-                  { id: 'hardcover', label: 'Golden Hard Cover', price: '₹250.00', desc: 'College thesis & project books' },
+                  { id: 'softcover', label: 'Thermal Soft Cover', price: '₹75.00', desc: 'Glued spine with clear front' },
+                  { id: 'hardcover', label: 'Golden Hard Cover', price: '₹220.00', desc: 'College thesis & project books' },
                 ].map((b) => (
                   <div
                     key={b.id}
@@ -1151,9 +1151,9 @@ export default function ShopCustomerPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { id: 'A4', label: 'A4 Sheet', price: '₹20.00' },
-                    { id: 'A3', label: 'A3 Certificate', price: '₹40.00' },
-                    { id: 'ID', label: 'ID Card / Badge', price: '₹10.00' },
-                    { id: 'AADHAAR', label: 'Aadhaar / PAN', price: '₹10.00' },
+                    { id: 'A3', label: 'A3 Certificate', price: '₹35.00' },
+                    { id: 'ID', label: 'ID Card / Badge', price: '₹15.00' },
+                    { id: 'AADHAAR', label: 'Aadhaar / PAN', price: '₹15.00' },
                   ].map((l) => (
                     <button
                       key={l.id}

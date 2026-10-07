@@ -91,12 +91,14 @@ async function main() {
         },
     });
     const pricingData = [
-        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 1.0 },
-        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 1.5 },
-        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 5.0 },
-        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 8.0 },
-        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 3.0 },
-        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 10.0 },
+        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 2.0 },
+        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 3.0 },
+        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 6.0 },
+        { paperSize: client_1.PaperSize.A4, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 10.0 },
+        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 8.0 },
+        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.BW, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 12.0 },
+        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.SINGLE, pricePerUnit: 20.0 },
+        { paperSize: client_1.PaperSize.A3, colorMode: client_1.ColorMode.COLOR, printSide: client_1.PrintSide.DOUBLE, pricePerUnit: 30.0 },
     ];
     for (const p of pricingData) {
         await prisma.pricingRule.upsert({
