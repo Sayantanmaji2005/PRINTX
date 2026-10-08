@@ -31,6 +31,12 @@ import {
   Smartphone,
   ChevronDown
 } from 'lucide-react';
+import {
+  PhonePeIcon,
+  GooglePayIcon,
+  PaytmIcon,
+  BhimUpiIcon,
+} from '@/components/PaymentLogos';
 import { fetchAllShops } from '@/lib/api';
 
 export default function HomePage() {
@@ -330,6 +336,24 @@ export default function HomePage() {
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                   Scan the generated Dynamic UPI QR or launch Google Pay, PhonePe, Paytm or BHIM with a single click.
                 </p>
+                <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs">
+                    <PhonePeIcon className="w-3.5 h-3.5" />
+                    <span>PhonePe</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">
+                    <GooglePayIcon className="w-3.5 h-3.5" />
+                    <span>Google Pay</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 shadow-2xs">
+                    <PaytmIcon className="w-4 h-3.5" />
+                    <span>Paytm</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                    <BhimUpiIcon className="w-3.5 h-3.5" />
+                    <span>BHIM</span>
+                  </span>
+                </div>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-200 text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" /> 100% Automatic Verification
@@ -673,7 +697,21 @@ export default function HomePage() {
                   <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Direct UPI Payouts:</strong> Customer payment goes straight to your own UPI ID (GPay/PhonePe).
+                      <strong className="text-slate-900">Direct UPI Payouts:</strong> Customer payment goes straight to your own UPI ID.
+                      <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">
+                          <GooglePayIcon className="w-3 h-3" />
+                          <span>GPay</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs">
+                          <PhonePeIcon className="w-3 h-3" />
+                          <span>PhonePe</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 shadow-2xs">
+                          <PaytmIcon className="w-3.5 h-3" />
+                          <span>Paytm</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
 

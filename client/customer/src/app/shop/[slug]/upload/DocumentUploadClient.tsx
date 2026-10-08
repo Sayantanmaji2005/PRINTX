@@ -43,6 +43,13 @@ import {
   PartyPopper,
 } from 'lucide-react';
 import {
+  PhonePeIcon,
+  GooglePayIcon,
+  PaytmIcon,
+  BhimUpiIcon,
+  PaymentAppsBadgeRow,
+} from '@/components/PaymentLogos';
+import {
   fetchShopBySlug,
   calculateOrderPrice,
   createOrder,
@@ -1651,8 +1658,28 @@ export default function DocumentUploadAndPrintFlowPage() {
                           alt="UPI Payment QR"
                           className="w-44 h-44 object-contain mx-auto"
                         />
-                        <div className="text-[10px] text-slate-500 font-medium pt-2 text-center">
-                          Scan with PhonePe, GPay, Paytm or BHIM
+                        <div className="pt-2 flex flex-col items-center gap-2">
+                          <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                            Scan with Any UPI App
+                          </div>
+                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs">
+                              <PhonePeIcon className="w-3.5 h-3.5" />
+                              <span>PhonePe</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">
+                              <GooglePayIcon className="w-3.5 h-3.5" />
+                              <span>GPay</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 shadow-2xs">
+                              <PaytmIcon className="w-4 h-3.5" />
+                              <span>Paytm</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                              <BhimUpiIcon className="w-3.5 h-3.5" />
+                              <span>BHIM</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -1693,7 +1720,7 @@ export default function DocumentUploadAndPrintFlowPage() {
                           }}
                           className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                         >
-                          <CreditCard className="w-4 h-4" />
+                          <BhimUpiIcon className="w-4 h-4 shrink-0 rounded-sm" />
                           <span>Pay ₹{(order.total || priceCalculation.grandTotal).toFixed(2)} with Any UPI App</span>
                         </a>
 
@@ -1707,8 +1734,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                               setHasOpenedUpi(true);
                               setShowReturnedBanner(true);
                             }}
-                            className="py-2.5 px-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                            className="py-2.5 px-2 rounded-2xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-950 text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95 group"
                           >
+                            <PhonePeIcon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
                             <span>PhonePe</span>
                           </a>
 
@@ -1720,8 +1748,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                               setHasOpenedUpi(true);
                               setShowReturnedBanner(true);
                             }}
-                            className="py-2.5 px-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                            className="py-2.5 px-2 rounded-2xl bg-white hover:bg-blue-50/80 border border-slate-200 text-slate-900 text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95 group"
                           >
+                            <GooglePayIcon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
                             <span>Google Pay</span>
                           </a>
 
@@ -1733,8 +1762,9 @@ export default function DocumentUploadAndPrintFlowPage() {
                               setHasOpenedUpi(true);
                               setShowReturnedBanner(true);
                             }}
-                            className="py-2.5 px-2 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1"
+                            className="py-2.5 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-950 text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95 group"
                           >
+                            <PaytmIcon className="w-5 h-4 shrink-0 group-hover:scale-110 transition-transform" />
                             <span>Paytm</span>
                           </a>
                         </div>

@@ -4,6 +4,12 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Printer, Smartphone, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import {
+  PhonePeIcon,
+  GooglePayIcon,
+  PaytmIcon,
+  BhimUpiIcon,
+} from '@/components/PaymentLogos';
 
 function StandeeContent() {
   const searchParams = useSearchParams();
@@ -65,7 +71,7 @@ function StandeeContent() {
         )}
 
         {/* Action Prompt */}
-        <div className="my-5 py-2 px-4 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold inline-flex items-center gap-1.5">
+        <div className="my-4 py-2 px-4 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold inline-flex items-center gap-1.5">
           <Smartphone className="w-3.5 h-3.5 text-blue-600" />
           <span>SCAN WITH ANY CAMERA TO PRINT</span>
         </div>
@@ -80,14 +86,35 @@ function StandeeContent() {
         </div>
 
         {/* Direct Link Caption */}
-        <div className="mb-3 text-[11px] font-mono text-slate-600 font-semibold max-w-xs break-all bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+        <div className="mb-2 text-[11px] font-mono text-slate-600 font-semibold max-w-xs break-all bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
           {customerUrl}
         </div>
 
-        {/* Direct PhonePe / UPI ID Badge */}
+        {/* Accepted Payment Apps Row with Logos and Names */}
+        <div className="mb-3 flex items-center justify-center gap-1.5 flex-wrap">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs">
+            <PhonePeIcon className="w-3.5 h-3.5" />
+            <span>PhonePe</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">
+            <GooglePayIcon className="w-3.5 h-3.5" />
+            <span>GPay</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 shadow-2xs">
+            <PaytmIcon className="w-4 h-3.5" />
+            <span>Paytm</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+            <BhimUpiIcon className="w-3.5 h-3.5" />
+            <span>BHIM</span>
+          </span>
+        </div>
+
+        {/* Direct UPI ID Badge */}
         {shop?.upiId && (
           <div className="mb-3 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold inline-flex items-center gap-1.5">
-            <span>⚡ Direct PhonePe / UPI:</span>
+            <BhimUpiIcon className="w-3.5 h-3.5" />
+            <span>Payee UPI:</span>
             <code className="font-mono font-bold text-emerald-950">{shop.upiId}</code>
           </div>
         )}
