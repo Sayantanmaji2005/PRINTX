@@ -471,6 +471,113 @@ export default function DocumentUploadAndPrintFlowPage() {
     };
   }, [pagesList, pagesPerSheet, printSide, copies, colorMode, paperSize, paperGsm, bindingOption, laminationOption, shop]);
 
+  // Client-side image optimization for fast mobile uploads
+  const optimizeImageForUpload = async (inputFile: File): Promise<File> => {
+    if (!inputFile.type.startsWith('image/')) return inputFile;
+    if (inputFile.size <= 1024 * 1024) return inputFile; // Below 1MB is already small
+
+    try {
+      return await new Promise<File>((resolve) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(inputFile);
+
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          const canvas = document.createElement('canvas');
+          const maxDimension = 2048; // High-resolution 300 DPI for A4 photo prints
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(inputFile);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob && blob.size < inputFile.size) {
+                const optimized = new File(
+                  [blob],
+                  inputFile.name.replace(/\.[^.]+$/, '') + '.jpg',
+                  {
+                    type: 'image/jpeg',
+                    lastModified: Date.now(),
+                  }
+                );
+                console.log(
+                  `Image optimized: ${Math.round(inputFile.size / 1024)}KB -> ${Math.round(optimized.size / 1024)}KB`
+                );
+                resolve(optimized);
+              } else {
+                resolve(inputFile);
+              }
+            },
+            'image/jpeg',
+            0.88
+          );
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(inputFile);
+        };
+
+        img.src = objectUrl;
+      });
+    } catch {
+      return inputFile;
+    }
+  };
+
+  // Resilient XMLHttpRequest upload with progress and timeout
+  const uploadWithXhr = (
+    url: string,
+    formData: FormData,
+    onProgress: (percent: number) => void,
+    timeoutMs = 60000
+  ): Promise<{ status: number; body: string; ok: boolean }> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.timeout = timeoutMs;
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        resolve({
+          status: xhr.status,
+          body: xhr.responseText,
+          ok: xhr.status >= 200 && xhr.status < 300,
+        });
+      };
+
+      xhr.onerror = () => reject(new Error('Network connection error during upload'));
+      xhr.ontimeout = () => reject(new Error('Upload connection timed out'));
+      xhr.onabort = () => reject(new Error('Upload was aborted'));
+
+      xhr.send(formData);
+    });
+  };
+
   // Step 1: File selection & upload
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -503,15 +610,25 @@ export default function DocumentUploadAndPrintFlowPage() {
   const uploadAndAnalyze = async (selectedFile: File) => {
     setError(null);
     setFile(selectedFile);
+    setUploading(true);
+    setUploadProgress(10);
+    setUploadStageMessage('Preparing Document...');
+    setUploadSubMessage(`Checking ${selectedFile.name}...`);
+
+    // 1. Optimize image client-side to prevent network stalls & timeouts
+    let fileToUpload = selectedFile;
+    if (selectedFile.type.startsWith('image/')) {
+      fileToUpload = await optimizeImageForUpload(selectedFile);
+    }
+
+    // 2. Ensure customer session
     let currentSessionId =
       sessionId || (typeof window !== 'undefined' ? sessionStorage.getItem('printx_customer_session_id') : null);
 
-    // Auto-create customer session on the fly if not yet active
     if (!currentSessionId) {
       try {
-        setUploading(true);
-        setUploadStageMessage('Initializing Print Session...');
-        setUploadSubMessage('Connecting to shop terminal...');
+        setUploadStageMessage('Connecting to Shop Terminal...');
+        setUploadSubMessage('Starting print session...');
         setUploadProgress(15);
         const newSession = await startCustomerSession(slug || 'printx-shop');
         if (newSession?.id) {
@@ -526,110 +643,99 @@ export default function DocumentUploadAndPrintFlowPage() {
 
     if (!currentSessionId) {
       setUploading(false);
-      setError('Active customer session could not be established. PrintX cloud server may be waking up. Please tap Retry in a few seconds.');
+      setError('Active customer session could not be established. PrintX cloud server is still waking up. Please tap "Retry Upload Now" in a few seconds.');
       return;
     }
 
     try {
-      setUploading(true);
-      setUploadProgress(20);
-      setUploadStageMessage('Uploading Document...');
-      setUploadSubMessage(`Preparing ${selectedFile.name} (${Math.round(selectedFile.size / 1024)} KB)...`);
+      const totalAttempts = 3;
+      let finalData: any = null;
 
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => (prev < 80 ? prev + 8 : prev));
-      }, 350);
-
-      let response: Response | null = null;
-      let lastErrorMessage = '';
-      const totalAttempts = 4;
-
-      // Smart multi-attempt retry loop: Render free tier cold-starts can take 35-50s
       for (let attempt = 1; attempt <= totalAttempts; attempt++) {
         try {
-          const formData = new FormData();
-          formData.append('customerSessionId', currentSessionId);
-          formData.append('file', selectedFile);
-
           if (attempt === 1) {
             setUploadStageMessage('Uploading to Cloud Print Engine...');
-            setUploadSubMessage('Analyzing document pages & colors...');
+            setUploadSubMessage(`Sending ${fileToUpload.name} (${Math.round(fileToUpload.size / 1024)} KB)...`);
           } else {
-            setUploadStageMessage('Cloud Server Is Waking Up...');
-            setUploadSubMessage(`PrintX free tier instance is spinning up. Retrying automatically (Attempt ${attempt}/${totalAttempts})...`);
-          }
-
-          response = await fetch(`${API_BASE_URL}/documents/upload`, {
-            method: 'POST',
-            body: formData,
-          });
-
-          // Check for expired session in response
-          if (response.status === 400) {
-            const errClone = response.clone();
-            try {
-              const errJson = await errClone.json();
-              if (errJson?.message?.toLowerCase().includes('session')) {
-                console.warn('Session expired, regenerating new customer session...');
-                const refreshed = await startCustomerSession(slug || 'printx-shop');
-                if (refreshed?.id) {
-                  currentSessionId = refreshed.id;
-                  setSessionId(refreshed.id);
-                  sessionStorage.setItem('printx_customer_session_id', refreshed.id);
-                  continue; // Retry with fresh session
-                }
-              }
-            } catch {}
-          }
-
-          // If server returned 5xx gateway error (Render cold start 502/503), keep retrying!
-          if (response && response.status >= 500 && attempt < totalAttempts) {
             setUploadStageMessage('Cloud Server Is Booting Up...');
-            setUploadSubMessage(`PrintX server container is starting (HTTP ${response.status}). Retrying in 4s (${attempt}/${totalAttempts})...`);
-            await new Promise((resolve) => setTimeout(resolve, 4000));
+            setUploadSubMessage(`Retrying upload automatically (Attempt ${attempt}/${totalAttempts})...`);
+          }
+
+          const formData = new FormData();
+          formData.append('customerSessionId', currentSessionId);
+          formData.append('file', fileToUpload);
+
+          const result = await uploadWithXhr(
+            `${API_BASE_URL}/documents/upload`,
+            formData,
+            (percent) => {
+              setUploadProgress(Math.min(95, Math.max(15, percent)));
+            },
+            45000
+          );
+
+          // If session expired (400), refresh session and retry
+          if (result.status === 400 && result.body.toLowerCase().includes('session')) {
+            console.warn('Session expired, regenerating new customer session...');
+            const refreshed = await startCustomerSession(slug || 'printx-shop');
+            if (refreshed?.id) {
+              currentSessionId = refreshed.id;
+              setSessionId(refreshed.id);
+              sessionStorage.setItem('printx_customer_session_id', refreshed.id);
+              continue;
+            }
+          }
+
+          // If 5xx (cold start 502/503), wait and retry
+          if (result.status >= 500 && attempt < totalAttempts) {
+            setUploadStageMessage('Cloud Server Is Initializing...');
+            setUploadSubMessage(`Server container is warming up (HTTP ${result.status}). Retrying in 4s...`);
+            await new Promise((r) => setTimeout(r, 4000));
             continue;
           }
 
-          if (response && response.ok) break;
-        } catch (fetchErr: any) {
-          lastErrorMessage = fetchErr?.message || 'Network error';
-          console.warn(`Upload attempt ${attempt} failed:`, lastErrorMessage);
+          let json: any = null;
+          try {
+            json = JSON.parse(result.body);
+          } catch {
+            throw new Error(`Server returned HTTP ${result.status}`);
+          }
 
+          if (!result.ok) {
+            throw new Error(json.message || 'Failed to analyze document');
+          }
+
+          finalData = json.data;
+          break;
+        } catch (attemptErr: any) {
+          console.warn(`Upload attempt ${attempt} error:`, attemptErr.message);
           if (attempt < totalAttempts) {
             setUploadStageMessage('Waking Up Cloud Server...');
-            setUploadSubMessage(`Server is starting up (~30s on first load). Retrying in 4 seconds (${attempt}/${totalAttempts})...`);
-            await new Promise((resolve) => setTimeout(resolve, 4000));
+            setUploadSubMessage(`Cloud instance is spinning up. Retrying in 4 seconds (${attempt}/${totalAttempts})...`);
+            await new Promise((r) => setTimeout(r, 4000));
+          } else {
+            throw attemptErr;
           }
         }
       }
 
-      clearInterval(progressInterval);
       setUploadProgress(100);
 
-      if (!response) {
-        throw new Error(
-          'Could not connect to PrintX backend server. The free cloud backend is waking up or network timed out. Please tap "Retry Upload Now" below.'
-        );
+      if (!finalData) {
+        throw new Error('Upload could not be completed. Please tap "Retry Upload Now" below.');
       }
 
-      let json: any = null;
-      try {
-        json = await response.json();
-      } catch (parseErr) {
-        throw new Error(`Server returned status ${response.status}. Please try again in a few seconds.`);
-      }
-
-      if (!response.ok) {
-        throw new Error(json.message || 'Failed to analyze document');
-      }
-
-      setProcessedDoc(json.data);
-      sessionStorage.setItem('printx_current_doc_id', json.data.id);
+      setProcessedDoc(finalData);
+      sessionStorage.setItem('printx_current_doc_id', finalData.id);
       setCurrentStep(2);
     } catch (err: any) {
-      console.error('Upload failed:', err);
+      console.error('Final upload failure:', err);
       let msg = err?.message || 'File upload and analysis failed';
-      if (msg.toLowerCase().includes('failed to fetch')) {
+      if (
+        msg.toLowerCase().includes('network') ||
+        msg.toLowerCase().includes('failed to fetch') ||
+        msg.toLowerCase().includes('timed out')
+      ) {
         msg = 'Connection to PrintX Cloud Server timed out. The server is still waking up from sleep mode. Please tap "Retry Upload Now" below!';
       }
       setError(msg);
