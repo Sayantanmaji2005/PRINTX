@@ -1,32 +1,50 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://printx-cib8.onrender.com/api';
 
 export async function fetchShopBySlug(slug: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/shops/public/${slug}`, {
-      cache: 'no-store',
-    });
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.message || 'Failed to fetch shop details');
+  let lastError: any = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/shops/public/${slug}`, {
+        cache: 'no-store',
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || 'Failed to fetch shop details');
+      }
+      return json.data;
+    } catch (err: any) {
+      lastError = err;
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 1500 * attempt));
+      }
     }
-    return json.data;
-  } catch (err: any) {
-    console.warn('fetchShopBySlug warn:', err.message);
-    throw err;
   }
+  console.warn('fetchShopBySlug warn:', lastError?.message);
+  throw lastError;
 }
 
 export async function startCustomerSession(shopSlug: string, customerPhone?: string) {
-  const res = await fetch(`${API_BASE_URL}/customer-sessions/start`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ shopSlug, customerPhone }),
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json.message || 'Failed to start customer session');
+  let lastError: any = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/customer-sessions/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopSlug, customerPhone }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || 'Failed to start customer session');
+      }
+      return json.data;
+    } catch (err: any) {
+      lastError = err;
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 1500 * attempt));
+      }
+    }
   }
-  return json.data;
+  throw lastError || new Error('Failed to start customer session');
 }
 
 export async function fetchAllShops() {

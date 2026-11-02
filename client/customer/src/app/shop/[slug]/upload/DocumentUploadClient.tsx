@@ -473,8 +473,11 @@ export default function DocumentUploadAndPrintFlowPage() {
 
   // Client-side image optimization for fast mobile uploads
   const optimizeImageForUpload = async (inputFile: File): Promise<File> => {
-    if (!inputFile.type.startsWith('image/')) return inputFile;
-    if (inputFile.size <= 1024 * 1024) return inputFile; // Below 1MB is already small
+    const isImageFile =
+      (inputFile.type && inputFile.type.startsWith('image/')) ||
+      /\.(jpe?g|png|webp|bmp)$/i.test(inputFile.name);
+    if (!isImageFile) return inputFile;
+    if (inputFile.size <= 800 * 1024) return inputFile; // Below 800KB is already small
 
     try {
       return await new Promise<File>((resolve) => {
@@ -548,7 +551,7 @@ export default function DocumentUploadAndPrintFlowPage() {
     url: string,
     formData: FormData,
     onProgress: (percent: number) => void,
-    timeoutMs = 60000
+    timeoutMs = 90000
   ): Promise<{ status: number; body: string; ok: boolean }> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -665,8 +668,9 @@ export default function DocumentUploadAndPrintFlowPage() {
           formData.append('customerSessionId', currentSessionId);
           formData.append('file', fileToUpload);
 
+          const uploadUrl = `${API_BASE_URL}/documents/upload?customerSessionId=${encodeURIComponent(currentSessionId)}`;
           const result = await uploadWithXhr(
-            `${API_BASE_URL}/documents/upload`,
+            uploadUrl,
             formData,
             (percent) => {
               setUploadProgress(Math.min(95, Math.max(15, percent)));

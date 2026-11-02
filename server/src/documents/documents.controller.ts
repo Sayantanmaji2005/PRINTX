@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseInterceptors,
   UploadedFile,
   Res,
@@ -54,8 +55,10 @@ export class DocumentsController {
   )
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
-    @Body('customerSessionId') customerSessionId: string,
+    @Body('customerSessionId') bodySessionId: string,
+    @Query('customerSessionId') querySessionId: string,
   ) {
+    const customerSessionId = bodySessionId || querySessionId;
     if (!customerSessionId) {
       throw new BadRequestException('customerSessionId is required');
     }
