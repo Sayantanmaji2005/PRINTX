@@ -582,7 +582,15 @@ export default function DocumentUploadAndPrintFlowPage() {
             } catch {}
           }
 
-          if (response) break;
+          // If server returned 5xx gateway error (Render cold start 502/503), keep retrying!
+          if (response && response.status >= 500 && attempt < totalAttempts) {
+            setUploadStageMessage('Cloud Server Is Booting Up...');
+            setUploadSubMessage(`PrintX server container is starting (HTTP ${response.status}). Retrying in 4s (${attempt}/${totalAttempts})...`);
+            await new Promise((resolve) => setTimeout(resolve, 4000));
+            continue;
+          }
+
+          if (response && response.ok) break;
         } catch (fetchErr: any) {
           lastErrorMessage = fetchErr?.message || 'Network error';
           console.warn(`Upload attempt ${attempt} failed:`, lastErrorMessage);

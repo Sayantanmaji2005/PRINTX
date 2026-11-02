@@ -89,8 +89,8 @@ export class ShopsService {
   }
 
   async findBySlug(slug: string): Promise<ShopPublicProfile> {
-    const cleanSlug = slug.toLowerCase().trim();
-    const shop = await this.prisma.shop.findUnique({
+    const cleanSlug = (slug || 'printx-shop').toLowerCase().trim();
+    let shop = await this.prisma.shop.findUnique({
       where: { slug: cleanSlug },
       include: {
         pricingRules: { where: { isActive: true } },
@@ -104,8 +104,25 @@ export class ShopsService {
       },
     });
 
+    // Fallback to primary active shop if slug is 'default' or not matched
     if (!shop) {
-      throw new NotFoundException(`Shop with handle '${slug}' was not found`);
+      shop = await this.prisma.shop.findFirst({
+        where: { status: ShopStatus.ACTIVE },
+        include: {
+          pricingRules: { where: { isActive: true } },
+          printers: {
+            select: { id: true, name: true, status: true, capabilities: true },
+          },
+          agents: {
+            select: { id: true, name: true, status: true, lastHeartbeatAt: true },
+            orderBy: { lastHeartbeatAt: 'desc' },
+          },
+        },
+      });
+    }
+
+    if (!shop) {
+      throw new NotFoundException(`No active Xerox shop is currently configured`);
     }
 
     if (shop.status === ShopStatus.SUSPENDED || shop.status === ShopStatus.INACTIVE) {

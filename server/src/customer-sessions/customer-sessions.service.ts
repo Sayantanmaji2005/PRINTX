@@ -15,12 +15,20 @@ export class CustomerSessionsService {
     dto: StartSessionDto,
     ipAddress?: string,
   ): Promise<CustomerSessionData> {
-    const shop = await this.prisma.shop.findUnique({
-      where: { slug: dto.shopSlug.toLowerCase().trim() },
+    const cleanSlug = (dto.shopSlug || 'printx-shop').toLowerCase().trim();
+    let shop = await this.prisma.shop.findUnique({
+      where: { slug: cleanSlug },
     });
 
+    // Fallback to active shop if slug is 'default' or not matched
     if (!shop) {
-      throw new NotFoundException(`Shop with handle '${dto.shopSlug}' not found`);
+      shop = await this.prisma.shop.findFirst({
+        where: { status: ShopStatus.ACTIVE },
+      });
+    }
+
+    if (!shop) {
+      throw new NotFoundException(`No active shop available to start session`);
     }
 
     if (shop.status !== ShopStatus.ACTIVE) {
