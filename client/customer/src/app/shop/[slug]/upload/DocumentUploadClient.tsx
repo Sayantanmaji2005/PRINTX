@@ -476,34 +476,74 @@ export default function DocumentUploadAndPrintFlowPage() {
   };
 
   const uploadAndAnalyze = async (selectedFile: File) => {
-    const currentSessionId = sessionId || sessionStorage.getItem('printx_customer_session_id');
+    setError(null);
+    let currentSessionId = sessionId || (typeof window !== 'undefined' ? sessionStorage.getItem('printx_customer_session_id') : null);
+
+    // Auto-create customer session on the fly if not yet active
     if (!currentSessionId) {
-      setError('Active customer session not found. Please scan QR again.');
+      try {
+        setUploading(true);
+        setUploadProgress(10);
+        const newSession = await startCustomerSession(slug);
+        if (newSession?.id) {
+          currentSessionId = newSession.id;
+          setSessionId(newSession.id);
+          sessionStorage.setItem('printx_customer_session_id', newSession.id);
+        }
+      } catch (sessErr: any) {
+        console.warn('Could not auto-create session before upload:', sessErr);
+      }
+    }
+
+    if (!currentSessionId) {
+      setUploading(false);
+      setError('Active customer session could not be established. PrintX cloud server may be waking up. Please tap Retry in a few seconds.');
       return;
     }
 
     try {
       setUploading(true);
-      setUploadProgress(20);
+      setUploadProgress(25);
 
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('customerSessionId', currentSessionId);
 
       const interval = setInterval(() => {
-        setUploadProgress((prev) => (prev < 85 ? prev + 15 : prev));
-      }, 140);
+        setUploadProgress((prev) => (prev < 85 ? prev + 10 : prev));
+      }, 200);
 
-      const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+      let response: Response | null = null;
+      let lastErrorMessage = '';
+
+      // Auto-retry up to 2 times in case Render free tier is cold-starting
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          response = await fetch(`${API_BASE_URL}/documents/upload`, {
+            method: 'POST',
+            body: formData,
+          });
+          if (response) break;
+        } catch (fetchErr: any) {
+          lastErrorMessage = fetchErr?.message || 'Network error';
+          if (attempt === 1) {
+            console.warn('First upload attempt timed out/failed. Cloud server might be waking up. Retrying in 2.5s...');
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+          }
+        }
+      }
 
       clearInterval(interval);
       setUploadProgress(100);
 
-      const json = await res.json();
-      if (!res.ok) {
+      if (!response) {
+        throw new Error(
+          'Failed to connect to PrintX backend server. Cloud instance was asleep (Render cold start) or network was interrupted. Please tap "Choose PDF / Files" again.'
+        );
+      }
+
+      const json = await response.json();
+      if (!response.ok) {
         throw new Error(json.message || 'Failed to analyze document');
       }
 
@@ -512,7 +552,11 @@ export default function DocumentUploadAndPrintFlowPage() {
       setCurrentStep(2);
     } catch (err: any) {
       console.error('Upload failed:', err);
-      setError(err.message || 'File upload and analysis failed');
+      let msg = err?.message || 'File upload and analysis failed';
+      if (msg.toLowerCase().includes('failed to fetch')) {
+        msg = 'Connection to PrintX Cloud Server timed out. Free cloud instances take ~30 seconds to wake up from sleep mode. Please try selecting the file again now!';
+      }
+      setError(msg);
       setFile(null);
     } finally {
       setUploading(false);
@@ -690,9 +734,18 @@ export default function DocumentUploadAndPrintFlowPage() {
 
         {/* Error Notification */}
         {error && (
-          <div className="mb-4 p-4 rounded-2xl bg-rose-100 border-2 border-slate-900 text-slate-950 text-xs flex items-center gap-2.5 shadow-neo-sm">
-            <AlertCircle className="w-5 h-5 text-rose-700 shrink-0 stroke-[2.2]" />
-            <span className="font-bold">{error}</span>
+          <div className="mb-4 p-4 rounded-2xl bg-rose-100 border-2 border-slate-900 text-slate-950 text-xs flex items-center justify-between gap-3 shadow-neo-sm">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 text-rose-700 shrink-0 stroke-[2.2]" />
+              <span className="font-bold">{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="px-2.5 py-1 text-[11px] font-black rounded-lg bg-white border border-slate-900 hover:bg-slate-100 transition-colors"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
