@@ -70,7 +70,13 @@ interface PageItem {
 export default function DocumentUploadAndPrintFlowPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params?.slug as string;
+  const rawSlug = params?.slug as string;
+  const slug =
+    rawSlug ||
+    (typeof window !== 'undefined'
+      ? window.location.pathname.split('/shop/')[1]?.split('/')[0]
+      : 'printx-shop') ||
+    'printx-shop';
 
   // Flow Step: 1 = Upload, 2 = PRINTX Document Editor, 3 = UPI Payment & Tracking
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -84,6 +90,8 @@ export default function DocumentUploadAndPrintFlowPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStageMessage, setUploadStageMessage] = useState<string>('Analyzing Document...');
+  const [uploadSubMessage, setUploadSubMessage] = useState<string>('Scanning page count & print rates...');
   const [processedDoc, setProcessedDoc] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -205,21 +213,38 @@ export default function DocumentUploadAndPrintFlowPage() {
 
   useEffect(() => {
     if (!slug) return;
+
+    // Immediately pre-warm Render cloud backend on page open
+    fetch(`${API_BASE_URL}/shops/all`, { cache: 'no-store' }).catch(() => {});
+
     const storedSessionId = sessionStorage.getItem('printx_customer_session_id');
     if (!storedSessionId) {
       startCustomerSession(slug)
         .then((sess) => {
-          sessionStorage.setItem('printx_customer_session_id', sess.id);
-          setSessionId(sess.id);
+          if (sess?.id) {
+            sessionStorage.setItem('printx_customer_session_id', sess.id);
+            setSessionId(sess.id);
+          }
         })
-        .catch((err) => console.warn('Could not auto-start session:', err));
+        .catch((err) => console.warn('Could not auto-start session on mount:', err));
     } else {
       setSessionId(storedSessionId);
     }
 
     fetchShopBySlug(slug)
-      .then((data) => setShop(data))
-      .catch((err) => setError(err.message));
+      .then((data) => {
+        if (data) setShop(data);
+      })
+      .catch((err) => {
+        console.warn('Shop details delayed:', err?.message);
+      });
+
+    // 5-minute keep-alive ping to prevent Render free instance from sleeping
+    const keepAlive = setInterval(() => {
+      fetch(`${API_BASE_URL}/shops/all`, { cache: 'no-store' }).catch(() => {});
+    }, 4 * 60 * 1000);
+
+    return () => clearInterval(keepAlive);
 
     if (typeof window !== 'undefined') {
       const search = window.location.search;
@@ -477,14 +502,18 @@ export default function DocumentUploadAndPrintFlowPage() {
 
   const uploadAndAnalyze = async (selectedFile: File) => {
     setError(null);
-    let currentSessionId = sessionId || (typeof window !== 'undefined' ? sessionStorage.getItem('printx_customer_session_id') : null);
+    setFile(selectedFile);
+    let currentSessionId =
+      sessionId || (typeof window !== 'undefined' ? sessionStorage.getItem('printx_customer_session_id') : null);
 
     // Auto-create customer session on the fly if not yet active
     if (!currentSessionId) {
       try {
         setUploading(true);
-        setUploadProgress(10);
-        const newSession = await startCustomerSession(slug);
+        setUploadStageMessage('Initializing Print Session...');
+        setUploadSubMessage('Connecting to shop terminal...');
+        setUploadProgress(15);
+        const newSession = await startCustomerSession(slug || 'printx-shop');
         if (newSession?.id) {
           currentSessionId = newSession.id;
           setSessionId(newSession.id);
@@ -503,46 +532,85 @@ export default function DocumentUploadAndPrintFlowPage() {
 
     try {
       setUploading(true);
-      setUploadProgress(25);
+      setUploadProgress(20);
+      setUploadStageMessage('Uploading Document...');
+      setUploadSubMessage(`Preparing ${selectedFile.name} (${Math.round(selectedFile.size / 1024)} KB)...`);
 
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('customerSessionId', currentSessionId);
-
-      const interval = setInterval(() => {
-        setUploadProgress((prev) => (prev < 85 ? prev + 10 : prev));
-      }, 200);
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => (prev < 80 ? prev + 8 : prev));
+      }, 350);
 
       let response: Response | null = null;
       let lastErrorMessage = '';
+      const totalAttempts = 4;
 
-      // Auto-retry up to 2 times in case Render free tier is cold-starting
-      for (let attempt = 1; attempt <= 2; attempt++) {
+      // Smart multi-attempt retry loop: Render free tier cold-starts can take 35-50s
+      for (let attempt = 1; attempt <= totalAttempts; attempt++) {
         try {
+          const formData = new FormData();
+          formData.append('customerSessionId', currentSessionId);
+          formData.append('file', selectedFile);
+
+          if (attempt === 1) {
+            setUploadStageMessage('Uploading to Cloud Print Engine...');
+            setUploadSubMessage('Analyzing document pages & colors...');
+          } else {
+            setUploadStageMessage('Cloud Server Is Waking Up...');
+            setUploadSubMessage(`PrintX free tier instance is spinning up. Retrying automatically (Attempt ${attempt}/${totalAttempts})...`);
+          }
+
           response = await fetch(`${API_BASE_URL}/documents/upload`, {
             method: 'POST',
             body: formData,
           });
+
+          // Check for expired session in response
+          if (response.status === 400) {
+            const errClone = response.clone();
+            try {
+              const errJson = await errClone.json();
+              if (errJson?.message?.toLowerCase().includes('session')) {
+                console.warn('Session expired, regenerating new customer session...');
+                const refreshed = await startCustomerSession(slug || 'printx-shop');
+                if (refreshed?.id) {
+                  currentSessionId = refreshed.id;
+                  setSessionId(refreshed.id);
+                  sessionStorage.setItem('printx_customer_session_id', refreshed.id);
+                  continue; // Retry with fresh session
+                }
+              }
+            } catch {}
+          }
+
           if (response) break;
         } catch (fetchErr: any) {
           lastErrorMessage = fetchErr?.message || 'Network error';
-          if (attempt === 1) {
-            console.warn('First upload attempt timed out/failed. Cloud server might be waking up. Retrying in 2.5s...');
-            await new Promise((resolve) => setTimeout(resolve, 2500));
+          console.warn(`Upload attempt ${attempt} failed:`, lastErrorMessage);
+
+          if (attempt < totalAttempts) {
+            setUploadStageMessage('Waking Up Cloud Server...');
+            setUploadSubMessage(`Server is starting up (~30s on first load). Retrying in 4 seconds (${attempt}/${totalAttempts})...`);
+            await new Promise((resolve) => setTimeout(resolve, 4000));
           }
         }
       }
 
-      clearInterval(interval);
+      clearInterval(progressInterval);
       setUploadProgress(100);
 
       if (!response) {
         throw new Error(
-          'Failed to connect to PrintX backend server. Cloud instance was asleep (Render cold start) or network was interrupted. Please tap "Choose PDF / Files" again.'
+          'Could not connect to PrintX backend server. The free cloud backend is waking up or network timed out. Please tap "Retry Upload Now" below.'
         );
       }
 
-      const json = await response.json();
+      let json: any = null;
+      try {
+        json = await response.json();
+      } catch (parseErr) {
+        throw new Error(`Server returned status ${response.status}. Please try again in a few seconds.`);
+      }
+
       if (!response.ok) {
         throw new Error(json.message || 'Failed to analyze document');
       }
@@ -554,10 +622,9 @@ export default function DocumentUploadAndPrintFlowPage() {
       console.error('Upload failed:', err);
       let msg = err?.message || 'File upload and analysis failed';
       if (msg.toLowerCase().includes('failed to fetch')) {
-        msg = 'Connection to PrintX Cloud Server timed out. Free cloud instances take ~30 seconds to wake up from sleep mode. Please try selecting the file again now!';
+        msg = 'Connection to PrintX Cloud Server timed out. The server is still waking up from sleep mode. Please tap "Retry Upload Now" below!';
       }
       setError(msg);
-      setFile(null);
     } finally {
       setUploading(false);
     }
@@ -732,20 +799,34 @@ export default function DocumentUploadAndPrintFlowPage() {
           </div>
         )}
 
-        {/* Error Notification */}
+        {/* Error Notification with 1-Click Retry */}
         {error && (
-          <div className="mb-4 p-4 rounded-2xl bg-rose-100 border-2 border-slate-900 text-slate-950 text-xs flex items-center justify-between gap-3 shadow-neo-sm">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle className="w-5 h-5 text-rose-700 shrink-0 stroke-[2.2]" />
-              <span className="font-bold">{error}</span>
+          <div className="mb-4 p-4 rounded-2xl bg-rose-50 border-2 border-slate-900 text-slate-950 text-xs shadow-neo-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-5 h-5 text-rose-700 shrink-0 stroke-[2.2] mt-0.5" />
+                <div>
+                  <span className="font-bold block leading-relaxed">{error}</span>
+                  {file && (
+                    <button
+                      type="button"
+                      onClick={() => uploadAndAnalyze(file)}
+                      className="mt-2.5 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black text-[11px] shadow-neo-sm inline-flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Retry Upload Now</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="px-2.5 py-1 text-[11px] font-black rounded-lg bg-white border border-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+              >
+                Dismiss
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="px-2.5 py-1 text-[11px] font-black rounded-lg bg-white border border-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              Dismiss
-            </button>
           </div>
         )}
 
@@ -831,7 +912,7 @@ export default function DocumentUploadAndPrintFlowPage() {
               </div>
             )}
 
-            {/* Upload Progress Loader with Black Outline */}
+            {/* Upload Progress Loader with Dynamic Stage Messages */}
             {uploading && (
               <div className="p-8 rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg text-center flex flex-col items-center">
                 <div className="relative flex items-center justify-center w-16 h-16 mb-4">
@@ -841,9 +922,11 @@ export default function DocumentUploadAndPrintFlowPage() {
                   </div>
                 </div>
 
-                <h2 className="text-base font-black text-slate-950 font-outfit">Analyzing Document...</h2>
-                <p className="text-xs text-slate-600 font-semibold mt-1">
-                  Scanning page count & print rates ({uploadProgress}%)
+                <h2 className="text-base font-black text-slate-950 font-outfit">
+                  {uploadStageMessage}
+                </h2>
+                <p className="text-xs text-slate-600 font-semibold mt-1 max-w-sm">
+                  {uploadSubMessage || `Scanning page count & print rates (${uploadProgress}%)`}
                 </p>
 
                 <div className="w-full bg-slate-100 rounded-full h-3 mt-4 overflow-hidden max-w-xs border-2 border-slate-900 shadow-neo-sm">

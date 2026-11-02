@@ -27,18 +27,23 @@ export class DocumentsController {
         fileSize: 50 * 1024 * 1024, // 50MB maximum
       },
       fileFilter: (req, file, callback) => {
-        const allowedMimes = [
-          'application/pdf',
-          'image/jpeg',
-          'image/png',
-          'image/webp',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'application/msword',
-        ];
-        if (!allowedMimes.includes(file.mimetype)) {
+        const mime = (file.mimetype || '').toLowerCase();
+        const ext = (file.originalname || '').split('.').pop()?.toLowerCase() || '';
+
+        const isPdf = mime.includes('pdf') || ext === 'pdf';
+        const isImage =
+          mime.startsWith('image/') ||
+          ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'bmp', 'tiff', 'gif'].includes(ext);
+        const isDoc =
+          mime.includes('word') ||
+          mime.includes('officedocument') ||
+          mime.includes('document') ||
+          ['docx', 'doc', 'txt', 'rtf'].includes(ext);
+
+        if (!isPdf && !isImage && !isDoc) {
           return callback(
             new BadRequestException(
-              `Unsupported file type: ${file.mimetype}. Supported: PDF, JPG, PNG, WEBP, DOCX`,
+              `Unsupported file format: ${file.mimetype || ext}. Please upload PDF, Word document, or Photos (JPG, PNG, WEBP).`,
             ),
             false,
           );
