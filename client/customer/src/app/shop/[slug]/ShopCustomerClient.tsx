@@ -319,32 +319,28 @@ export default function ShopCustomerPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/70 via-slate-50 to-white text-slate-900 relative overflow-hidden">
-      {/* Decorative ambient glowing orbs */}
-      <div className="fixed -top-32 -left-32 w-80 h-80 bg-blue-400/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed -bottom-32 -right-32 w-80 h-80 bg-indigo-400/15 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Top Mobile-First Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/85 border-b border-blue-100 shadow-xs">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative overflow-hidden">
+      {/* Top Mobile-First Header with Modern Black Outline */}
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/95 border-b-2 border-slate-900 shadow-neo-sm">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-              <Printer className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center text-white shadow-neo-sm">
+              <Printer className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <span className="text-xl font-black tracking-tight text-slate-900 font-['Outfit']">
+            <span className="text-xl font-black tracking-tight text-slate-950 font-outfit">
               PRINT<span className="text-brand-600">X</span>
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             {shop?.isAgentOnline ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-200 text-slate-950 border-2 border-slate-900 shadow-neo-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse border border-slate-900" />
                 Agent Online
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-rose-200 text-slate-950 border-2 border-slate-900 shadow-neo-sm">
+                <span className="w-2 h-2 rounded-full bg-rose-600 border border-slate-900" />
                 Agent Offline
               </span>
             )}
@@ -355,52 +351,52 @@ export default function ShopCustomerPage() {
       {/* Main Customer Screen Container */}
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 flex flex-col justify-between relative z-10">
         <div>
-          {/* Shop Card */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white border border-blue-100 shadow-md shadow-blue-500/5 relative overflow-hidden mb-4">
+          {/* Shop Card with Crisp Modern Black Outline */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg relative overflow-hidden mb-4">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <div className="text-[11px] font-bold tracking-wider text-brand-600 uppercase">
+              <div className="text-[11px] font-black tracking-wider text-slate-900 uppercase">
                 CONNECTED XEROX SHOP
               </div>
               {shop.isAgentOnline ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-200 text-slate-950 border border-slate-900 shadow-neo-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse border border-slate-900" />
                   ONLINE
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-rose-200 text-slate-950 border border-slate-900 shadow-neo-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600 border border-slate-900" />
                   OFFLINE
                 </span>
               )}
             </div>
 
-            <h1 className="text-2xl font-extrabold text-slate-900 font-['Outfit']">
+            <h1 className="text-2xl font-black text-slate-950 font-outfit">
               Welcome to {shop.name}
             </h1>
 
             {shop.address && (
-              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <p className="text-xs text-slate-600 font-medium mt-1 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-slate-900 shrink-0 stroke-[2.2]" />
                 <span>{shop.address}</span>
               </p>
             )}
 
-            <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 flex-wrap gap-2">
-              <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+            <div className="mt-4 pt-3.5 border-t-2 border-slate-900 flex items-center justify-between text-[11px] text-slate-700 flex-wrap gap-2 font-bold">
+              <div className="flex items-center gap-1.5">
                 {shop.isAgentOnline ? (
                   <>
-                    <Zap className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className="text-emerald-700 font-semibold">Counter Agent Live & Spooling</span>
+                    <Zap className="w-3.5 h-3.5 text-emerald-600 stroke-[2.2]" />
+                    <span className="text-emerald-800 font-extrabold">Counter Agent Live & Spooling</span>
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
-                    <span className="text-rose-600 font-semibold">Counter Agent Offline (Spool Paused)</span>
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 stroke-[2.2]" />
+                    <span className="text-rose-700 font-extrabold">Counter Agent Offline (Spool Paused)</span>
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="flex items-center gap-1.5 text-slate-950">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 stroke-[2.2]" />
                 <span>UPI Verified</span>
               </div>
             </div>
@@ -408,18 +404,18 @@ export default function ShopCustomerPage() {
 
           {/* Offline Notice Banner if Agent is closed */}
           {!shop.isAgentOnline && (
-            <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs flex items-start gap-3 animate-in fade-in">
-              <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-                <AlertCircle className="w-5 h-5" />
+            <div className="mb-6 p-4 rounded-2xl bg-amber-100 border-2 border-slate-900 text-slate-950 shadow-neo-sm flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-200 border border-slate-900 text-slate-950 flex items-center justify-center shrink-0 mt-0.5 shadow-neo-sm">
+                <AlertCircle className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div className="flex-1">
-                <div className="text-xs font-bold text-amber-950 flex items-center gap-2">
+                <div className="text-xs font-black text-slate-950 flex items-center gap-2">
                   <span>Counter PC Agent is Currently Offline</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-200/80 text-amber-900 uppercase">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-200 text-slate-950 uppercase border border-slate-900">
                     Agent Closed
                   </span>
                 </div>
-                <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">
+                <p className="text-[11px] text-slate-700 font-medium mt-1 leading-relaxed">
                   The PrintX Agent is not running on this shop&apos;s computer. Please ask the shopkeeper to double-click <strong>start-agent.bat</strong> on their counter PC to enable instant auto-printing.
                 </p>
               </div>
@@ -428,215 +424,215 @@ export default function ShopCustomerPage() {
 
           {/* Core Slogan Banner */}
           <div className="mb-6 text-center">
-            <h2 className="text-xl font-extrabold text-slate-900 font-['Outfit']">
+            <h2 className="text-xl font-black text-slate-950 font-outfit">
               Print anything. Pay digitally. Collect instantly.
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-600 font-medium mt-1">
               Select an option below to start your print order
             </p>
           </div>
 
-          {/* 12 Service Cards Grid */}
+          {/* 12 Service Cards Grid with Black Outlines */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             {/* 1. Upload Document (PDF, DOCX) */}
             <button
               onClick={() => router.push(`/shop/${slug}/upload`)}
-              className="action-card p-4 rounded-3xl bg-white border border-blue-100 hover:border-brand-500 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-brand-600 group-hover:scale-110 transition-transform">
-                <UploadCloud className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-blue-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <UploadCloud className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Upload Document</span>
-                <span className="text-[10px] text-brand-600 font-semibold mt-0.5 block">PDF, DOCX, PPTX</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Upload Document</span>
+                <span className="text-[10px] text-brand-600 font-extrabold mt-0.5 block">PDF, DOCX, PPTX</span>
               </div>
             </button>
 
             {/* 2. Google Drive */}
             <button
               onClick={() => setActiveModal('drive')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-indigo-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                <FolderDown className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-indigo-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <FolderDown className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Google Drive</span>
-                <span className="text-[10px] text-slate-500 mt-0.5 block">Import from Cloud</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Google Drive</span>
+                <span className="text-[10px] text-slate-600 font-bold mt-0.5 block">Import from Cloud</span>
               </div>
             </button>
 
             {/* 3. Scan Document */}
             <button
               onClick={() => setActiveModal('scanner')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-emerald-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                <Camera className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-emerald-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <Camera className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Scan Document</span>
-                <span className="text-[10px] text-slate-500 mt-0.5 block">Use Phone Camera</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Scan Document</span>
+                <span className="text-[10px] text-slate-600 font-bold mt-0.5 block">Use Phone Camera</span>
               </div>
             </button>
 
             {/* 4. Upload Images */}
             <button
               onClick={() => router.push(`/shop/${slug}/upload`)}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-amber-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
-                <ImageIcon className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-amber-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <ImageIcon className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Upload Images</span>
-                <span className="text-[10px] text-slate-500 mt-0.5 block">JPG, PNG, Photos</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Upload Images</span>
+                <span className="text-[10px] text-slate-600 font-bold mt-0.5 block">JPG, PNG, Photos</span>
               </div>
             </button>
 
             {/* 5. Passport Photo Studio */}
             <button
               onClick={() => setActiveModal('passport')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-sky-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200/80 flex items-center justify-center text-sky-600 group-hover:scale-110 transition-transform">
-                <Award className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-sky-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <Award className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Passport Photo</span>
-                <span className="text-[10px] text-sky-600 font-medium mt-0.5 block">8, 16, 32 Sheet Layout</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Passport Photo</span>
+                <span className="text-[10px] text-sky-700 font-bold mt-0.5 block">8, 16, 32 Sheet Layout</span>
               </div>
             </button>
 
             {/* 6. Resume / CV */}
             <button
               onClick={() => setActiveModal('resume')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-violet-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-violet-50 border border-violet-200/80 flex items-center justify-center text-violet-600 group-hover:scale-110 transition-transform">
-                <FileCheck className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-purple-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <FileCheck className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Resume / CV</span>
-                <span className="text-[10px] text-violet-600 font-medium mt-0.5 block">High GSM Paper</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Resume / CV</span>
+                <span className="text-[10px] text-purple-700 font-bold mt-0.5 block">High GSM Paper</span>
               </div>
             </button>
 
             {/* 7. ID Card & Certificate */}
             <button
               onClick={() => setActiveModal('idcard')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-rose-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
-                <CreditCard className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-rose-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <CreditCard className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">ID & Certificate</span>
-                <span className="text-[10px] text-rose-600 font-medium mt-0.5 block">PVC & Badge Sizing</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">ID & Certificate</span>
+                <span className="text-[10px] text-rose-700 font-bold mt-0.5 block">PVC & Badge Sizing</span>
               </div>
             </button>
 
             {/* 8. Binding Service */}
             <button
               onClick={() => setActiveModal('binding')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-orange-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/80 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
-                <BookOpen className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-orange-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <BookOpen className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Spiral & Binding</span>
-                <span className="text-[10px] text-orange-600 font-medium mt-0.5 block">Comb, Wiro & Hard</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Spiral & Binding</span>
+                <span className="text-[10px] text-orange-700 font-bold mt-0.5 block">Comb, Wiro & Hard</span>
               </div>
             </button>
 
             {/* 9. Lamination */}
             <button
               onClick={() => setActiveModal('lamination')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-teal-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-teal-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Lamination</span>
-                <span className="text-[10px] text-teal-600 font-medium mt-0.5 block">A4, A3, Gloss / Matte</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Lamination</span>
+                <span className="text-[10px] text-teal-700 font-bold mt-0.5 block">A4, A3, Gloss / Matte</span>
               </div>
             </button>
 
             {/* 10. Design Studio */}
             <button
               onClick={() => setActiveModal('design')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-fuchsia-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-fuchsia-50 border border-fuchsia-200/80 flex items-center justify-center text-fuchsia-600 group-hover:scale-110 transition-transform">
-                <Palette className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-fuchsia-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <Palette className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Design Studio</span>
-                <span className="text-[10px] text-fuchsia-600 font-medium mt-0.5 block">Posters, Cards, Covers</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Design Studio</span>
+                <span className="text-[10px] text-fuchsia-700 font-bold mt-0.5 block">Posters, Cards, Covers</span>
               </div>
             </button>
 
             {/* 11. Bulk Photocopy / Xerox */}
             <button
               onClick={() => setActiveModal('bulk')}
-              className="action-card p-4 rounded-3xl bg-white border border-slate-200/80 hover:border-cyan-400 text-left flex flex-col justify-between h-36 group relative overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 text-left flex flex-col justify-between h-36 group relative overflow-hidden transition-all cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-2xl bg-cyan-50 border border-cyan-200/80 flex items-center justify-center text-cyan-600 group-hover:scale-110 transition-transform">
-                <Copy className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-xl bg-cyan-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm group-hover:scale-105 transition-transform">
+                <Copy className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block font-['Outfit']">Bulk Photocopy</span>
-                <span className="text-[10px] text-cyan-600 font-medium mt-0.5 block">50+ Page Discounts</span>
+                <span className="text-xs font-black text-slate-950 block font-outfit">Bulk Photocopy</span>
+                <span className="text-[10px] text-cyan-700 font-bold mt-0.5 block">50+ Page Discounts</span>
               </div>
             </button>
           </div>
 
-          {/* Pricing Info Banner */}
-          <div className="mt-6 p-4 rounded-3xl bg-white border border-blue-100 shadow-xs flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-brand-600 shrink-0 mt-0.5">
-              <Info className="w-4 h-4" />
+          {/* Pricing Info Banner with Black Outlines */}
+          <div className="mt-6 p-5 rounded-3xl bg-white border-2 border-slate-900 shadow-neo flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shrink-0 mt-0.5 shadow-neo-sm">
+              <Info className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <div className="text-xs text-slate-600 flex-1">
-              <div className="text-slate-900 font-bold flex items-center justify-between">
-                <span className="font-['Outfit']">Verified Rates for {shop.name}</span>
-                <span className="text-[10px] text-emerald-600 font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+            <div className="text-xs text-slate-700 flex-1">
+              <div className="text-slate-950 font-black flex items-center justify-between">
+                <span className="font-outfit text-sm">Verified Rates for {shop.name}</span>
+                <span className="text-[10px] text-slate-950 font-black px-2.5 py-0.5 rounded-full bg-emerald-200 border-2 border-slate-900 shadow-neo-sm">
                   Live Rates
                 </span>
               </div>
-              <div className="mt-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-slate-700">
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A4 B&W (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹2.00</strong>
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A4 B&W (Single)</span>
+                  <strong className="text-slate-950 font-black">₹2.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A4 B&W (Both)</span>
-                  <strong className="text-brand-600 font-bold">₹3.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A4 B&W (Both)</span>
+                  <strong className="text-slate-950 font-black">₹3.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A4 Color (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹6.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A4 Color (Single)</span>
+                  <strong className="text-slate-950 font-black">₹6.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A4 Color (Both)</span>
-                  <strong className="text-brand-600 font-bold">₹10.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A4 Color (Both)</span>
+                  <strong className="text-slate-950 font-black">₹10.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A3 B&W (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹8.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A3 B&W (Single)</span>
+                  <strong className="text-slate-950 font-black">₹8.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A3 Color (Single)</span>
-                  <strong className="text-brand-600 font-bold">₹20.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A3 Color (Single)</span>
+                  <strong className="text-slate-950 font-black">₹20.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>Spiral Binding</span>
-                  <strong className="text-brand-600 font-bold">₹35.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">Spiral Binding</span>
+                  <strong className="text-slate-950 font-black">₹35.00</strong>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                  <span>A4 Lamination</span>
-                  <strong className="text-brand-600 font-bold">₹20.00</strong>
+                <div className="p-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
+                  <span className="font-bold">A4 Lamination</span>
+                  <strong className="text-slate-950 font-black">₹20.00</strong>
                 </div>
               </div>
             </div>
@@ -655,31 +651,34 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 1. GOOGLE DRIVE IMPORT ================= */}
       {activeModal === 'drive' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-indigo-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-                  <FolderDown className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <FolderDown className="w-4 h-4 stroke-[2.2]" />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Google Drive Import</h3>
+                <h3 className="font-black text-slate-950 text-base font-outfit">Google Drive Import</h3>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
-            <div className="mt-4 space-y-3.5 text-xs text-slate-600">
-              <p>You can import any document or PDF from your Google Drive:</p>
-              <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2">
-                <div className="font-semibold text-indigo-950">Option A: Native Phone Storage Picker</div>
-                <p className="text-[11px] text-indigo-900/80">
+            <div className="mt-4 space-y-3.5 text-xs text-slate-700">
+              <p className="font-semibold">You can import any document or PDF from your Google Drive:</p>
+              <div className="p-3.5 rounded-2xl bg-indigo-50 border-2 border-slate-900 shadow-neo-sm space-y-1.5">
+                <div className="font-black text-slate-950">Option A: Native Phone Storage Picker</div>
+                <p className="text-[11px] text-slate-700 font-medium">
                   Tap &quot;Select from Drive&quot; below, then choose &quot;Google Drive&quot; in your mobile file selector.
                 </p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                <label className="block text-[11px] font-black text-slate-900 uppercase mb-1">
                   Option B: Paste Shared Google Drive Link
                 </label>
                 <input
@@ -687,21 +686,21 @@ export default function ShopCustomerPage() {
                   placeholder="https://drive.google.com/file/d/..."
                   value={driveUrl}
                   onChange={(e) => setDriveUrl(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500"
+                  className="w-full px-3.5 py-2 text-xs bg-white border-2 border-slate-900 rounded-xl text-slate-950 font-medium placeholder-slate-400 focus:outline-none shadow-neo-sm"
                 />
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="mt-5 pt-3 border-t-2 border-slate-900 flex items-center justify-end gap-2">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 text-slate-950 text-xs font-black shadow-neo-sm transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={() => router.push(`/shop/${slug}/upload?source=drive`)}
-                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-md shadow-blue-500/20"
+                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 Open File Picker
               </button>
@@ -713,31 +712,31 @@ export default function ShopCustomerPage() {
       {/* ================= MODAL: 2. DOCUMENT SCANNER ================= */}
       {activeModal === 'scanner' && (
         <div className="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-slate-800">
             <div className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-emerald-400" />
-              <span className="font-bold text-sm font-['Outfit']">Document Camera Scanner</span>
+              <Camera className="w-5 h-5 text-emerald-400 stroke-[2.2]" />
+              <span className="font-black text-sm font-outfit">Document Camera Scanner</span>
             </div>
             <button
               onClick={() => setActiveModal(null)}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+              className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-300"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
 
           {/* Viewfinder Canvas */}
-          <div className="flex-1 my-3 flex flex-col items-center justify-center relative rounded-2xl overflow-hidden bg-black border border-slate-800">
+          <div className="flex-1 my-3 flex flex-col items-center justify-center relative rounded-2xl overflow-hidden bg-black border-2 border-slate-800">
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Document Edge Alignment Overlay Guide */}
             <div className="absolute inset-8 border-2 border-emerald-400/70 rounded-2xl pointer-events-none flex flex-col justify-between p-3">
-              <div className="flex justify-between text-[10px] font-mono text-emerald-300 font-bold bg-black/40 px-2 py-0.5 rounded">
+              <div className="flex justify-between text-[10px] font-mono text-emerald-300 font-bold bg-black/60 px-2 py-0.5 rounded border border-emerald-400/40">
                 <span>ALIGN DOCUMENT CORNERS</span>
                 <span>A4 AUTO-DETECT</span>
               </div>
-              <div className="text-center text-[10px] text-emerald-300 font-bold bg-black/40 py-0.5 rounded">
+              <div className="text-center text-[10px] text-emerald-300 font-bold bg-black/60 py-0.5 rounded border border-emerald-400/40">
                 Keep camera flat and steady
               </div>
             </div>
@@ -745,12 +744,12 @@ export default function ShopCustomerPage() {
 
           {/* Captured Pages Strip */}
           {scannerPages.length > 0 && (
-            <div className="mb-3 flex items-center gap-2 overflow-x-auto p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span className="text-[10px] font-bold text-slate-400 px-1">Pages ({scannerPages.length}):</span>
+            <div className="mb-3 flex items-center gap-2 overflow-x-auto p-2 rounded-xl bg-slate-900 border-2 border-slate-800">
+              <span className="text-[10px] font-black text-slate-300 px-1">Pages ({scannerPages.length}):</span>
               {scannerPages.map((p, idx) => (
-                <div key={idx} className="relative w-12 h-16 rounded-lg overflow-hidden border border-emerald-500 shrink-0">
+                <div key={idx} className="relative w-12 h-16 rounded-lg overflow-hidden border-2 border-emerald-400 shrink-0">
                   <img src={p} alt={`Scanned page ${idx + 1}`} className="w-full h-full object-cover" />
-                  <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] text-center font-bold">#{idx + 1}</span>
+                  <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center font-bold">#{idx + 1}</span>
                 </div>
               ))}
             </div>
@@ -761,32 +760,32 @@ export default function ShopCustomerPage() {
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => setScannerFilter('bw')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                  scannerFilter === 'bw' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-slate-800 text-slate-300 border-slate-700'
+                className={`px-3 py-1 rounded-full text-xs font-black border-2 transition-all ${
+                  scannerFilter === 'bw' ? 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-neo-sm' : 'bg-slate-900 text-slate-300 border-slate-700'
                 }`}
               >
                 B&W Xerox
               </button>
               <button
                 onClick={() => setScannerFilter('enhanced')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                  scannerFilter === 'enhanced' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-slate-800 text-slate-300 border-slate-700'
+                className={`px-3 py-1 rounded-full text-xs font-black border-2 transition-all ${
+                  scannerFilter === 'enhanced' ? 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-neo-sm' : 'bg-slate-900 text-slate-300 border-slate-700'
                 }`}
               >
                 Enhanced
               </button>
               <button
                 onClick={() => setScannerFilter('grayscale')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                  scannerFilter === 'grayscale' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-slate-800 text-slate-300 border-slate-700'
+                className={`px-3 py-1 rounded-full text-xs font-black border-2 transition-all ${
+                  scannerFilter === 'grayscale' ? 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-neo-sm' : 'bg-slate-900 text-slate-300 border-slate-700'
                 }`}
               >
                 Grayscale
               </button>
               <button
                 onClick={() => setScannerFilter('original')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                  scannerFilter === 'original' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-slate-800 text-slate-300 border-slate-700'
+                className={`px-3 py-1 rounded-full text-xs font-black border-2 transition-all ${
+                  scannerFilter === 'original' ? 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-neo-sm' : 'bg-slate-900 text-slate-300 border-slate-700'
                 }`}
               >
                 Color
@@ -797,16 +796,16 @@ export default function ShopCustomerPage() {
               <button
                 onClick={() => setScannerPages([])}
                 disabled={scannerPages.length === 0}
-                className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-400 text-xs font-semibold disabled:opacity-40"
+                className="px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-slate-400 text-xs font-bold disabled:opacity-40"
               >
                 Clear
               </button>
 
               <button
                 onClick={captureScannerPage}
-                className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg transition-transform active:scale-95"
+                className="w-16 h-16 rounded-full border-4 border-slate-950 flex items-center justify-center bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-neo-lg transition-transform active:scale-95"
               >
-                <Camera className="w-7 h-7" />
+                <Camera className="w-7 h-7 stroke-[2.2]" />
               </button>
 
               <button
@@ -815,7 +814,7 @@ export default function ShopCustomerPage() {
                   router.push(`/shop/${slug}/upload`);
                 }}
                 disabled={scannerPages.length === 0}
-                className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold disabled:opacity-40"
+                className="px-5 py-3 rounded-2xl bg-emerald-400 hover:bg-emerald-300 border-2 border-slate-950 text-slate-950 text-xs font-black shadow-neo disabled:opacity-40"
               >
                 Done ({scannerPages.length})
               </button>
@@ -826,31 +825,34 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 3. PASSPORT PHOTO STUDIO ================= */}
       {activeModal === 'passport' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-white border border-sky-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
-                  <Award className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-sky-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <Award className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Passport Photo Studio</h3>
-                  <p className="text-[11px] text-slate-500">Auto-crop, background tone & A4 sheet tiling</p>
+                  <h3 className="font-black text-slate-950 text-base font-outfit">Passport Photo Studio</h3>
+                  <p className="text-[11px] text-slate-600 font-semibold">Auto-crop, background tone & A4 sheet tiling</p>
                 </div>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
             <div className="mt-4 space-y-4">
               {/* Photo Input or Upload */}
               {!passportPhoto ? (
-                <div className="p-8 rounded-2xl border-2 border-dashed border-sky-200 text-center flex flex-col items-center">
-                  <Award className="w-10 h-10 text-sky-500 mb-2" />
-                  <p className="text-xs font-bold text-slate-800">Upload Your Portrait Photo</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Clear front face with neutral expression</p>
-                  <label className="mt-4 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-sky-500/20">
+                <div className="p-8 rounded-2xl border-2 border-dashed border-slate-900 text-center flex flex-col items-center bg-slate-50">
+                  <Award className="w-10 h-10 text-slate-950 mb-2 stroke-[2.2]" />
+                  <p className="text-xs font-black text-slate-950 font-outfit">Upload Your Portrait Photo</p>
+                  <p className="text-[11px] text-slate-600 font-medium mt-0.5">Clear front face with neutral expression</p>
+                  <label className="mt-4 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 border-2 border-slate-900 text-slate-950 text-xs font-black cursor-pointer shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all">
                     <span>Select Photo</span>
                     <input
                       type="file"
@@ -872,25 +874,25 @@ export default function ShopCustomerPage() {
                   {/* Preset & Layout Controls */}
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Standard Preset</label>
+                      <label className="block text-[11px] font-black text-slate-900 mb-1">Standard Preset</label>
                       <select
                         value={passportPreset}
                         onChange={(e) => setPassportPreset(e.target.value as any)}
-                        className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                        className="w-full px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold text-slate-950 shadow-neo-sm"
                       >
-                        <option value="passport">Indian Passport (3.5 ├ù 4.5 cm)</option>
-                        <option value="visa">US / Europe Visa (2 ├ù 2 in)</option>
+                        <option value="passport">Indian Passport (3.5 × 4.5 cm)</option>
+                        <option value="visa">US / Europe Visa (2 × 2 in)</option>
                         <option value="pan">PAN Card Specification</option>
                         <option value="aadhaar">Aadhaar / ID Card</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Photos Per A4 Sheet</label>
+                      <label className="block text-[11px] font-black text-slate-900 mb-1">Photos Per A4 Sheet</label>
                       <select
                         value={passportLayout}
                         onChange={(e) => setPassportLayout(Number(e.target.value) as any)}
-                        className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                        className="w-full px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold text-slate-950 shadow-neo-sm"
                       >
                         <option value={8}>8 Photos (Standard Pack)</option>
                         <option value={16}>16 Photos (Value Pack)</option>
@@ -899,28 +901,28 @@ export default function ShopCustomerPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="text-[11px] font-bold text-slate-700">Background Tone:</span>
+                  <div className="flex items-center gap-2 text-xs flex-wrap">
+                    <span className="text-[11px] font-black text-slate-900">Background Tone:</span>
                     <button
                       onClick={() => setPassportBg('white')}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                        passportBg === 'white' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-700'
+                      className={`px-3 py-1 rounded-lg text-xs font-black border-2 transition-all ${
+                        passportBg === 'white' ? 'bg-slate-950 text-white border-slate-950 shadow-neo-sm' : 'bg-slate-100 text-slate-800 border-slate-300'
                       }`}
                     >
                       White
                     </button>
                     <button
                       onClick={() => setPassportBg('blue')}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                        passportBg === 'blue' ? 'bg-sky-600 text-white border-sky-600' : 'bg-sky-50 text-sky-700'
+                      className={`px-3 py-1 rounded-lg text-xs font-black border-2 transition-all ${
+                        passportBg === 'blue' ? 'bg-sky-400 text-slate-950 border-slate-900 shadow-neo-sm' : 'bg-sky-50 text-slate-800 border-slate-300'
                       }`}
                     >
                       Studio Blue
                     </button>
                     <button
                       onClick={() => setPassportBg('gray')}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                        passportBg === 'gray' ? 'bg-slate-600 text-white border-slate-600' : 'bg-slate-100 text-slate-700'
+                      className={`px-3 py-1 rounded-lg text-xs font-black border-2 transition-all ${
+                        passportBg === 'gray' ? 'bg-slate-400 text-slate-950 border-slate-900 shadow-neo-sm' : 'bg-slate-100 text-slate-800 border-slate-300'
                       }`}
                     >
                       Light Gray
@@ -928,25 +930,25 @@ export default function ShopCustomerPage() {
                   </div>
 
                   {/* A4 Photo Sheet Live Canvas Preview */}
-                  <div className="p-3 rounded-2xl bg-slate-100 border border-slate-200 flex justify-center">
+                  <div className="p-3 rounded-2xl bg-slate-100 border-2 border-slate-900 shadow-neo-sm flex justify-center">
                     <canvas
                       ref={passportCanvasRef}
-                      className="w-full max-w-sm rounded-lg shadow-md border border-slate-300 bg-white"
+                      className="w-full max-w-sm rounded-lg shadow-sm border-2 border-slate-900 bg-white"
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">
-                Rate: ₹40.00 <span className="text-[11px] text-slate-500 font-normal">/ A4 Photo Glossy Sheet (8 Photos)</span>
+            <div className="mt-5 pt-3 border-t-2 border-slate-900 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-black text-slate-950">
+                Rate: ₹40.00 <span className="text-[11px] text-slate-600 font-semibold">/ A4 Photo Glossy Sheet (8 Photos)</span>
               </span>
               <div className="flex items-center gap-2">
                 {passportPhoto && (
                   <button
                     onClick={() => setPassportPhoto(null)}
-                    className="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold"
+                    className="px-3 py-2 rounded-xl bg-slate-100 border-2 border-slate-900 text-slate-950 text-xs font-black shadow-neo-sm"
                   >
                     Change Photo
                   </button>
@@ -960,7 +962,7 @@ export default function ShopCustomerPage() {
                     router.push(`/shop/${slug}/upload?preset=passport`);
                   }}
                   disabled={!passportPhoto}
-                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 disabled:opacity-40"
+                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-40 transition-all"
                 >
                   Proceed to Print
                 </button>
@@ -972,31 +974,34 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 4. RESUME / CV PRINTING ================= */}
       {activeModal === 'resume' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white border border-violet-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-600">
-                  <FileCheck className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-purple-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <FileCheck className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Resume & CV Printing</h3>
-                  <p className="text-[11px] text-slate-500">Executive bond papers & sharp professional prints</p>
+                  <h3 className="font-black text-slate-950 text-base font-outfit">Resume & CV Printing</h3>
+                  <p className="text-[11px] text-slate-600 font-semibold">Executive bond papers & sharp professional prints</p>
                 </div>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3.5 text-xs text-slate-700">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Paper Weight & Finish</label>
+                  <label className="block text-[11px] font-black text-slate-900 mb-1">Paper Weight & Finish</label>
                   <select
                     value={resumePaperGsm}
                     onChange={(e) => setResumePaperGsm(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
+                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold text-slate-950 shadow-neo-sm"
                   >
                     <option value="80">80 GSM Executive Bond Paper (+₹1/sheet)</option>
                     <option value="100">100 GSM Premium Ultra-White (+₹2/sheet)</option>
@@ -1005,11 +1010,11 @@ export default function ShopCustomerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Color Mode</label>
+                  <label className="block text-[11px] font-black text-slate-900 mb-1">Color Mode</label>
                   <select
                     value={resumeColor}
                     onChange={(e) => setResumeColor(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold"
+                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold text-slate-950 shadow-neo-sm"
                   >
                     <option value="BW">Black & White (Sharp & Crisp)</option>
                     <option value="COLOR">Full Color (Profile Photo / Badges)</option>
@@ -1017,21 +1022,21 @@ export default function ShopCustomerPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-violet-50/70 border border-violet-200 space-y-1.5">
-                <div className="font-bold text-violet-950 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+              <div className="p-4 rounded-2xl bg-purple-50 border-2 border-slate-900 shadow-neo-sm space-y-1.5">
+                <div className="font-black text-slate-950 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-700 stroke-[2.2]" />
                   <span>HR Recommended Settings</span>
                 </div>
-                <p className="text-[11px] text-violet-900/80 leading-relaxed">
+                <p className="text-[11px] text-slate-700 font-medium leading-relaxed">
                   For job interviews, 80-100 GSM heavy bond paper creates a strong tactile impression. Single-sided printing is recommended.
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="mt-5 pt-3 border-t-2 border-slate-900 flex items-center justify-end gap-2">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 text-slate-950 text-xs font-black shadow-neo-sm transition-all"
               >
                 Cancel
               </button>
@@ -1044,7 +1049,7 @@ export default function ShopCustomerPage() {
                   setActiveModal(null);
                   router.push(`/shop/${slug}/upload?preset=resume`);
                 }}
-                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 Upload Resume PDF
               </button>
@@ -1055,20 +1060,23 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 5. SPIRAL & HARD BINDING ================= */}
       {activeModal === 'binding' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white border border-orange-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
-                  <BookOpen className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-orange-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <BookOpen className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Document Binding Options</h3>
-                  <p className="text-[11px] text-slate-500">Project reports, thesis, legal files & brochures</p>
+                  <h3 className="font-black text-slate-950 text-base font-outfit">Document Binding Options</h3>
+                  <p className="text-[11px] text-slate-600 font-semibold">Project reports, thesis, legal files & brochures</p>
                 </div>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
@@ -1085,23 +1093,23 @@ export default function ShopCustomerPage() {
                   <div
                     key={b.id}
                     onClick={() => setBindingType(b.id)}
-                    className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+                    className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
                       bindingType === b.id
-                        ? 'border-orange-500 bg-orange-50/60 shadow-xs'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                        ? 'border-slate-900 bg-orange-100 shadow-neo'
+                        : 'border-slate-900 bg-white hover:bg-slate-50 shadow-neo-sm'
                     }`}
                   >
-                    <div className="font-bold text-slate-900 text-xs">{b.label}</div>
-                    <div className="text-[10px] text-orange-700 font-bold mt-0.5">{b.price}</div>
-                    <div className="text-[9px] text-slate-500 mt-1 leading-tight">{b.desc}</div>
+                    <div className="font-black text-slate-950 text-xs">{b.label}</div>
+                    <div className="text-[10px] text-orange-800 font-black mt-0.5">{b.price}</div>
+                    <div className="text-[9px] text-slate-600 mt-1 leading-tight font-medium">{b.desc}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">
-                Selected: <span className="text-orange-600 capitalize">{bindingType}</span>
+            <div className="mt-5 pt-3 border-t-2 border-slate-900 flex items-center justify-between">
+              <span className="text-xs font-black text-slate-950">
+                Selected: <span className="text-orange-700 uppercase">{bindingType}</span>
               </span>
               <button
                 onClick={() => {
@@ -1117,7 +1125,7 @@ export default function ShopCustomerPage() {
                   setActiveModal(null);
                   router.push(`/shop/${slug}/upload?preset=binding`);
                 }}
-                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 Upload Document to Bind
               </button>
@@ -1128,26 +1136,29 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 6. LAMINATION ================= */}
       {activeModal === 'lamination' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-teal-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600">
-                  <ShieldCheck className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-teal-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <ShieldCheck className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Document Lamination</h3>
-                  <p className="text-[11px] text-slate-500">Waterproof & tearproof thermal pouch lamination</p>
+                  <h3 className="font-black text-slate-950 text-base font-outfit">Document Lamination</h3>
+                  <p className="text-[11px] text-slate-600 font-semibold">Waterproof & tearproof thermal pouch lamination</p>
                 </div>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3.5 text-xs text-slate-700">
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Size Pouch</label>
+                <label className="block text-[11px] font-black text-slate-900 mb-1.5 uppercase">Size Pouch</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { id: 'A4', label: 'A4 Sheet', price: '₹20.00' },
@@ -1158,32 +1169,34 @@ export default function ShopCustomerPage() {
                     <button
                       key={l.id}
                       onClick={() => setLaminationSize(l.id)}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        laminationSize === l.id ? 'border-teal-500 bg-teal-50/60 font-bold' : 'border-slate-200 bg-white'
+                      className={`p-2.5 rounded-xl border-2 text-left transition-all ${
+                        laminationSize === l.id
+                          ? 'border-slate-900 bg-teal-200 shadow-neo font-black'
+                          : 'border-slate-900 bg-white hover:bg-slate-50 shadow-neo-sm'
                       }`}
                     >
-                      <div className="text-xs text-slate-900">{l.label}</div>
-                      <div className="text-[10px] text-teal-700 font-bold">{l.price}</div>
+                      <div className="text-xs text-slate-950 font-bold">{l.label}</div>
+                      <div className="text-[10px] text-teal-800 font-black">{l.price}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Finish</label>
+                <label className="block text-[11px] font-black text-slate-900 mb-1.5 uppercase">Finish</label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setLaminationFinish('gloss')}
-                    className={`flex-1 py-2 rounded-xl border text-xs font-semibold ${
-                      laminationFinish === 'gloss' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 border-slate-200'
+                    className={`flex-1 py-2 rounded-xl border-2 text-xs font-black transition-all ${
+                      laminationFinish === 'gloss' ? 'bg-slate-950 text-white border-slate-950 shadow-neo-sm' : 'bg-white text-slate-950 border-slate-900 shadow-neo-sm'
                     }`}
                   >
                     High Gloss Ultra Clear
                   </button>
                   <button
                     onClick={() => setLaminationFinish('matte')}
-                    className={`flex-1 py-2 rounded-xl border text-xs font-semibold ${
-                      laminationFinish === 'matte' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 border-slate-200'
+                    className={`flex-1 py-2 rounded-xl border-2 text-xs font-black transition-all ${
+                      laminationFinish === 'matte' ? 'bg-slate-950 text-white border-slate-950 shadow-neo-sm' : 'bg-white text-slate-950 border-slate-900 shadow-neo-sm'
                     }`}
                   >
                     Matte Non-Reflective
@@ -1192,10 +1205,10 @@ export default function ShopCustomerPage() {
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="mt-5 pt-3 border-t-2 border-slate-900 flex items-center justify-end gap-2">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 text-slate-950 text-xs font-black shadow-neo-sm transition-all"
               >
                 Cancel
               </button>
@@ -1206,7 +1219,7 @@ export default function ShopCustomerPage() {
                   setActiveModal(null);
                   router.push(`/shop/${slug}/upload?preset=lamination`);
                 }}
-                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 Upload Document
               </button>
@@ -1217,28 +1230,31 @@ export default function ShopCustomerPage() {
 
       {/* ================= MODAL: 7. BULK XEROX CALCULATOR ================= */}
       {activeModal === 'bulk' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-cyan-100 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600">
-                  <Copy className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-cyan-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                  <Copy className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">Bulk Xerox Calculator</h3>
-                  <p className="text-[11px] text-slate-500">Tier discounts automatically applied on 50+ pages</p>
+                  <h3 className="font-black text-slate-950 text-base font-outfit">Bulk Xerox Calculator</h3>
+                  <p className="text-[11px] text-slate-600 font-semibold">Tier discounts automatically applied on 50+ pages</p>
                 </div>
               </div>
-              <button onClick={() => setActiveModal(null)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X className="w-4 h-4" />
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-xl border border-slate-300 hover:border-slate-900 hover:bg-slate-100 text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
             <div className="mt-4 space-y-4 text-xs text-slate-700">
               <div>
-                <div className="flex items-center justify-between font-bold mb-1">
+                <div className="flex items-center justify-between font-black mb-1.5 text-slate-950">
                   <span>Number of Pages / Sheets:</span>
-                  <span className="text-cyan-700 font-mono text-sm">{bulkPages} pages</span>
+                  <span className="text-cyan-800 font-mono text-sm px-2 py-0.5 rounded-md bg-cyan-100 border border-slate-900">{bulkPages} pages</span>
                 </div>
                 <input
                   type="range"
@@ -1247,30 +1263,30 @@ export default function ShopCustomerPage() {
                   step={10}
                   value={bulkPages}
                   onChange={(e) => setBulkPages(Number(e.target.value))}
-                  className="w-full accent-cyan-600"
+                  className="w-full accent-slate-950 cursor-pointer"
                 />
               </div>
 
               {/* Discount Badge */}
-              <div className="p-3 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-cyan-100 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] font-bold text-cyan-950">
+                  <div className="text-[11px] font-black text-slate-950">
                     {bulkPages >= 500 ? 'Tier 3 Wholesale Discount' : bulkPages >= 100 ? 'Tier 2 Bulk Discount' : bulkPages >= 50 ? 'Tier 1 Student / Bulk' : 'Standard Rate'}
                   </div>
-                  <div className="text-[10px] text-cyan-800">
+                  <div className="text-[10px] text-slate-700 font-semibold">
                     {bulkPages >= 500 ? '15% Off Total Bill' : bulkPages >= 100 ? '10% Off Total Bill' : bulkPages >= 50 ? '5% Off Total Bill' : 'Add 50+ pages for discount'}
                   </div>
                 </div>
-                <span className="text-sm font-extrabold text-cyan-700 font-mono">
+                <span className="text-sm font-black text-slate-950 font-mono px-2 py-1 rounded-lg bg-white border-2 border-slate-900 shadow-neo-sm">
                   {bulkPages >= 500 ? '-15%' : bulkPages >= 100 ? '-10%' : bulkPages >= 50 ? '-5%' : '0%'}
                 </span>
               </div>
 
               {/* Calculation Preview */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center justify-between">
                 <div>
-                  <span className="text-slate-500 text-[11px] block">Estimated Total Cost:</span>
-                  <span className="text-lg font-black text-slate-900 font-['Outfit']">
+                  <span className="text-slate-600 text-[11px] font-bold block">Estimated Total Cost:</span>
+                  <span className="text-xl font-black text-slate-950 font-outfit">
                     ₹{Math.max(
                       10,
                       Math.round(
@@ -1287,7 +1303,7 @@ export default function ShopCustomerPage() {
                     setActiveModal(null);
                     router.push(`/shop/${slug}/upload?preset=bulk`);
                   }}
-                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                  className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all"
                 >
                   Upload & Print
                 </button>

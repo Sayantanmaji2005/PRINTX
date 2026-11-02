@@ -10,9 +10,9 @@ Yeh lightweight background agent Xerox / Print shop ke computer par chalta hai a
 Aapke dukan ka unique slug set karein:
 ```json
 {
-  "serverUrl": "http://localhost:4000",
-  "shopSlug": "maji-xerox-station",
-  "agentName": "Maji Xerox Counter PC",
+  "serverUrl": "https://printx-cib8.onrender.com",
+  "shopSlug": "printx-shop",
+  "agentName": "PRINTX Shop Counter PC",
   "pollIntervalMs": 3000,
   "heartbeatIntervalMs": 10000,
   "autoPrint": true,

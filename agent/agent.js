@@ -13,9 +13,9 @@ const os = require('os');
 // Load Configuration
 const configPath = path.join(__dirname, 'config.json');
 let config = {
-  serverUrl: 'http://localhost:4000',
-  shopSlug: 'maji-xerox-station',
-  agentName: 'Shop Counter PC',
+  serverUrl: process.env.SERVER_URL || 'https://printx-cib8.onrender.com',
+  shopSlug: process.env.SHOP_SLUG || 'printx-shop',
+  agentName: process.env.AGENT_NAME || 'Shop Counter PC',
   pollIntervalMs: 3000,
   heartbeatIntervalMs: 10000,
   autoPrint: true,

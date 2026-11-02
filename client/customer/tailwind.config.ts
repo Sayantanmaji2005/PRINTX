@@ -26,10 +26,15 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
         glow: '0 0 25px -5px rgba(12, 143, 233, 0.3)',
+        neo: '4px 4px 0px 0px #0f172a',
+        'neo-sm': '2px 2px 0px 0px #0f172a',
+        'neo-lg': '6px 6px 0px 0px #0f172a',
+        'neo-hover': '5px 5px 0px 0px #0f172a',
       },
     },
   },

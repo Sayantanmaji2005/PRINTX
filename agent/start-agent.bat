@@ -10,9 +10,16 @@ echo                   Zero Setup - Auto Hardware Bridge
 echo ======================================================================
 echo.
 
-:: Clean up any duplicate background PowerShell agent processes for this script
-for /f "tokens=2" %%i in ('wmic process where "name='powershell.exe' and commandline like '%%agent.ps1%%'" get ProcessId 2^>nul ^| findstr /r "[0-9]"') do (
-    taskkill /PID %%i /F >nul 2>nul
+:: Clean up any duplicate background PowerShell agent processes safely without wmic
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name = 'powershell.exe' and CommandLine like '%%agent.ps1%%' and ProcessId != $PID\" | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>nul
+
+where node >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    if exist "%~dp0agent.js" (
+        echo [LAUNCH] Node.js runtime detected. Starting high-speed engine...
+        node "%~dp0agent.js"
+        goto restart_prompt
+    )
 )
 
 :loop

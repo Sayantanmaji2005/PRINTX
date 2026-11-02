@@ -83,10 +83,6 @@ export default function SuperAdminDashboard() {
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem('printx_admin_cached_overview');
-        if (cached && (cached.includes('maji-xerox-station') || cached.includes('Maji Xerox'))) {
-          localStorage.removeItem('printx_admin_cached_overview');
-          return null;
-        }
         return cached ? JSON.parse(cached) : null;
       } catch {
         return null;
@@ -540,20 +536,20 @@ export default function SuperAdminDashboard() {
                     setActiveTab(tab.id as AdminTab);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 font-bold'
-                      : 'text-slate-600 hover:bg-slate-100/90 hover:text-slate-900'
+                      ? 'bg-amber-300 text-slate-950 border-2 border-slate-900 shadow-neo-sm font-extrabold'
+                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 border-2 border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                    <Icon className={`w-4 h-4 stroke-[2.2] ${isActive ? 'text-slate-950' : 'text-slate-600'}`} />
                     <span>{tab.label}</span>
                   </div>
                   {tab.badge !== undefined && tab.badge > 0 ? (
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        isActive ? 'bg-white text-blue-700' : 'bg-blue-100 text-blue-700'
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-black border border-slate-900 ${
+                        isActive ? 'bg-white text-slate-950 shadow-neo-sm' : 'bg-slate-100 text-slate-900'
                       }`}
                     >
                       {tab.badge}
@@ -566,42 +562,42 @@ export default function SuperAdminDashboard() {
         </div>
 
         {/* Sidebar Bottom Footer */}
-        <div className="p-3 border-t border-slate-100 bg-slate-50/70 space-y-2.5 shrink-0">
-          <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 mb-1">
+        <div className="p-3 border-t-2 border-slate-900 bg-slate-50 space-y-2.5 shrink-0">
+          <div className="p-3 rounded-xl bg-white border-2 border-slate-900 shadow-neo-sm">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 mb-1">
               <span>Super Admin Network</span>
-              <span className="text-emerald-600 font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-emerald-700 font-black flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse border border-slate-900" />
                 Live
               </span>
             </div>
-            <div className="text-xs font-bold text-slate-800 truncate">
+            <div className="text-xs font-black text-slate-950 truncate">
               {data?.recentShops?.length || data?.totalShops || 0} Xerox Shops Connected
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Central Management Hub</div>
+            <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Central Management Hub</div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs shadow-blue-500/20 transition-all cursor-pointer"
+              className="flex-1 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold flex items-center justify-center gap-1.5 border-2 border-slate-900 shadow-neo-sm hover:shadow-neo active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.2]" />
               <span>Add Shop</span>
             </button>
             <button
               onClick={() => loadData(false)}
-              className="p-2 rounded-xl bg-white hover:bg-blue-50 text-slate-600 hover:text-brand-600 transition-colors border border-slate-200 shadow-xs cursor-pointer"
+              className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-900 transition-all border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Refresh Data"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-600' : ''}`} />
+              <RefreshCw className={`w-4 h-4 stroke-[2.2] ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200 shadow-xs cursor-pointer"
+              className="p-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 transition-all border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         </div>
@@ -645,65 +641,64 @@ export default function SuperAdminDashboard() {
         {activeTab === 'OVERVIEW' && (
           <div className="space-y-6">
             {/* Super Admin Clean Hero Header Banner */}
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 text-white shadow-xl shadow-blue-500/15 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="p-6 rounded-3xl bg-slate-950 text-white border-3 border-slate-900 shadow-neo-lg relative overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div className="max-w-2xl">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white uppercase tracking-wider backdrop-blur-sm">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-300 text-slate-950 uppercase tracking-wider border border-slate-900 shadow-neo-sm">
                       Super Admin Master Hub
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-300/30">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white border border-white/30">
                       ₹299 / Month / Station
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-bold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping border border-slate-900" />
                       Direct Shop UPI Routing Active
                     </span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold font-['Outfit']">
+                  <h1 className="text-2xl sm:text-3xl font-black font-outfit tracking-tight">
                     PRINTX Multi-Shop Network & Master Dashboard
                   </h1>
-                  <p className="text-xs text-blue-100 mt-1.5 leading-relaxed">
-                    Centrally managing <strong>{(data?.recentShops || []).length} Xerox shops</strong>. 100% of customer print money transfers directly to each shop owner's UPI. Platform collects ₹299/mo per active shop subscription.
+                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed font-medium">
+                    Centrally managing <strong>{(data?.recentShops || []).length} Xerox shops</strong>. 100% of customer print money transfers directly to each shop owner&apos;s UPI. Platform collects ₹299/mo per active shop subscription.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0">
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-blue-50 text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-white text-slate-950 hover:bg-amber-300 text-xs font-black transition-all border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
                   >
-                    <Plus className="w-4 h-4 text-blue-600" />
+                    <Plus className="w-4 h-4 stroke-[2.2] text-slate-950" />
                     <span>Onboard New Shop</span>
                   </button>
                   <button
                     onClick={handleExportCSV}
-                    className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center gap-2 backdrop-blur-md cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
                   >
-                    <FileSpreadsheet className="w-4 h-4" />
+                    <FileSpreadsheet className="w-4 h-4 stroke-2" />
                     <span>Export Data</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 5-Metric Clean Stats Grid */}
+            {/* 5-Metric Clean Stats Grid with Black Outlines */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
               <div
                 onClick={() => setActiveTab('SHOPS')}
-                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+                className="p-5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold group-hover:text-brand-600 transition-colors">Partner Shops</span>
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                    <Store className="w-4 h-4" />
+                <div className="flex items-center justify-between text-slate-600 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider group-hover:text-brand-600 transition-colors">Partner Shops</span>
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <Store className="w-4 h-4 stroke-[2.2]" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                <div className="text-2xl sm:text-3xl font-black text-slate-950">
                   {data?.recentShops?.length ?? data?.totalShops ?? 0}
                 </div>
-                <span className="text-[11px] text-blue-600 font-medium mt-1 flex items-center gap-1">
+                <span className="text-[11px] text-blue-700 font-bold mt-1 flex items-center gap-1">
                   <span>View All Stations</span>
                   <span>→</span>
                 </span>
@@ -711,130 +706,130 @@ export default function SuperAdminDashboard() {
 
               <div
                 onClick={() => setActiveTab('SHOPS')}
-                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+                className="p-5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold group-hover:text-emerald-600 transition-colors">Active Subscriptions</span>
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <ShieldCheck className="w-4 h-4" />
+                <div className="flex items-center justify-between text-slate-600 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider group-hover:text-emerald-700 transition-colors">Active Plans</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <ShieldCheck className="w-4 h-4 stroke-[2.2]" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
+                <div className="text-2xl sm:text-3xl font-black text-emerald-700">
                   {(data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length}
                 </div>
-                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">Active & Unlocked</span>
+                <span className="text-[11px] text-emerald-700 font-bold mt-1 block">Active & Unlocked</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Monthly SaaS MRR</span>
-                  <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                    <DollarSign className="w-4 h-4" />
+              <div className="p-5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+                <div className="flex items-center justify-between text-slate-600 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider">Monthly MRR</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <DollarSign className="w-4 h-4 stroke-[2.2]" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-indigo-700">
+                <div className="text-2xl sm:text-3xl font-black text-slate-950">
                   ₹{(((data?.recentShops || []).filter((s: any) => s.status === 'ACTIVE').length || 0) * 299).toLocaleString('en-IN')}
                 </div>
-                <span className="text-[11px] text-indigo-600 font-medium mt-1 block">₹299/shop Recurring</span>
+                <span className="text-[11px] text-purple-800 font-bold mt-1 block">₹299/shop Recurring</span>
               </div>
 
               <div
                 onClick={() => setActiveTab('ORDERS')}
-                className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-400 transition-all cursor-pointer group"
+                className="p-5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold group-hover:text-amber-600 transition-colors">Customer Print Orders</span>
-                  <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                    <FileText className="w-4 h-4" />
+                <div className="flex items-center justify-between text-slate-600 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider group-hover:text-amber-700 transition-colors">Customer Orders</span>
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <FileText className="w-4 h-4 stroke-[2.2]" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                <div className="text-2xl sm:text-3xl font-black text-slate-950">
                   {data?.totalOrders || data?.recentOrders?.length || 0}
                 </div>
-                <span className="text-[11px] text-amber-600 font-medium mt-1 block">Across All Stations</span>
+                <span className="text-[11px] text-amber-800 font-bold mt-1 block">Across All Stations</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-blue-100/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all col-span-2 md:col-span-1">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold">Shopkeeper UPI GMV</span>
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <Zap className="w-4 h-4" />
+              <div className="p-5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all col-span-2 md:col-span-1">
+                <div className="flex items-center justify-between text-slate-600 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider">Shopkeeper UPI GMV</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <Zap className="w-4 h-4 stroke-[2.2]" />
                   </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700">
+                <div className="text-2xl sm:text-3xl font-black text-emerald-800">
                   ₹{(data?.metrics?.totalRevenue !== undefined ? data?.metrics?.totalRevenue : (data?.revenueAggregation?._sum?.total || 0)).toLocaleString('en-IN')}
                 </div>
-                <span className="text-[11px] text-emerald-600 font-medium mt-1 block">100% Direct to Shop UPI</span>
+                <span className="text-[11px] text-emerald-800 font-bold mt-1 block">100% Direct to Shop UPI</span>
               </div>
             </div>
 
-            {/* Quick Actions Navigation */}
+            {/* Quick Actions Navigation with Black Outlines */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
                 onClick={() => setActiveTab('SHOPS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
+                className="p-3.5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 flex items-center gap-3 transition-all text-left group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <Store className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-blue-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+                  <Store className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Partner Shops & Plans</div>
-                  <div className="text-[10px] text-slate-500">Live countdowns & locks</div>
+                  <div className="text-xs font-bold text-slate-950">Partner Shops</div>
+                  <div className="text-[10px] text-slate-500 font-semibold">Live countdowns & locks</div>
                 </div>
               </button>
 
               <button
                 onClick={() => setActiveTab('ORDERS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
+                className="p-3.5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 flex items-center gap-3 transition-all text-left group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <FileText className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+                  <FileText className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Orders & Invoices</div>
-                  <div className="text-[10px] text-slate-500">View customer prints</div>
+                  <div className="text-xs font-bold text-slate-950">Orders & Invoices</div>
+                  <div className="text-[10px] text-slate-500 font-semibold">View customer prints</div>
                 </div>
               </button>
 
               <button
                 onClick={() => setActiveTab('PRINTERS')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
+                className="p-3.5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 flex items-center gap-3 transition-all text-left group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <Zap className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-amber-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+                  <Zap className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Printer Fleet</div>
-                  <div className="text-[10px] text-slate-500">Hardware telemetry</div>
+                  <div className="text-xs font-bold text-slate-950">Printer Fleet</div>
+                  <div className="text-[10px] text-slate-500 font-semibold">Hardware telemetry</div>
                 </div>
               </button>
 
               <button
                 onClick={() => setActiveTab('PRICING')}
-                className="p-3.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/50 flex items-center gap-3 transition-all text-left group cursor-pointer shadow-xs"
+                className="p-3.5 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 flex items-center gap-3 transition-all text-left group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <Tag className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+                  <Tag className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Rate Config</div>
-                  <div className="text-[10px] text-slate-500">Edit page prices</div>
+                  <div className="text-xs font-bold text-slate-950">Rate Config</div>
+                  <div className="text-[10px] text-slate-500 font-semibold">Edit page prices</div>
                 </div>
               </button>
             </div>
 
             {/* Quick Xerox Network Summary Widget */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm">
+            <div className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-brand-600">
-                    <Store className="w-4 h-4" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-200 border-2 border-slate-900 flex items-center justify-center text-slate-950 shadow-neo-sm">
+                    <Store className="w-4 h-4 stroke-[2.2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base font-['Outfit']">
+                    <h3 className="font-black text-slate-950 text-base font-outfit">
                       Connected Xerox Stations Snapshot
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-600 font-medium">
                       Overview of live counters and real-time subscription status
                     </p>
                   </div>
@@ -842,10 +837,10 @@ export default function SuperAdminDashboard() {
 
                 <button
                   onClick={() => setActiveTab('SHOPS')}
-                  className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors"
+                  className="text-xs font-bold text-slate-950 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-300 hover:bg-amber-400 border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
                 >
                   <span>Manage All Shops & Countdowns</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-3.5 h-3.5 stroke-2" />
                 </button>
               </div>
 
@@ -855,7 +850,7 @@ export default function SuperAdminDashboard() {
                   return (
                     <div
                       key={shop.id}
-                      className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-blue-300 hover:bg-white transition-all flex flex-col justify-between"
+                      className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-2">
@@ -928,20 +923,20 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* Live Customer Order Stream */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm">
+            <div className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900 text-base font-['Outfit']">
+                  <h3 className="font-black text-slate-950 text-base font-outfit">
                     Recent Customer Prints Feed
                   </h3>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping border border-slate-900" />
                 </div>
                 <button
                   onClick={() => setActiveTab('ORDERS')}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
+                  className="text-xs text-slate-950 hover:text-brand-600 font-black flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 shadow-neo-sm transition-all cursor-pointer"
                 >
                   <span>View All Orders</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3.5 h-3.5 stroke-[2.2]" />
                 </button>
               </div>
 
@@ -1008,14 +1003,14 @@ export default function SuperAdminDashboard() {
                     placeholder="Search shop, owner, phone, city..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-blue-100 transition-all w-52 sm:w-64"
+                    className="pl-9 pr-4 py-2 text-xs bg-white border-2 border-slate-900 rounded-xl text-slate-950 font-bold placeholder-slate-400 focus:outline-none shadow-neo-sm transition-all w-52 sm:w-64"
                   />
                 </div>
 
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all cursor-pointer"
+                  className="px-3 py-2 text-xs bg-white border-2 border-slate-900 rounded-xl text-slate-950 font-black shadow-neo-sm transition-all cursor-pointer"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active (Unlocked)</option>
@@ -1024,9 +1019,9 @@ export default function SuperAdminDashboard() {
 
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 border-2 border-slate-900 text-white text-xs font-black shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5 cursor-pointer transition-all"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Onboard New Shop</span>
                 </button>
               </div>
@@ -1051,8 +1046,8 @@ export default function SuperAdminDashboard() {
                   return (
                     <div
                       key={shop.id}
-                      className={`p-6 rounded-3xl bg-white border transition-all flex flex-col justify-between shadow-sm hover:shadow-md ${
-                        !sub.isLocked ? 'border-blue-100 hover:border-brand-500' : 'border-red-200 bg-red-50/20'
+                      className={`p-6 rounded-3xl bg-white border-2 border-slate-900 transition-all flex flex-col justify-between shadow-neo hover:shadow-neo-hover ${
+                        !sub.isLocked ? 'bg-white' : 'bg-rose-50'
                       }`}
                     >
                       <div>
@@ -1317,14 +1312,14 @@ export default function SuperAdminDashboard() {
                     placeholder="Search order #, file, phone..."
                     value={orderSearchQuery}
                     onChange={(e) => setOrderSearchQuery(e.target.value)}
-                    className="pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-500 transition-all w-48 sm:w-56"
+                    className="pl-9 pr-4 py-2 text-xs bg-white border-2 border-slate-900 rounded-xl text-slate-950 font-bold placeholder-slate-400 focus:outline-none shadow-neo-sm transition-all w-48 sm:w-56"
                   />
                 </div>
 
                 <select
                   value={orderFilterStatus}
                   onChange={(e) => setOrderFilterStatus(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:bg-white focus:border-brand-500 transition-all"
+                  className="px-3 py-2 text-xs bg-white border-2 border-slate-900 rounded-xl text-slate-950 font-black shadow-neo-sm transition-all"
                 >
                   <option value="ALL">All Status</option>
                   <option value="SUCCESS">Paid (Success)</option>
@@ -1334,16 +1329,16 @@ export default function SuperAdminDashboard() {
 
                 <button
                   onClick={handleExportCSV}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-3.5 py-2 rounded-xl bg-white border-2 border-slate-900 text-slate-950 text-xs font-black hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer shadow-neo-sm hover:shadow-neo active:translate-x-0.5 active:translate-y-0.5 transition-all"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export</span>
+                  <Download className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Export CSV</span>
                 </button>
               </div>
             </div>
 
             {/* Orders Table */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm overflow-hidden">
+            <div className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo overflow-hidden">
               {filteredOrders && filteredOrders.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
@@ -1505,7 +1500,7 @@ export default function SuperAdminDashboard() {
               {printers.map((prn) => (
                 <div
                   key={prn.id}
-                  className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  className="p-5 rounded-3xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -1656,7 +1651,7 @@ export default function SuperAdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Category 1: A4 Document Printing */}
-              <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
+              <div className="p-5 rounded-3xl bg-white border-2 border-slate-900 shadow-neo space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                   <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
                     A4
@@ -1732,7 +1727,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Category 2: A3 Printing & Scanning */}
-              <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
+              <div className="p-5 rounded-3xl bg-white border-2 border-slate-900 shadow-neo space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                   <div className="w-7 h-7 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs">
                     A3
@@ -1808,7 +1803,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Category 3: Finishing (Binding & Lamination) */}
-              <div className="p-5 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
+              <div className="p-5 rounded-3xl bg-white border-2 border-slate-900 shadow-neo space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                   <div className="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
                     <Layers className="w-4 h-4" />
@@ -1885,7 +1880,7 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* Volume Bulk Discounts Card */}
-            <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-sm space-y-4">
+            <div className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo space-y-4">
               <div className="flex items-center gap-2">
                 <Percent className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-bold text-slate-900 text-sm font-['Outfit']">
@@ -2183,7 +2178,7 @@ export default function SuperAdminDashboard() {
       {/* ========================================================================= */}
       {selectedPrinterShop && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-white border border-indigo-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-xl bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg relative animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
@@ -2308,7 +2303,7 @@ export default function SuperAdminDashboard() {
       {/* ========================================================================= */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg relative animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-brand-600">
@@ -2445,7 +2440,7 @@ export default function SuperAdminDashboard() {
       {/* ========================================================================= */}
       {shopToDelete && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-red-100 rounded-3xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white border-2 border-slate-900 rounded-3xl p-6 shadow-neo-lg relative animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 text-red-600 mb-3">
               <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5" />

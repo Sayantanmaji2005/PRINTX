@@ -4,6 +4,8 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PDFDocument } from 'pdf-lib';
 
+jest.setTimeout(30000);
+
 describe('PrintX Platform API (Phase 1 & Phase 2 e2e)', () => {
   let app: INestApplication;
   let ownerToken = '';

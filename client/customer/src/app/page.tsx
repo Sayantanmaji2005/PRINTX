@@ -145,25 +145,25 @@ export default function HomePage() {
       <div className="fixed top-1/3 -right-40 w-96 h-96 bg-indigo-400/15 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-10 left-1/4 w-80 h-80 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Navbar (Fixed & 100% Stable) */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/90 border-b border-blue-100/80 shadow-xs transition-all">
+      {/* Top Navbar with Crisp Modern Black Outline */}
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/95 border-b-2 border-slate-900 shadow-neo-sm transition-all">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-              <Printer className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-slate-950 border-2 border-slate-900 flex items-center justify-center shadow-neo-sm group-hover:scale-105 transition-transform">
+              <Printer className="w-5 h-5 text-white stroke-[2.2]" />
             </div>
-            <span className="text-2xl font-black tracking-tight text-slate-900 font-['Outfit']">
+            <span className="text-2xl font-black tracking-tight text-slate-950 font-outfit">
               PRINT<span className="text-brand-600">X</span>
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <a href="#brand" className="hover:text-brand-600 transition-colors font-semibold text-brand-600">Brand</a>
+          <nav className="hidden md:flex items-center gap-5 text-sm font-bold text-slate-700">
+            <a href="#brand" className="hover:text-brand-600 transition-colors font-extrabold text-brand-600">Brand</a>
             <a href="#services" className="hover:text-brand-600 transition-colors">Services</a>
             <a href="#how-it-works" className="hover:text-brand-600 transition-colors">How It Works</a>
             <a href="#pricing" className="hover:text-brand-600 transition-colors">Pricing List</a>
-            <a href="#recharge" className="text-emerald-700 font-bold hover:text-emerald-800 transition-colors px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
+            <a href="#recharge" className="text-slate-950 font-black hover:bg-amber-400 transition-colors px-3 py-1 rounded-full bg-amber-300 border-2 border-slate-900 text-xs shadow-neo-sm">
               Shop Plan ₹299
             </a>
             <a href="#shops" className="hover:text-brand-600 transition-colors">Find Station</a>
@@ -176,7 +176,7 @@ export default function HomePage() {
               href={(process.env.NEXT_PUBLIC_ADMIN_URL || 'https://printx-admin.vercel.app').replace(/\/+$/, '') + '/login'}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold px-3.5 py-2 rounded-xl bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-600 transition-all border border-slate-200 shadow-xs active:scale-95"
+              className="text-xs font-bold px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 transition-all border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5"
             >
               Super Admin Portal →
             </a>
@@ -184,9 +184,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Brand Showcase Section (Pure Visual, Zero Text Overlay) */}
+      {/* Brand Showcase Section with Black Outline Card */}
       <section id="brand" className="relative z-10 max-w-6xl mx-auto px-4 pt-20 md:pt-24 w-full scroll-mt-20">
-        <div className="relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl bg-slate-950">
+        <div className="relative rounded-3xl overflow-hidden border-3 border-slate-900 shadow-neo-lg bg-slate-950">
           <img
             src="/printxdemo.png"
             alt="PRINTX Smart Xerox & Automated Cloud Printing Brand Showcase"
@@ -197,183 +197,183 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 pt-10 pb-14 md:pt-14 md:pb-20 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-5 shadow-xs">
-          <Zap className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-300 border-2 border-slate-900 text-slate-950 text-xs font-black mb-5 shadow-neo-sm">
+          <Zap className="w-3.5 h-3.5 text-slate-950 fill-slate-950 stroke-[2.5]" />
           <span>⚡ INDIA&apos;S SMARTEST CONTACTLESS XEROX & PRINT KIOSK</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight max-w-4xl leading-[1.15] text-slate-900 font-['Outfit']">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight max-w-4xl leading-[1.15] text-slate-950 font-outfit">
           Instant Cloud Xerox,{' '}
           <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent font-black">
             Zero Waiting Time.
           </span>
           <br className="hidden sm:inline" />
-          <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 bg-clip-text text-transparent block mt-2 sm:mt-1">
+          <span className="text-2xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 bg-clip-text text-transparent block mt-2 sm:mt-1">
             Scan & Print Directly from Your Phone.
           </span>
         </h1>
 
-        <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+        <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-700 max-w-2xl leading-relaxed font-medium">
           Transform your smartphone into an on-demand printing studio. No app installation, no pendrives, no WhatsApp file sharing — simply scan the shop counter QR and your fresh prints roll out in seconds.
         </p>
 
-        {/* Hero Quick Action Buttons */}
+        {/* Hero Quick Action Buttons with Modern Black Outlines */}
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#shops"
-            className="px-6 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-lg shadow-brand-500/25 flex items-center gap-2 transition-all active:scale-95 hover:gap-3"
+            className="px-6 py-3.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-sm border-2 border-slate-900 shadow-neo hover:shadow-neo-hover flex items-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
           >
             <span>Scan or Select a Print Station</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 stroke-[2.2]" />
           </a>
           <a
             href="#pricing"
-            className="px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition-all active:scale-95"
+            className="px-6 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-black text-sm border-2 border-slate-900 shadow-neo hover:shadow-neo-hover transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
           >
             View Rate Card & Pricing
           </a>
         </div>
 
-        {/* Quick Trust Highlights */}
+        {/* Quick Trust Highlights with Black Outlines */}
         <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl text-left">
-          <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-100/80 shadow-xs flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Zap className="w-4 h-4" />
+          <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+              <Zap className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-900">0 Waiting Time</div>
-              <div className="text-[11px] text-slate-500">Immediate Print Dispatch</div>
+              <div className="text-xs font-black text-slate-950">0 Waiting Time</div>
+              <div className="text-[11px] text-slate-600 font-semibold">Immediate Dispatch</div>
             </div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-100/80 shadow-xs flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-4 h-4" />
+          <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+              <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-900">100% UPI Safe</div>
-              <div className="text-[11px] text-slate-500">Encrypted Indian Gateway</div>
+              <div className="text-xs font-black text-slate-950">100% UPI Safe</div>
+              <div className="text-[11px] text-slate-600 font-semibold">Direct Shop Routing</div>
             </div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-100/80 shadow-xs flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-              <Smartphone className="w-4 h-4" />
+          <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+              <Smartphone className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-900">No App Install</div>
-              <div className="text-[11px] text-slate-500">Works in Any Browser</div>
+              <div className="text-xs font-black text-slate-950">No App Install</div>
+              <div className="text-[11px] text-slate-600 font-semibold">Any Mobile Browser</div>
             </div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-blue-100/80 shadow-xs flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-              <Cpu className="w-4 h-4" />
+          <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-neo-sm hover:shadow-neo hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center shrink-0 shadow-neo-sm">
+              <Cpu className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-900">Cloud Print Agent</div>
-              <div className="text-[11px] text-slate-500">Direct Desktop Driver</div>
+              <div className="text-xs font-black text-slate-950">Cloud Print Agent</div>
+              <div className="text-[11px] text-slate-600 font-semibold">Native Desktop Driver</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4-Step Process Section ("How It Works") */}
-      <section id="how-it-works" className="py-16 bg-white border-y border-slate-200/80 relative">
+      {/* 4-Step Process Section ("How It Works") with Modern Black Outlines */}
+      <section id="how-it-works" className="py-16 bg-white border-y-2 border-slate-900 relative">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">
-              <Sparkles className="w-3.5 h-3.5" /> HOW IT WORKS
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-300 border-2 border-slate-900 text-slate-950 text-xs font-black mb-2 shadow-neo-sm">
+              <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" /> HOW IT WORKS
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-950 font-outfit">
               Seamless 4-Step Self-Service Flow
             </h2>
-            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+            <p className="mt-3 text-sm text-slate-600 font-medium leading-relaxed">
               No need to explain pages or duplex settings to the shopkeeper. Configure everything visually from your own smartphone.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left relative">
             {/* Step 1 */}
-            <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-white transition-all flex flex-col justify-between group">
+            <div className="p-6 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <QrCode className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center mb-5 shadow-neo-sm group-hover:scale-105 transition-transform">
+                  <QrCode className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <div className="text-xs font-extrabold text-blue-600 tracking-wider mb-1">STEP 01</div>
-                <h3 className="font-bold text-slate-900 text-lg">Scan Shop Standee QR</h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                <div className="inline-block text-[10px] font-black px-2 py-0.5 rounded-md bg-blue-200 border border-slate-900 text-slate-950 mb-2">STEP 01</div>
+                <h3 className="font-black text-slate-950 text-lg">Scan Shop Standee QR</h3>
+                <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">
                   Open your phone camera or any scanner to scan the unique PrintX counter QR standee at the Xerox shop.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-200 text-[11px] font-semibold text-blue-700 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> Instant Shop Connect
+              <div className="mt-4 pt-3 border-t-2 border-slate-900 text-[11px] font-bold text-slate-950 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" /> Instant Shop Connect
               </div>
             </div>
 
             {/* Step 2 */}
-            <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-indigo-300 hover:bg-white transition-all flex flex-col justify-between group">
+            <div className="p-6 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <UploadCloud className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-indigo-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center mb-5 shadow-neo-sm group-hover:scale-105 transition-transform">
+                  <UploadCloud className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <div className="text-xs font-extrabold text-indigo-600 tracking-wider mb-1">STEP 02</div>
-                <h3 className="font-bold text-slate-900 text-lg">Upload & Configure</h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                <div className="inline-block text-[10px] font-black px-2 py-0.5 rounded-md bg-indigo-200 border border-slate-900 text-slate-950 mb-2">STEP 02</div>
+                <h3 className="font-black text-slate-950 text-lg">Upload & Configure</h3>
+                <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">
                   Upload PDF, Word or Photos. Customize B&W / Color, Single / Duplex, GSM paper quality, and number of copies.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-200 text-[11px] font-semibold text-indigo-700 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> Live Price Calculation
+              <div className="mt-4 pt-3 border-t-2 border-slate-900 text-[11px] font-bold text-slate-950 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" /> Live Price Calculation
               </div>
             </div>
 
             {/* Step 3 */}
-            <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-emerald-300 hover:bg-white transition-all flex flex-col justify-between group">
+            <div className="p-6 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <CreditCard className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center mb-5 shadow-neo-sm group-hover:scale-105 transition-transform">
+                  <CreditCard className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <div className="text-xs font-extrabold text-emerald-600 tracking-wider mb-1">STEP 03</div>
-                <h3 className="font-bold text-slate-900 text-lg">Fast UPI Payment</h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                <div className="inline-block text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-200 border border-slate-900 text-slate-950 mb-2">STEP 03</div>
+                <h3 className="font-black text-slate-950 text-lg">Fast UPI Payment</h3>
+                <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">
                   Scan the generated Dynamic UPI QR or launch Google Pay, PhonePe, Paytm or BHIM with a single click.
                 </p>
                 <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white px-2 py-0.5 rounded-lg border border-slate-900 shadow-neo-sm">
                     <PhonePeIcon className="w-3.5 h-3.5" />
                     <span>PhonePe</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white px-2 py-0.5 rounded-lg border border-slate-900 shadow-neo-sm">
                     <GooglePayIcon className="w-3.5 h-3.5" />
-                    <span>Google Pay</span>
+                    <span>GPay</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 shadow-2xs">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white px-2 py-0.5 rounded-lg border border-slate-900 shadow-neo-sm">
                     <PaytmIcon className="w-4 h-3.5" />
                     <span>Paytm</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white px-2 py-0.5 rounded-lg border border-slate-900 shadow-neo-sm">
                     <BhimUpiIcon className="w-3.5 h-3.5" />
                     <span>BHIM</span>
                   </span>
                 </div>
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-200 text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> 100% Automatic Verification
+              <div className="mt-4 pt-3 border-t-2 border-slate-900 text-[11px] font-bold text-slate-950 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" /> 100% Automatic Verification
               </div>
             </div>
 
             {/* Step 4 */}
-            <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-amber-300 hover:bg-white transition-all flex flex-col justify-between group">
+            <div className="p-6 rounded-2xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <CheckCircle2 className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-slate-900 text-slate-950 flex items-center justify-center mb-5 shadow-neo-sm group-hover:scale-105 transition-transform">
+                  <CheckCircle2 className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <div className="text-xs font-extrabold text-amber-600 tracking-wider mb-1">STEP 04</div>
-                <h3 className="font-bold text-slate-900 text-lg">Instant Auto-Print</h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                <div className="inline-block text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-200 border border-slate-900 text-slate-950 mb-2">STEP 04</div>
+                <h3 className="font-black text-slate-950 text-lg">Instant Auto-Print</h3>
+                <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">
                   Once payment is verified, the local Print Agent triggers the printer and your crisp prints are ready for pickup.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-200 text-[11px] font-semibold text-amber-700 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> Zero Staff Dependency
+              <div className="mt-4 pt-3 border-t-2 border-slate-900 text-[11px] font-bold text-slate-950 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" /> Zero Staff Dependency
               </div>
             </div>
           </div>
@@ -381,34 +381,36 @@ export default function HomePage() {
       </section>
 
       {/* Live Network Stations Section */}
-      <section id="shops" className="py-16 md:py-20 bg-gradient-to-b from-blue-50/50 via-slate-50 to-white border-y border-slate-200/80 relative">
+      <section id="shops" className="py-16 md:py-20 bg-slate-50 border-y-2 border-slate-900 relative">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2 border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-200 border-2 border-slate-900 text-slate-950 text-xs font-black mb-2 shadow-neo-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse border border-slate-900" />
               <span>LIVE CONNECTED STATIONS</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-950 font-outfit">
               Find a Connected Xerox Counter Nearby
             </h2>
-            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+            <p className="mt-3 text-sm text-slate-600 font-medium leading-relaxed">
               Real-time hardware status of partner Xerox stations. Stations with running Desktop Agents show <strong>ONLINE</strong> for instant auto-print.
             </p>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs text-slate-500">Loading live print stations...</div>
+            <div className="p-12 text-center text-xs font-bold text-slate-500">Loading live print stations...</div>
           ) : shops.length === 0 ? (
-            <div className="p-8 rounded-3xl bg-white border border-slate-200 text-center max-w-md mx-auto">
-              <Store className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-              <div className="font-bold text-slate-900 text-sm">Demo PrintX Station</div>
-              <p className="text-xs text-slate-500 mt-1">Visit our flagship counter to test instant phone-to-printer dispatch.</p>
+            <div className="p-8 rounded-3xl bg-white border-2 border-slate-900 text-center max-w-md mx-auto shadow-neo">
+              <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-slate-900 flex items-center justify-center mx-auto mb-3 text-slate-950 shadow-neo-sm">
+                <Store className="w-6 h-6 stroke-[2.2]" />
+              </div>
+              <div className="font-black text-slate-950 text-base">Demo PrintX Station</div>
+              <p className="text-xs text-slate-600 font-medium mt-1">Visit our flagship counter to test instant phone-to-printer dispatch.</p>
               <a
                 href="/shop/printx-shop"
-                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20"
+                className="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs border-2 border-slate-900 shadow-neo active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 <span>Open Station</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
               </a>
             </div>
           ) : (
@@ -416,55 +418,55 @@ export default function HomePage() {
               {shops.map((s) => (
                 <div
                   key={s.id}
-                  className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all flex flex-col justify-between group"
+                  className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="font-mono text-xs px-2.5 py-0.5 rounded-lg bg-blue-50 text-brand-700 font-bold border border-blue-200">
+                      <span className="font-mono text-xs px-2.5 py-0.5 rounded-lg bg-blue-100 text-slate-950 font-black border-2 border-slate-900 shadow-neo-sm">
                         /{s.slug}
                       </span>
                       {s.isAgentOnline ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-200 text-slate-950 border-2 border-slate-900 shadow-neo-sm">
+                          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse border border-slate-900" />
                           ONLINE (Agent Active)
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs">
-                          <span className="w-2 h-2 rounded-full bg-rose-500" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-slate-950 border-2 border-slate-900 shadow-neo-sm">
+                          <span className="w-2 h-2 rounded-full bg-rose-600 border border-slate-900" />
                           OFFLINE (Agent Closed)
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-extrabold text-slate-900 text-lg font-['Outfit'] group-hover:text-brand-600 transition-colors">
+                    <h3 className="font-black text-slate-950 text-xl font-outfit group-hover:text-brand-600 transition-colors">
                       {s.name}
                     </h3>
                     {s.address && (
-                      <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <p className="text-xs text-slate-600 font-medium mt-1.5 flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-slate-900 shrink-0 stroke-[2.2]" />
                         <span>{s.address}</span>
                       </p>
                     )}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="text-[11px] text-slate-500 font-medium">
+                  <div className="mt-6 pt-4 border-t-2 border-slate-900 flex items-center justify-between">
+                    <div className="text-[11px] text-slate-600 font-bold">
                       {s.isAgentOnline ? (
-                        <span className="text-emerald-600 font-bold">⚡ Ready to Print</span>
+                        <span className="text-emerald-700 font-black">⚡ Ready to Print</span>
                       ) : (
-                        <span className="text-slate-400">Agent Disconnected</span>
+                        <span className="text-slate-500">Agent Disconnected</span>
                       )}
                     </div>
                     <a
                       href={`/shop/${s.slug}`}
-                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 ${
                         s.isAgentOnline
-                          ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/20'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                          ? 'bg-amber-300 hover:bg-amber-400 text-slate-950'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
                       }`}
                     >
                       <span>Open Counter</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
                     </a>
                   </div>
                 </div>
@@ -474,16 +476,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services Section */}
+      {/* Services Section with Black Outlines */}
       <section id="services" className="py-16 md:py-24 max-w-6xl mx-auto px-4 w-full">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">
-            <Layers className="w-3.5 h-3.5" /> FULL SUITE OF SERVICES
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-100 border-2 border-slate-900 text-slate-950 text-xs font-black mb-2 shadow-neo-sm">
+            <Layers className="w-3.5 h-3.5 stroke-[2.2]" /> FULL SUITE OF SERVICES
           </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-950 font-outfit">
             Comprehensive Printing & Finishing Solutions
           </h2>
-          <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+          <p className="mt-3 text-sm text-slate-600 font-medium leading-relaxed">
             From single-page legal affidavits to complete 500-page academic dissertations with spiral binding.
           </p>
         </div>
@@ -494,37 +496,36 @@ export default function HomePage() {
             return (
               <div
                 key={idx}
-                className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                className="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-neo hover:shadow-neo-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex flex-col justify-between group relative overflow-hidden"
               >
-                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${srv.gradient} opacity-5 rounded-bl-full group-hover:scale-125 transition-transform`} />
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${srv.gradient} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center shadow-neo-sm group-hover:scale-105 transition-transform">
+                      <Icon className="w-6 h-6 stroke-[2.2]" />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-950 border border-slate-900 shadow-neo-sm">
                       {srv.tag}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900 font-['Outfit'] group-hover:text-brand-600 transition-colors">
+                  <h3 className="text-lg font-black text-slate-950 font-outfit group-hover:text-brand-600 transition-colors">
                     {srv.title}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">
                     {srv.desc}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 bg-blue-50/80 px-2.5 py-1 rounded-lg border border-blue-100">
+                <div className="mt-6 pt-4 border-t-2 border-slate-900 flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-950 bg-amber-100 px-2.5 py-1 rounded-lg border border-slate-900 shadow-neo-sm">
                     {srv.badge}
                   </span>
                   <a
                     href="#shops"
-                    className="text-xs font-semibold text-brand-600 flex items-center gap-1 group-hover:gap-1.5 transition-all"
+                    className="text-xs font-black text-slate-950 flex items-center gap-1 group-hover:gap-1.5 transition-all"
                   >
                     <span>Order Now</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
                   </a>
                 </div>
               </div>
@@ -533,35 +534,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Transparent Pricing List Section (Light Theme) */}
-      <section id="pricing" className="py-16 bg-gradient-to-b from-blue-50/50 via-white to-slate-50 border-y border-slate-200/80 text-slate-900 relative overflow-hidden">
-        {/* Soft ambient glowing highlights */}
-        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none" />
-
+      {/* Transparent Pricing List Section (Modern Precision Black Outline) */}
+      <section id="pricing" className="py-16 bg-white border-y-2 border-slate-900 text-slate-950 relative overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-3 border border-blue-200 shadow-xs">
-              <BadgePercent className="w-3.5 h-3.5" /> 100% TRANSPARENT RATE CARD
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-300 text-slate-950 text-xs font-black mb-3 border-2 border-slate-900 shadow-neo-sm">
+              <BadgePercent className="w-3.5 h-3.5 stroke-[2.2]" /> 100% TRANSPARENT RATE CARD
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit']">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-950 font-outfit">
               Standard Print & Xerox Pricing
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 font-medium">
               No hidden fees. Dynamic volume discounts automatically applied at checkout.
             </p>
           </div>
 
-          {/* Pricing Category Tabs */}
+          {/* Pricing Category Tabs with Black Outlines */}
           <div className="flex justify-center mb-8">
-            <div className="p-1 rounded-2xl bg-slate-100 border border-slate-200 inline-flex gap-1 shadow-inner">
+            <div className="p-1.5 rounded-2xl bg-slate-100 border-2 border-slate-900 inline-flex gap-1.5 shadow-neo-sm">
               <button
                 type="button"
                 onClick={() => setPricingCategory('standard')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   pricingCategory === 'standard'
-                    ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-amber-300 text-slate-950 border-2 border-slate-900 shadow-neo-sm'
+                    : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
                 Black & White Docs
@@ -569,10 +566,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setPricingCategory('color')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   pricingCategory === 'color'
-                    ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-amber-300 text-slate-950 border-2 border-slate-900 shadow-neo-sm'
+                    : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
                 Color & Photo Prints
@@ -580,10 +577,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setPricingCategory('finishing')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   pricingCategory === 'finishing'
-                    ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-amber-300 text-slate-950 border-2 border-slate-900 shadow-neo-sm'
+                    : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
                 Binding & Lamination
@@ -591,10 +588,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Pricing Table Card (Light) */}
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-lg overflow-hidden">
-            <div className="divide-y divide-slate-100">
-              <div className="grid grid-cols-12 px-6 py-3.5 bg-slate-50/90 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+          {/* Pricing Table Card with Black Outline */}
+          <div className="rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg overflow-hidden">
+            <div className="divide-y-2 divide-slate-900">
+              <div className="grid grid-cols-12 px-6 py-3.5 bg-slate-100 text-[11px] font-black text-slate-950 uppercase tracking-wider border-b-2 border-slate-900">
                 <div className="col-span-6 sm:col-span-7">Service / Specification</div>
                 <div className="col-span-3 sm:col-span-2 text-right">Standard Rate</div>
                 <div className="col-span-3 text-right">Bulk / Student Offer</div>
@@ -603,17 +600,17 @@ export default function HomePage() {
               {pricingData[pricingCategory].map((row, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-12 px-6 py-4 items-center hover:bg-blue-50/30 transition-colors text-sm"
+                  className="grid grid-cols-12 px-6 py-4 items-center hover:bg-slate-50 transition-colors text-sm font-semibold"
                 >
                   <div className="col-span-6 sm:col-span-7">
-                    <div className="font-bold text-slate-900">{row.item}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{row.specs}</div>
+                    <div className="font-black text-slate-950">{row.item}</div>
+                    <div className="text-xs text-slate-600 font-medium mt-0.5">{row.specs}</div>
                   </div>
-                  <div className="col-span-3 sm:col-span-2 text-right font-black text-brand-600">
+                  <div className="col-span-3 sm:col-span-2 text-right font-black text-slate-950">
                     {row.rate}
                   </div>
                   <div className="col-span-3 text-right">
-                    <span className="inline-block text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                    <span className="inline-block text-xs font-bold text-slate-950 bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-slate-900 shadow-neo-sm">
                       {row.bulk}
                     </span>
                   </div>
@@ -621,14 +618,14 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="p-4 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-3">
+            <div className="p-4 bg-slate-50 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-700 font-medium gap-3">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 stroke-[2.2] shrink-0" />
                 <span>Rates may slightly vary depending on individual shop configuration.</span>
               </div>
               <a
                 href="#shops"
-                className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all text-xs shrink-0 shadow-sm"
+                className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black transition-all text-xs shrink-0 border-2 border-slate-900 shadow-neo-sm hover:shadow-neo active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               >
                 Go to Live Print Station →
               </a>
@@ -637,43 +634,40 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Shop Partner ₹299 Monthly Recharge Pack Section (Light Theme) */}
-      <section id="recharge" className="py-16 md:py-20 bg-gradient-to-b from-slate-50 via-blue-50/40 to-white text-slate-900 relative overflow-hidden border-b border-slate-200/80">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-400/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
-
+      {/* Shop Partner ₹299 Monthly Recharge Pack Section with Black Outlines */}
+      <section id="recharge" className="py-16 md:py-20 bg-slate-50 text-slate-950 relative overflow-hidden border-b-2 border-slate-900">
         <div className="max-w-6xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-3 border border-emerald-200 shadow-xs">
-              <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-200 text-slate-950 text-xs font-black mb-3 border-2 border-slate-900 shadow-neo-sm">
+              <Zap className="w-3.5 h-3.5 text-slate-950 fill-slate-950 stroke-[2.2]" />
               <span>SHOP PARTNER PLAN • FLAT MONTHLY RECHARGE</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-['Outfit'] tracking-tight text-slate-900">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-outfit tracking-tight text-slate-950">
               Power Your Xerox Shop for Just{' '}
               <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                 ₹299 / Month
               </span>
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-3 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
               Everything a Cyber Cafe or Xerox store needs to run automated, queue-free cloud printing. Zero commission on your print income — you keep 100% of your earnings.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            {/* Pricing Feature Highlight Box (Left) */}
-            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col justify-between">
+            {/* Pricing Feature Highlight Box (Left) with Black Outline */}
+            <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+                <div className="flex items-center justify-between pb-6 border-b-2 border-slate-900">
                   <div>
-                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">ALL-IN-ONE XEROX LICENSE</span>
-                    <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] mt-1">Smart PrintX Station Pack</h3>
+                    <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">ALL-IN-ONE XEROX LICENSE</span>
+                    <h3 className="text-2xl font-black text-slate-950 font-outfit mt-1">Smart PrintX Station Pack</h3>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-1 justify-end">
-                      <span className="text-3xl sm:text-4xl font-black text-slate-900 font-['Outfit']">₹299</span>
-                      <span className="text-xs text-slate-500">/ month</span>
+                      <span className="text-3xl sm:text-4xl font-black text-slate-950 font-outfit">₹299</span>
+                      <span className="text-xs text-slate-600 font-bold">/ month</span>
                     </div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-slate-950 border border-slate-900 shadow-neo-sm mt-1">
                       0% Commission Cut
                     </span>
                   </div>
@@ -738,75 +732,75 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-slate-500">
+              <div className="mt-6 pt-5 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-slate-600 font-semibold">
                   💳 Instant recharge via UPI • Auto-renew or cancel anytime
                 </div>
                 <a
                   href="https://wa.me/919002761536?text=Hi%20PrintX%20Team,%20I%20want%20to%20recharge/activate%20the%20Rs%20299%20Monthly%20Shop%20Partner%20Pack%20for%20my%20Xerox%20Shop."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs sm:text-sm border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
+                  <MessageCircle className="w-4 h-4 fill-white text-slate-950 stroke-[2.2]" />
                   <span>Recharge Shop Now (₹299)</span>
                 </a>
               </div>
             </div>
 
-            {/* Why Recharge with PrintX (Right) */}
-            <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col justify-between">
+            {/* Why Recharge with PrintX (Right) with Black Outline */}
+            <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-brand-600 flex items-center justify-center mb-4">
-                  <Store className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-slate-900 text-slate-950 flex items-center justify-center mb-4 shadow-neo-sm">
+                  <Store className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 font-['Outfit']">How ₹299 Transforms Your Shop</h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                <h3 className="text-xl font-black text-slate-950 font-outfit">How ₹299 Transforms Your Shop</h3>
+                <p className="text-xs text-slate-600 font-medium mt-1.5 leading-relaxed">
                   Save 2+ hours daily, stop taking WhatsApp prints manually, eliminate loose change arguments, and handle 3x more customers during exam rush hours.
                 </p>
 
                 <div className="mt-6 space-y-3">
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-200 text-slate-950 border border-slate-900 flex items-center justify-center font-black text-xs shrink-0 shadow-neo-sm">
                       ₹0
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-slate-900">No Commission Deductions</span>
-                      <p className="text-[11px] text-slate-500">All customer UPI payments reach your account directly.</p>
+                      <span className="font-bold text-slate-950">No Commission Deductions</span>
+                      <p className="text-[11px] text-slate-600">All customer UPI payments reach your account directly.</p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-brand-700 border border-blue-200 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-200 text-slate-950 border border-slate-900 flex items-center justify-center font-black text-xs shrink-0 shadow-neo-sm">
                       10x
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-slate-900">Parallel Customer Queue</span>
-                      <p className="text-[11px] text-slate-500">Multiple students can upload and print simultaneously.</p>
+                      <span className="font-bold text-slate-950">Parallel Customer Queue</span>
+                      <p className="text-[11px] text-slate-600">Multiple students can upload and print simultaneously.</p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-900 shadow-neo-sm flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-purple-200 text-slate-950 border border-slate-900 flex items-center justify-center font-black text-xs shrink-0 shadow-neo-sm">
                       24h
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-slate-900">Technician Support Included</span>
-                      <p className="text-[11px] text-slate-500">Call or WhatsApp +91 9002761536 for instant remote setup.</p>
+                      <span className="font-bold text-slate-950">Technician Support Included</span>
+                      <p className="text-[11px] text-slate-600">Call or WhatsApp +91 9002761536 for instant remote setup.</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="mt-6 pt-4 border-t-2 border-slate-900">
                 <a
                   href={(process.env.NEXT_PUBLIC_ADMIN_URL || 'https://printx-admin.vercel.app').replace(/\/+$/, '') + '/login'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-950 font-black text-xs border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <span>Already a partner? Open Shop Dashboard</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
                 </a>
               </div>
             </div>
@@ -814,86 +808,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Active Xerox Stations Section */}
-      <section id="shops" className="py-16 md:py-20 max-w-6xl mx-auto px-4 w-full">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">
-              <Store className="w-3.5 h-3.5" /> LIVE COUNTERS
+      {/* Zero-Storage Privacy & Hardware Guarantee Section with Black Outlines */}
+      <section className="py-16 md:py-20 max-w-6xl mx-auto px-4 w-full">
+        <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-slate-900 shadow-neo-lg relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-300 text-slate-950 text-xs font-black mb-3 border-2 border-slate-900 shadow-neo-sm">
+                <ShieldCheck className="w-4 h-4 stroke-[2.2]" /> 100% PRIVATE & EPHEMERAL
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 font-outfit">
+                Zero Cloud Storage • Auto-Purged After Printing
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 font-medium mt-2 leading-relaxed">
+                Your private bank statements, college assignments, legal contracts, and personal photos are never stored permanently. As soon as the physical printer spools the pages, files are securely shredded and permanently deleted from RAM and disk.
+              </p>
             </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-['Outfit']">
-              Find & Connect to a PrintX Station
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Select an active shop near you or scan their on-counter QR standee.
-            </p>
-          </div>
 
-          <div className="text-xs font-semibold text-slate-600 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Realtime Cloud Agent Sync</span>
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <a
+                href="#shops"
+                className="px-6 py-3.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs sm:text-sm border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
+              >
+                <span>Find a Live Counter</span>
+                <ArrowRight className="w-4 h-4 stroke-[2.2]" />
+              </a>
+              <a
+                href="#pricing"
+                className="px-6 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-black text-xs sm:text-sm border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
+              >
+                View Rate Card
+              </a>
+            </div>
           </div>
         </div>
-
-        {loading ? (
-          <div className="p-12 rounded-3xl bg-white border border-blue-100 text-center text-sm text-slate-500 shadow-sm flex flex-col items-center justify-center gap-3">
-            <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="font-semibold text-slate-700">Connecting with active Xerox shops...</p>
-          </div>
-        ) : shops.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {shops.map((shop) => (
-              <Link
-                key={shop.id}
-                href={`/shop/${shop.slug}`}
-                className="p-5 rounded-3xl bg-white border border-slate-200 hover:border-brand-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-brand-600 group-hover:scale-105 transition-transform">
-                      <Printer className="w-6 h-6" />
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      STATION ONLINE
-                    </span>
-                  </div>
-
-                  <h3 className="font-bold text-slate-900 text-lg mt-4 group-hover:text-brand-600 transition-colors">
-                    {shop.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{shop.address || 'Smart Xerox Station, India'}</span>
-                  </p>
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-slate-500">Auto Print Ready</span>
-                  <div className="flex items-center gap-1 text-xs font-bold text-brand-600 group-hover:translate-x-1 transition-transform">
-                    <span>Open Station</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="p-10 rounded-3xl bg-white border border-blue-100 text-center text-slate-600 shadow-sm max-w-lg mx-auto">
-            <Store className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-            <h4 className="font-bold text-slate-900 text-base">No Stations Registered Yet</h4>
-            <p className="text-xs text-slate-500 mt-1.5">
-              Log in to the Super Admin Portal to add Xerox shops and download counter QR standees.
-            </p>
-            <Link
-              href="/shop/default"
-              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold text-xs shadow-md"
-            >
-              <span>Explore Demo Station</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        )}
       </section>
 
       {/* About Us Section */}
@@ -1053,56 +1000,56 @@ export default function HomePage() {
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Your Full Name *</label>
+                      <label className="block text-xs font-bold text-slate-900 mb-1">Your Full Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Rahul Sharma"
                         value={contactForm.name}
                         onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 text-xs font-bold text-slate-950 focus:outline-none focus:bg-white shadow-neo-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Phone / WhatsApp Number *</label>
+                      <label className="block text-xs font-bold text-slate-900 mb-1">Phone / WhatsApp Number *</label>
                       <input
                         type="tel"
                         required
                         placeholder="e.g. 9876543210"
                         value={contactForm.phone}
                         onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 text-xs font-bold text-slate-950 focus:outline-none focus:bg-white shadow-neo-sm"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Email Address (Optional)</label>
+                    <label className="block text-xs font-bold text-slate-900 mb-1">Email Address (Optional)</label>
                     <input
                       type="email"
                       placeholder="e.g. rahul@gmail.com"
                       value={contactForm.email}
                       onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 text-xs font-bold text-slate-950 focus:outline-none focus:bg-white shadow-neo-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Your Message / Requirement</label>
+                    <label className="block text-xs font-bold text-slate-900 mb-1">Your Message / Requirement</label>
                     <textarea
                       rows={3}
                       placeholder="Tell us what you are looking for (e.g. Bulk thesis printing, franchise inquiry, support...)"
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 text-xs font-bold text-slate-950 focus:outline-none focus:bg-white shadow-neo-sm resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                    className="w-full py-3.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs border-2 border-slate-900 shadow-neo hover:shadow-neo-hover active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    <Send className="w-3.5 h-3.5 stroke-[2.2]" />
                     <span>Submit Inquiry</span>
                   </button>
                 </form>
@@ -1112,26 +1059,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 bg-white py-10 text-xs text-slate-500">
+      {/* Footer with Black Outline */}
+      <footer className="mt-auto border-t-2 border-slate-900 bg-white py-10 text-xs text-slate-600 font-medium">
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
-                <Printer className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-slate-950 border border-slate-900 flex items-center justify-center text-white">
+                <Printer className="w-4 h-4 stroke-[2.2]" />
               </div>
-              <span className="text-xl font-black text-slate-900 font-['Outfit']">
+              <span className="text-xl font-black text-slate-950 font-outfit">
                 PRINT<span className="text-brand-600">X</span>
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
+            <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
               India&apos;s pioneering cloud automated xerox & print-on-demand kiosk SaaS platform.
             </p>
           </div>
 
           <div>
-            <div className="font-bold text-slate-900 mb-2.5 uppercase tracking-wider text-[11px]">Quick Navigation</div>
-            <ul className="space-y-2 text-[11px]">
+            <div className="font-black text-slate-950 mb-2.5 uppercase tracking-wider text-[11px]">Quick Navigation</div>
+            <ul className="space-y-2 text-[11px] font-bold">
               <li><a href="#services" className="hover:text-brand-600 transition-colors">Services Offered</a></li>
               <li><a href="#how-it-works" className="hover:text-brand-600 transition-colors">4-Step Flow</a></li>
               <li><a href="#pricing" className="hover:text-brand-600 transition-colors">Rate Card & Pricing</a></li>
@@ -1140,8 +1087,8 @@ export default function HomePage() {
           </div>
 
           <div>
-            <div className="font-bold text-slate-900 mb-2.5 uppercase tracking-wider text-[11px]">Company & Legal</div>
-            <ul className="space-y-2 text-[11px]">
+            <div className="font-black text-slate-950 mb-2.5 uppercase tracking-wider text-[11px]">Company & Legal</div>
+            <ul className="space-y-2 text-[11px] font-bold">
               <li><a href="#about" className="hover:text-brand-600 transition-colors">About PrintX</a></li>
               <li><a href="#contact" className="hover:text-brand-600 transition-colors">Contact Support</a></li>
               <li><span className="text-slate-400">Privacy Policy (Auto-Purge)</span></li>
@@ -1150,25 +1097,25 @@ export default function HomePage() {
           </div>
 
           <div>
-            <div className="font-bold text-slate-900 mb-2.5 uppercase tracking-wider text-[11px]">Admin Access</div>
-            <p className="text-[11px] text-slate-500 mb-3">
+            <div className="font-black text-slate-950 mb-2.5 uppercase tracking-wider text-[11px]">Admin Access</div>
+            <p className="text-[11px] text-slate-600 mb-3 font-medium">
               Shop owners & Super Admins can manage printers, standee QRs and revenue reports.
             </p>
             <a
               href={(process.env.NEXT_PUBLIC_ADMIN_URL || 'https://printx-admin.vercel.app').replace(/\/+$/, '') + '/login'}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-950 text-[11px] font-black border-2 border-slate-900 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
             >
               <span>Admin Login</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3 h-3 stroke-[2.2]" />
             </a>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
+        <div className="max-w-6xl mx-auto px-4 pt-6 border-t-2 border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-bold text-slate-900">
           <p>© 2026 PrintX Technologies Pvt Ltd. All rights reserved.</p>
-          <p className="text-slate-400">Built for speed, security & high concurrency.</p>
+          <p className="text-slate-500 font-semibold">Built for speed, security & high concurrency.</p>
         </div>
       </footer>
     </div>
